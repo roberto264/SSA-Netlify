@@ -174,14 +174,16 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Initialnachricht
+  // Initialnachricht - warten bis progress geladen ist
   useEffect(() => {
-    const greeting = generateGreeting();
-    setMessages([{ role: 'assistant', content: greeting }]);
-  }, []);
+    if (progress !== undefined) {
+      const greeting = generateGreeting();
+      setMessages([{ role: 'assistant', content: greeting }]);
+    }
+  }, [progress, profile]);
 
   const generateGreeting = () => {
-    const a = analysis;
+    const a = analyzeProgress();
     const name = profile?.name?.split(' ')[0] || 'Lernender';
     
     let greeting = `Hallo ${name}! 👋 Ich bin dein persönlicher Solar-Coach.\n\n`;
