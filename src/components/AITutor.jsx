@@ -291,23 +291,23 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
   };
 
   return (
-    <main className="max-w-5xl mx-auto px-6 py-8">
-      <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6">
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+      <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base">
         <ArrowLeft className="w-4 h-4" />
         Zurück zum Dashboard
       </button>
 
-      <div className="grid grid-cols-3 gap-6">
-        {/* Analyse Sidebar */}
-        <div className="col-span-1 space-y-4">
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-indigo-600" />
+      <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Analyse Sidebar - hidden on mobile, shown as collapsed section */}
+        <div className="lg:col-span-1 space-y-4 order-2 lg:order-1">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5">
+            <h3 className="font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
               Dein Lernstand
             </h3>
             
-            <div className="mb-4">
-              <div className="flex justify-between text-sm mb-1">
+            <div className="mb-3 sm:mb-4">
+              <div className="flex justify-between text-xs sm:text-sm mb-1">
                 <span>Gesamtfortschritt</span>
                 <span className="font-bold">{analysis.overallProgress}%</span>
               </div>
@@ -316,9 +316,9 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5 sm:space-y-2">
               {analysis.moduleProgress.map(m => (
-                <div key={m.id} className="flex items-center justify-between text-sm">
+                <div key={m.id} className="flex items-center justify-between text-xs sm:text-sm">
                   <span className="text-gray-600">{m.icon} {m.title}</span>
                   <span className={`font-medium ${m.percent === 100 ? 'text-green-600' : m.percent > 0 ? 'text-indigo-600' : 'text-gray-400'}`}>
                     {m.percent}%
@@ -329,12 +329,12 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
           </div>
 
           {analysis.weakAreas.length > 0 && (
-            <div className="bg-amber-50 rounded-xl border border-amber-200 p-5">
-              <h3 className="font-bold text-amber-800 mb-3 flex items-center gap-2">
-                <Target className="w-5 h-5" />
+            <div className="bg-amber-50 rounded-xl border border-amber-200 p-4 sm:p-5 hidden sm:block">
+              <h3 className="font-bold text-amber-800 mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
+                <Target className="w-4 h-4 sm:w-5 sm:h-5" />
                 Fokus-Bereiche
               </h3>
-              <ul className="space-y-2 text-sm text-amber-700">
+              <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-amber-700">
                 {analysis.weakAreas.slice(0, 3).map((area, i) => (
                   <li key={i}>• {area.name}</li>
                 ))}
@@ -343,9 +343,9 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
           )}
 
           {analysis.strongAreas.length > 0 && (
-            <div className="bg-green-50 rounded-xl border border-green-200 p-5">
-              <h3 className="font-bold text-green-800 mb-3 flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
+            <div className="bg-green-50 rounded-xl border border-green-200 p-4 sm:p-5 hidden sm:block">
+              <h3 className="font-bold text-green-800 mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
+                <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
                 Stärken
               </h3>
               <ul className="space-y-2 text-sm text-green-700">
@@ -358,47 +358,49 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
         </div>
 
         {/* Chat */}
-        <div className="col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-amber-100 flex items-center gap-3">
-            <div className="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center">
-              <Brain className="w-6 h-6 text-white" />
+        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden order-1 lg:order-2">
+          <div className="p-3 sm:p-4 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-amber-100 flex items-center gap-2 sm:gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-500 rounded-xl flex items-center justify-center">
+              <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-gray-900">Solar-Coach</h3>
-              <p className="text-sm text-gray-500">Dein persönlicher AI-Tutor</p>
+              <h3 className="font-bold text-gray-900 text-sm sm:text-base">Solar-Coach</h3>
+              <p className="text-xs sm:text-sm text-gray-500">Dein persönlicher AI-Tutor</p>
             </div>
           </div>
 
-          <div className="h-96 overflow-y-auto p-4 space-y-4">
+          <div className="h-64 sm:h-96 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] p-3 rounded-xl ${
+                <div className={`max-w-[90%] sm:max-w-[85%] p-2.5 sm:p-3 rounded-xl ${
                   msg.role === 'user' 
                     ? 'bg-indigo-600 text-white' 
                     : 'bg-gray-100 text-gray-800'
                 }`}>
-                  <div className="whitespace-pre-wrap text-sm">{msg.content}</div>
+                  <div className="whitespace-pre-wrap text-xs sm:text-sm">{msg.content}</div>
                 </div>
               </div>
             ))}
             {isProcessing && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 p-3 rounded-xl">
-                  <Loader2 className="w-5 h-5 animate-spin text-gray-500" />
+                <div className="bg-gray-100 p-2.5 sm:p-3 rounded-xl">
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-gray-500" />
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-4 border-t border-gray-100 flex items-center gap-3">
+          <div className="p-3 sm:p-4 border-t border-gray-100 flex items-center gap-2 sm:gap-3">
             <button
               onMouseDown={startRecording}
               onMouseUp={stopRecording}
               onMouseLeave={stopRecording}
-              className={`p-3 rounded-full transition ${isRecording ? 'bg-red-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+              onTouchStart={startRecording}
+              onTouchEnd={stopRecording}
+              className={`p-2.5 sm:p-3 rounded-full transition flex-shrink-0 ${isRecording ? 'bg-red-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
             >
-              <Mic className="w-5 h-5" />
+              <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <input
               type="text"
@@ -406,14 +408,14 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && sendMessage(inputText)}
               placeholder="Frag mich etwas..."
-              className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="flex-1 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
             />
             <button
               onClick={() => sendMessage(inputText)}
               disabled={isProcessing || !inputText.trim()}
-              className="p-3 bg-amber-500 text-white rounded-full hover:bg-amber-600 disabled:opacity-50 transition"
+              className="p-2.5 sm:p-3 bg-amber-500 text-white rounded-full hover:bg-amber-600 disabled:opacity-50 transition flex-shrink-0"
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>

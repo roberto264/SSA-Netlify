@@ -37,24 +37,24 @@ function Header({ currentUser }) {
 
   return (
     <header className="bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
-            <Sun className="w-6 h-6 text-white" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500 rounded-lg sm:rounded-xl flex items-center justify-center">
+            <Sun className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-indigo-950">Swiss Solar Academy</h1>
-            <p className="text-xs text-gray-500">Powered by Gama AG</p>
+            <h1 className="text-base sm:text-xl font-bold text-indigo-950">Swiss Solar Academy</h1>
+            <p className="text-xs text-gray-500 hidden sm:block">Powered by Gama AG</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="text-right">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-gray-900">{profile?.name || 'User'}</p>
               <p className="text-xs text-gray-500">{profile?.firma || profile?.role}</p>
             </div>
-            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+            <span className={`px-2 py-1 text-xs font-medium rounded-full hidden sm:inline-block ${
               profile?.role === 'betreiber' ? 'bg-red-100 text-red-700' :
               profile?.role === 'arbeitgeber' ? 'bg-purple-100 text-purple-700' :
               'bg-blue-100 text-blue-700'
@@ -62,7 +62,7 @@ function Header({ currentUser }) {
               {profile?.role === 'betreiber' ? 'Admin' : 
                profile?.role === 'arbeitgeber' ? 'Arbeitgeber' : 'Lernender'}
             </span>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base ${
               profile?.role === 'betreiber' ? 'bg-indigo-950' :
               profile?.role === 'arbeitgeber' ? 'bg-purple-600' :
               'bg-indigo-600'
@@ -71,10 +71,10 @@ function Header({ currentUser }) {
             </div>
             <button 
               onClick={signOut}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
+              className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
               title="Abmelden"
             >
-              <LogOut className="w-5 h-5" />
+              <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
@@ -108,77 +108,81 @@ function LernenderDashboard({ onSelectModule, onStartRoleplay, onStartTutor }) {
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-8">
-      <div className="bg-gradient-to-r from-indigo-950 to-indigo-600 rounded-2xl p-8 mb-8 text-white">
-        <div className="flex justify-between items-center">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+      {/* Hero Section - Responsive */}
+      <div className="bg-gradient-to-r from-indigo-950 to-indigo-600 rounded-xl sm:rounded-2xl p-4 sm:p-8 mb-4 sm:mb-8 text-white">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h2 className="text-3xl font-bold mb-2">Willkommen, {profile?.name?.split(' ')[0]}! 👋</h2>
-            <p className="text-indigo-200 text-lg">Du hast {overallProgress}% deiner Ausbildung abgeschlossen.</p>
+            <h2 className="text-xl sm:text-3xl font-bold mb-1 sm:mb-2">Willkommen, {profile?.name?.split(' ')[0]}! 👋</h2>
+            <p className="text-indigo-200 text-sm sm:text-lg">Du hast {overallProgress}% deiner Ausbildung abgeschlossen.</p>
           </div>
-          <div className="text-right">
-            <div className="text-5xl font-bold">{overallProgress}%</div>
-            <p className="text-indigo-200">Fortschritt</p>
-          </div>
-        </div>
-        <div className="mt-6 bg-white/20 rounded-full h-3">
-          <div className="bg-amber-500 h-3 rounded-full transition-all" style={{ width: `${overallProgress}%` }}></div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{completedTopics}</p>
-              <p className="text-sm text-gray-500">Themen abgeschlossen</p>
-            </div>
+          <div className="text-left sm:text-right">
+            <div className="text-3xl sm:text-5xl font-bold">{overallProgress}%</div>
+            <p className="text-indigo-200 text-sm">Fortschritt</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{totalTopics - completedTopics}</p>
-              <p className="text-sm text-gray-500">Noch offen</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-              <Trophy className="w-6 h-6 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{quizPassed}</p>
-              <p className="text-sm text-gray-500">Quiz bestanden</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <MessageCircle className="w-6 h-6 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{rollenspielSessions.length}</p>
-              <p className="text-sm text-gray-500">Rollenspiele</p>
-            </div>
-          </div>
+        <div className="mt-4 sm:mt-6 bg-white/20 rounded-full h-2 sm:h-3">
+          <div className="bg-amber-500 h-2 sm:h-3 rounded-full transition-all" style={{ width: `${overallProgress}%` }}></div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Kursmodule</h3>
-          <span className="text-sm text-gray-500">{modules.length} Module • {totalTopics} Themen</span>
+      {/* Stats Grid - 2x2 on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-8">
+        <div className="bg-white rounded-xl p-3 sm:p-5 border border-gray-100 shadow-sm">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+            </div>
+            <div>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{completedTopics}</p>
+              <p className="text-xs sm:text-sm text-gray-500">Abgeschlossen</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl p-3 sm:p-5 border border-gray-100 shadow-sm">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{totalTopics - completedTopics}</p>
+              <p className="text-xs sm:text-sm text-gray-500">Offen</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl p-3 sm:p-5 border border-gray-100 shadow-sm">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+              <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{quizPassed}</p>
+              <p className="text-xs sm:text-sm text-gray-500">Quiz best.</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl p-3 sm:p-5 border border-gray-100 shadow-sm">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+              <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{rollenspielSessions.length}</p>
+              <p className="text-xs sm:text-sm text-gray-500">Rollenspiele</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modules Section */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-6 mb-4 sm:mb-8">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900">Kursmodule</h3>
+          <span className="text-xs sm:text-sm text-gray-500">{modules.length} Module • {totalTopics} Themen</span>
         </div>
         
-        <div className="grid grid-cols-5 gap-4">
+        {/* Module Grid - scrollable on mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           {modules.map((module) => {
             const moduleProgress = getModuleProgress(module.id);
             const isComplete = moduleProgress === 100;
@@ -188,17 +192,17 @@ function LernenderDashboard({ onSelectModule, onStartRoleplay, onStartTutor }) {
               <div 
                 key={module.id}
                 onClick={() => onSelectModule(module)}
-                className={`rounded-xl p-5 cursor-pointer transition-all ${
+                className={`rounded-xl p-3 sm:p-5 cursor-pointer transition-all ${
                   isActive 
                     ? 'bg-white shadow-md border-2 border-indigo-600' 
                     : 'bg-gray-50 hover:shadow-md hover:bg-white border-2 border-transparent hover:border-indigo-200'
                 }`}
               >
-                <div className={`w-12 h-12 bg-gradient-to-br ${module.color} rounded-xl flex items-center justify-center text-2xl mb-4`}>
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${module.color} rounded-xl flex items-center justify-center text-xl sm:text-2xl mb-2 sm:mb-4`}>
                   {module.icon}
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-1">{module.title}</h4>
-                <p className="text-xs text-gray-500 mb-3">{module.description}</p>
+                <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base truncate">{module.title}</h4>
+                <p className="text-xs text-gray-500 mb-2 sm:mb-3 line-clamp-2 hidden sm:block">{module.description}</p>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="flex-1 bg-gray-200 rounded-full h-1.5">
                     <div 
@@ -215,7 +219,7 @@ function LernenderDashboard({ onSelectModule, onStartRoleplay, onStartTutor }) {
                   isActive ? 'bg-indigo-600 text-white' :
                   'bg-gray-100 text-gray-500'
                 }`}>
-                  {isComplete ? 'Abgeschlossen' : isActive ? 'In Bearbeitung' : 'Offen'}
+                  {isComplete ? 'Fertig' : isActive ? 'Aktiv' : 'Offen'}
                 </span>
               </div>
             );
@@ -223,19 +227,20 @@ function LernenderDashboard({ onSelectModule, onStartRoleplay, onStartTutor }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      {/* Action Cards - Stack on mobile */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div 
           onClick={onStartRoleplay}
-          className="bg-gradient-to-br from-indigo-950 to-indigo-600 rounded-xl p-6 text-white cursor-pointer hover:shadow-lg transition"
+          className="bg-gradient-to-br from-indigo-950 to-indigo-600 rounded-xl p-4 sm:p-6 text-white cursor-pointer hover:shadow-lg transition"
         >
-          <div className="flex items-start gap-4">
-            <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <MessageCircle className="w-7 h-7" />
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
             <div className="flex-1">
-              <h4 className="font-bold text-xl mb-2">Kundengespräche üben</h4>
-              <p className="text-indigo-200 mb-4">Trainiere realistische Verkaufsgespräche mit KI-gestützten Kunden.</p>
-              <button className="bg-white text-indigo-600 font-semibold py-3 px-6 rounded-lg hover:bg-gray-50 transition">
+              <h4 className="font-bold text-lg sm:text-xl mb-1 sm:mb-2">Kundengespräche üben</h4>
+              <p className="text-indigo-200 text-sm mb-3 sm:mb-4">Trainiere Verkaufsgespräche mit KI-Kunden.</p>
+              <button className="bg-white text-indigo-600 font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-gray-50 transition text-sm sm:text-base">
                 Gespräch starten
               </button>
             </div>
@@ -244,16 +249,16 @@ function LernenderDashboard({ onSelectModule, onStartRoleplay, onStartTutor }) {
 
         <div 
           onClick={onStartTutor}
-          className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 cursor-pointer hover:shadow-md transition"
+          className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-6 cursor-pointer hover:shadow-md transition"
         >
-          <div className="flex items-start gap-4">
-            <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Brain className="w-7 h-7 text-amber-600" />
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Brain className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600" />
             </div>
             <div className="flex-1">
-              <h4 className="font-bold text-xl text-gray-900 mb-2">AI Lehrer</h4>
-              <p className="text-gray-500 mb-4">Lass dich vom AI Tutor durch die Themen führen.</p>
-              <button className="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-700 transition">
+              <h4 className="font-bold text-lg sm:text-xl text-gray-900 mb-1 sm:mb-2">AI Lehrer</h4>
+              <p className="text-gray-500 text-sm mb-3 sm:mb-4">Lass dich vom AI Tutor durch die Themen führen.</p>
+              <button className="bg-indigo-600 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-indigo-700 transition text-sm sm:text-base">
                 Mit AI Lehrer lernen
               </button>
             </div>
@@ -663,45 +668,45 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
   };
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-8">
-      <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6">
+    <main className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+      <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base">
         <ArrowLeft className="w-4 h-4" />
         Zurück
       </button>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <div className="flex items-center gap-4 mb-6">
-          <div className={`w-16 h-16 bg-gradient-to-br ${module.color} rounded-xl flex items-center justify-center text-3xl`}>
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-6">
+        <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br ${module.color} rounded-xl flex items-center justify-center text-2xl sm:text-3xl`}>
             {module.icon}
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{module.title}</h2>
-            <p className="text-gray-500">{module.description}</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{module.title}</h2>
+            <p className="text-gray-500 text-sm sm:text-base">{module.description}</p>
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {module.topics.map(topic => {
             const completed = isTopicCompleted(topic.id);
             return (
               <div 
                 key={topic.id}
                 onClick={() => onSelectTopic(topic)}
-                className={`p-5 rounded-xl cursor-pointer transition border-2 ${
+                className={`p-3 sm:p-5 rounded-xl cursor-pointer transition border-2 ${
                   completed 
                     ? 'bg-green-50 border-green-200' 
                     : 'bg-gray-50 border-transparent hover:bg-white hover:shadow-md hover:border-indigo-200'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {completed && <CheckCircle className="w-5 h-5 text-green-500" />}
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {completed && <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />}
                     <div>
-                      <h3 className="font-semibold text-gray-900">{topic.title}</h3>
-                      <p className="text-sm text-gray-500">{topic.description}</p>
+                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{topic.title}</h3>
+                      <p className="text-xs sm:text-sm text-gray-500">{topic.description}</p>
                     </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
                 </div>
               </div>
             );
@@ -759,45 +764,45 @@ function Quiz({ module, topic, onBack }) {
   if (showResult) {
     const percentage = Math.round((score / topic.questions.length) * 100);
     return (
-      <main className="max-w-2xl mx-auto px-6 py-8">
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8 text-center">
-          <div className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${percentage >= 70 ? 'bg-green-100' : 'bg-red-100'}`}>
-            {percentage >= 70 ? <Trophy className="w-10 h-10 text-green-600" /> : <XCircle className="w-10 h-10 text-red-600" />}
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 sm:p-8 text-center">
+          <div className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full flex items-center justify-center ${percentage >= 70 ? 'bg-green-100' : 'bg-red-100'}`}>
+            {percentage >= 70 ? <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" /> : <XCircle className="w-8 h-8 sm:w-10 sm:h-10 text-red-600" />}
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{percentage >= 70 ? 'Bestanden!' : 'Nicht bestanden'}</h2>
-          <p className="text-gray-500 mb-6">{score}/{topic.questions.length} richtig ({percentage}%)</p>
-          <button onClick={onBack} className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium">Zurück zum Modul</button>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{percentage >= 70 ? 'Bestanden!' : 'Nicht bestanden'}</h2>
+          <p className="text-gray-500 mb-4 sm:mb-6">{score}/{topic.questions.length} richtig ({percentage}%)</p>
+          <button onClick={onBack} className="px-4 sm:px-6 py-2.5 sm:py-3 bg-indigo-600 text-white rounded-lg font-medium text-sm sm:text-base">Zurück zum Modul</button>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-8">
-      <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6">
+    <main className="max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+      <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base">
         <ArrowLeft className="w-4 h-4" />
         Zurück
       </button>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-gray-900">{topic.title}</h3>
-          <span className="text-sm text-gray-500">{currentQuestion + 1}/{topic.questions.length}</span>
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h3 className="font-bold text-gray-900 text-sm sm:text-base">{topic.title}</h3>
+          <span className="text-xs sm:text-sm text-gray-500">{currentQuestion + 1}/{topic.questions.length}</span>
         </div>
 
-        <div className="w-full bg-gray-100 rounded-full h-2 mb-6">
+        <div className="w-full bg-gray-100 rounded-full h-2 mb-4 sm:mb-6">
           <div className="bg-indigo-600 h-2 rounded-full" style={{ width: `${((currentQuestion + 1) / topic.questions.length) * 100}%` }}></div>
         </div>
 
-        <h4 className="text-lg font-semibold text-gray-900 mb-6">{question.question}</h4>
+        <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">{question.question}</h4>
 
-        <div className="space-y-3 mb-6">
+        <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
           {question.options.map((option, index) => (
             <button
               key={index}
               onClick={() => handleAnswer(index)}
               disabled={answered}
-              className={`w-full p-4 text-left rounded-xl border-2 transition ${
+              className={`w-full p-3 sm:p-4 text-left rounded-xl border-2 transition text-sm sm:text-base ${
                 answered
                   ? index === question.correct ? 'border-green-500 bg-green-50'
                     : index === selectedAnswer ? 'border-red-500 bg-red-50' : 'border-gray-200'
@@ -811,10 +816,10 @@ function Quiz({ module, topic, onBack }) {
 
         {answered && (
           <>
-            <div className={`p-4 rounded-xl mb-6 ${selectedAnswer === question.correct ? 'bg-green-50' : 'bg-amber-50'}`}>
-              <p className="text-sm">{question.explanation}</p>
+            <div className={`p-3 sm:p-4 rounded-xl mb-4 sm:mb-6 ${selectedAnswer === question.correct ? 'bg-green-50' : 'bg-amber-50'}`}>
+              <p className="text-xs sm:text-sm">{question.explanation}</p>
             </div>
-            <button onClick={handleNext} className="w-full py-3 bg-indigo-600 text-white rounded-lg font-medium">
+            <button onClick={handleNext} className="w-full py-2.5 sm:py-3 bg-indigo-600 text-white rounded-lg font-medium text-sm sm:text-base">
               {currentQuestion < topic.questions.length - 1 ? 'Weiter' : 'Ergebnis'}
             </button>
           </>
@@ -829,36 +834,36 @@ function Quiz({ module, topic, onBack }) {
 // ============================================
 function PersonaSelection({ onSelect, onBack }) {
   return (
-    <main className="max-w-5xl mx-auto px-6 py-8">
-      <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6">
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+      <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base">
         <ArrowLeft className="w-4 h-4" />
         Zurück
       </button>
 
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Wähle einen Kunden</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Wähle einen Kunden</h2>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         {personas.map(persona => (
           <div 
             key={persona.id}
             onClick={() => onSelect(persona)}
-            className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 hover:shadow-lg hover:border-indigo-200 cursor-pointer transition"
+            className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-6 hover:shadow-lg hover:border-indigo-200 cursor-pointer transition"
           >
-            <div className="flex items-start gap-4">
-              <div className="text-5xl">{persona.image}</div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-bold text-gray-900">{persona.name}</h3>
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="text-4xl sm:text-5xl">{persona.image}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <h3 className="font-bold text-gray-900 text-sm sm:text-base">{persona.name}</h3>
                   <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                     persona.difficulty === 'Einsteiger' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                   }`}>
                     {persona.difficulty}
                   </span>
                 </div>
-                <p className="text-sm text-gray-500 mb-3">{persona.summary}</p>
-                <div className="flex flex-wrap gap-2">
-                  {persona.tags.map(tag => (
-                    <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">{tag}</span>
+                <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3">{persona.summary}</p>
+                <div className="flex flex-wrap gap-1 sm:gap-2">
+                  {persona.tags.slice(0, 3).map(tag => (
+                    <span key={tag} className="px-2 py-0.5 sm:py-1 bg-gray-100 text-gray-600 text-xs rounded-full">{tag}</span>
                   ))}
                 </div>
               </div>
@@ -973,49 +978,51 @@ function VoiceChat({ persona, onBack }) {
   };
 
   return (
-    <main className="max-w-3xl mx-auto px-6 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <button onClick={endSession} className="flex items-center gap-2 text-gray-500 hover:text-gray-700">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <button onClick={endSession} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm sm:text-base">
           <ArrowLeft className="w-4 h-4" />
           Gespräch beenden
         </button>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-100 flex items-center gap-3" style={{ backgroundColor: persona.color + '10' }}>
-          <div className="text-4xl">{persona.image}</div>
+        <div className="p-3 sm:p-4 border-b border-gray-100 flex items-center gap-2 sm:gap-3" style={{ backgroundColor: persona.color + '10' }}>
+          <div className="text-3xl sm:text-4xl">{persona.image}</div>
           <div>
-            <h3 className="font-bold text-gray-900">{persona.name}</h3>
-            <p className="text-sm text-gray-500">{persona.difficulty}</p>
+            <h3 className="font-bold text-gray-900 text-sm sm:text-base">{persona.name}</h3>
+            <p className="text-xs sm:text-sm text-gray-500">{persona.difficulty}</p>
           </div>
         </div>
 
-        <div className="h-96 overflow-y-auto p-4 space-y-4">
+        <div className="h-64 sm:h-96 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] p-3 rounded-xl ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}>
+              <div className={`max-w-[85%] sm:max-w-[80%] p-2.5 sm:p-3 rounded-xl text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}>
                 {msg.content}
               </div>
             </div>
           ))}
           {isProcessing && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 p-3 rounded-xl">
-                <Loader2 className="w-5 h-5 animate-spin text-gray-500" />
+              <div className="bg-gray-100 p-2.5 sm:p-3 rounded-xl">
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-gray-500" />
               </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-4 border-t border-gray-100 flex items-center gap-3">
+        <div className="p-3 sm:p-4 border-t border-gray-100 flex items-center gap-2 sm:gap-3">
           <button
             onMouseDown={startRecording}
             onMouseUp={stopRecording}
             onMouseLeave={stopRecording}
-            className={`p-3 rounded-full ${isRecording ? 'bg-red-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            onTouchStart={startRecording}
+            onTouchEnd={stopRecording}
+            className={`p-2.5 sm:p-3 rounded-full flex-shrink-0 ${isRecording ? 'bg-red-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
           >
-            <Mic className="w-5 h-5" />
+            <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
           <input
             type="text"
@@ -1023,14 +1030,14 @@ function VoiceChat({ persona, onBack }) {
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && sendMessage(inputText)}
             placeholder="Nachricht..."
-            className="flex-1 px-4 py-2 border border-gray-200 rounded-lg"
+            className="flex-1 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg text-sm sm:text-base"
           />
           <button
             onClick={() => sendMessage(inputText)}
             disabled={isProcessing || !inputText.trim()}
-            className="p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:opacity-50"
+            className="p-2.5 sm:p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:opacity-50 flex-shrink-0"
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>
