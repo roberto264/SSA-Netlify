@@ -1,5 +1,3 @@
-const busboy = require('busboy');
-
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -14,21 +12,37 @@ exports.handler = async (event) => {
   try {
     const { audio } = JSON.parse(event.body);
     
-    // Convert base64 to blob
+    // Convert base64 to buffer
     const binaryData = Buffer.from(audio, 'base64');
     
-    const formData = new FormData();
-    const blob = new Blob([binaryData], { type: 'audio/webm' });
-    formData.append('file', blob, 'audio.webm');
-    formData.append('model', 'whisper-1');
-    formData.append('language', 'de');
+    // Create form data manually
+    const boundary = '----FormBoundary' + Math.random().toString(36).substring(2);
+    
+    const formParts = [
+      `--${boundary}\r\n`,
+      `Content-Disposition: form-data; name="file"; filename="audio.webm"\r\n`,
+      `Content-Type: audio/webm\r\n\r\n`,
+    ];
+    
+    const formEnd = `\r\n--${boundary}\r\n` +
+      `Content-Disposition: form-data; name="model"\r\n\r\n` +
+      `whisper-1\r\n` +
+      `--${boundary}\r\n` +
+      `Content-Disposition: form-data; name="language"\r\n\r\n` +
+      `de\r\n` +
+      `--${boundary}--\r\n`;
+
+    const formStart = Buffer.from(formParts.join(''), 'utf8');
+    const formEndBuffer = Buffer.from(formEnd, 'utf8');
+    const fullBody = Buffer.concat([formStart, binaryData, formEndBuffer]);
 
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': `multipart/form-data; boundary=${boundary}`
       },
-      body: formData
+      body: fullBody
     });
 
     const data = await response.json();
