@@ -1,40 +1,76 @@
-# Swiss Solar Academy - Netlify Version
+# Swiss Solar Academy - Mit Login & Datenbank
 
-## Deployment auf Netlify
+## Setup Anleitung
 
-### Option 1: Via GitHub
-1. Pushe diesen Ordner zu einem GitHub Repository
-2. Gehe zu netlify.com → "Add new site" → "Import an existing project"
-3. Wähle dein GitHub Repo
-4. Netlify erkennt die Einstellungen automatisch
+### 1. Supabase Datenbank einrichten
 
-### Option 2: Drag & Drop
-1. Führe lokal `npm install && npm run build` aus
-2. Ziehe den `dist` Ordner auf netlify.com/drop
+1. Gehe zu deinem Supabase Projekt: https://supabase.com/dashboard/project/iyuxooqzreodwenonniz
+2. Klick auf **"SQL Editor"** (links)
+3. Klick **"New Query"**
+4. Öffne die Datei `supabase-schema.sql` und kopiere den gesamten Inhalt
+5. Füge ihn ein und klick **"Run"**
 
-### Environment Variable setzen
-1. In Netlify: Site settings → Environment variables
-2. Füge hinzu:
-   - Key: `OPENAI_API_KEY`
-   - Value: `sk-dein-echter-api-key`
+### 2. Supabase Auth aktivieren
 
-## Lokal testen
-```bash
-npm install
-npm run dev
-```
-Hinweis: Voice-Chat funktioniert lokal nicht (braucht Netlify Functions).
+1. Gehe zu **"Authentication"** → **"Providers"**
+2. Stelle sicher, dass **"Email"** aktiviert ist
+3. Optional: Deaktiviere "Confirm email" für einfacheres Testen unter **"Authentication"** → **"Settings"**
+
+### 3. Environment Variables in Netlify
+
+Füge diese zwei Variables hinzu (Site settings → Environment variables):
+
+- `VITE_SUPABASE_URL` = `https://iyuxooqzreodwenonniz.supabase.co`
+- `VITE_SUPABASE_ANON_KEY` = `sb_publishable_0aVb5jLTvJPOElWSJjccsQ_dP_UPeMy`
+- `OPENAI_API_KEY` = dein OpenAI Key (hast du schon)
+
+### 4. Deploy
+
+Push zu GitHub → Netlify baut automatisch neu.
+
+---
+
+## Features
+
+### Für Lernende:
+- Login/Registrierung
+- Persönlicher Fortschritt wird gespeichert
+- Quiz-Ergebnisse werden gespeichert
+- Rollenspiel-Sessions werden gespeichert
+
+### Für Arbeitgeber:
+- Übersicht aller Mitarbeiter der eigenen Firma
+- Fortschritt und Quiz-Ergebnisse einsehen
+
+### Für Betreiber (Admin):
+- Alle Lernenden sehen
+- Detailliertes Profil mit Soft Skills
+- Filter nach Firma
+
+---
+
+## Benutzer-Rollen
+
+Neue Benutzer werden automatisch als "lernender" angelegt.
+
+Um einen Benutzer zum Admin zu machen:
+1. Gehe zu Supabase → **"Table Editor"** → **"profiles"**
+2. Finde den Benutzer
+3. Ändere `role` zu `betreiber` oder `arbeitgeber`
+
+---
 
 ## Struktur
+
 ```
-├── netlify/
-│   └── functions/
-│       ├── chat.js      # OpenAI Chat API
-│       ├── tts.js       # Text-to-Speech
-│       └── transcribe.js # Speech-to-Text
-├── src/
-│   ├── App.jsx
-│   ├── personas/
-│   └── ...
-└── netlify.toml
+src/
+├── lib/
+│   ├── supabase.js      # Supabase Client
+│   ├── AuthContext.jsx  # Login State
+│   └── database.js      # Datenbank Hooks
+├── components/
+│   └── AuthPage.jsx     # Login/Register
+├── modules/             # Kursmodule
+├── personas/            # AI Kunden
+└── App.jsx              # Hauptapp
 ```
