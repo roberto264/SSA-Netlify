@@ -9,6 +9,7 @@ import {
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import { useProgress, useQuizResults, useRollenspiele, useAllUsers, useFirmaUsers } from './lib/database';
 import AuthPage from './components/AuthPage';
+import AITutor from './components/AITutor';
 import { modules } from './modules';
 import { personas } from './personas';
 
@@ -1062,6 +1063,7 @@ function AppContent() {
   const handleBack = () => {
     if (view === 'voicechat') { setView('personas'); setSelectedPersona(null); }
     else if (view === 'personas') { setView('dashboard'); }
+    else if (view === 'tutor') { setView('dashboard'); }
     else if (view === 'quiz') { setView('module'); setSelectedTopic(null); }
     else if (view === 'module') { setView('dashboard'); setSelectedModule(null); }
     else { setView('dashboard'); }
@@ -1079,8 +1081,11 @@ function AppContent() {
             <LernenderDashboard 
               onSelectModule={(m) => { setSelectedModule(m); setView('module'); }}
               onStartRoleplay={() => setView('personas')}
-              onStartTutor={() => {}}
+              onStartTutor={() => setView('tutor')}
             />
+          )}
+          {view === 'tutor' && (
+            <AITutor onBack={handleBack} />
           )}
           {view === 'module' && selectedModule && (
             <ModuleDetail 
