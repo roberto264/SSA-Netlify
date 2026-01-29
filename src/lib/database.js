@@ -304,3 +304,73 @@ export function useFirmen() {
 
   return { firmen, loading };
 }
+
+// ============================================
+// AUDIO FORTSCHRITT HOOK
+// ============================================
+
+export function useAudioProgress() {
+  const { user } = useAuth();
+  const [audioProgress, setAudioProgress] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchAudioProgress();
+    }
+  }, [user]);
+
+  const fetchAudioProgress = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('audio_fortschritt')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
+      // Convert array to object keyed by modul_id
+      const progressMap = {};
+      (data || []).forEach(item => {
+        progressMap[item.modul_id] = item.position;
+      });
+      setAudioProgress(progressMap);
+    } catch (error) {
+      console.error('Error fetching audio progress:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveAudioProgress = async (modulId, position) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('audio_fortschritt')
+        .upsert({
+          user_id: user.id,
+          modul_id: modulId,
+          position: position,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,modul_id'
+        });
+
+      if (error) throw error;
+      
+      setAudioProgress(prev => ({
+        ...prev,
+        [modulId]: position
+      }));
+    } catch (error) {
+      console.error('Error saving audio progress:', error);
+    }
+  };
+
+  const getAudioProgress = (modulId) => {
+    return audioProgress[modulId] || 0;
+  };
+
+  return { audioProgress, loading, saveAudioProgress, getAudioProgress, refresh: fetchAudioProgress };
+}

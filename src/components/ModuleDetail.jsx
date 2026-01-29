@@ -1,81 +1,237 @@
-import React, { useState } from 'react';
-import { ArrowLeft, ChevronRight, CheckCircle, ChevronLeft, Play, Pause, Volume2, X } from 'lucide-react';
-import { useProgress } from '../lib/database';
+import React, { useState, useRef, useEffect } from 'react';
+import { ArrowLeft, ChevronRight, CheckCircle, ChevronLeft, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, Maximize2 } from 'lucide-react';
+import { useProgress, useAudioProgress } from '../lib/database';
 import { getLernhilfen } from '../modules/lernhilfen';
 
 // ============================================
 // AUDIO PLAYER KOMPONENTE
 // ============================================
-function AudioPlayer({ audioData }) {
+function AudioPlayer({ audioData, modulId }) {
+  const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const { saveAudioProgress, getAudioProgress } = useAudioProgress();
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-    if (!isPlaying) {
-      const interval = setInterval(() => {
-        setProgress(p => {
-          if (p >= 100) {
-            clearInterval(interval);
-            setIsPlaying(false);
-            return 0;
-          }
-          return p + 0.3;
-        });
-      }, 100);
+  // Lade gespeicherten Fortschritt beim Start
+  useEffect(() => {
+    const savedPosition = getAudioProgress(modulId);
+    if (savedPosition && audioRef.current) {
+      audioRef.current.currentTime = savedPosition;
+      setCurrentTime(savedPosition);
+    }
+  }, [modulId, getAudioProgress]);
+
+  // Speichere Fortschritt alle 5 Sekunden während der Wiedergabe
+  useEffect(() => {
+    let saveInterval;
+    if (isPlaying) {
+      saveInterval = setInterval(() => {
+        if (audioRef.current) {
+          saveAudioProgress(modulId, audioRef.current.currentTime);
+        }
+      }, 5000);
+    }
+    return () => clearInterval(saveInterval);
+  }, [isPlaying, modulId, saveAudioProgress]);
+
+  // Speichere Fortschritt beim Pausieren
+  const handlePause = () => {
+    if (audioRef.current) {
+      saveAudioProgress(modulId, audioRef.current.currentTime);
     }
   };
 
-  // Parse duration (e.g., "12:34" -> 754 seconds)
-  const parseDuration = (duration) => {
-    const parts = duration.split(':');
-    return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+  const togglePlay = () => {
+    if (!audioRef.current || !audioData.url) return;
+    
+    if (isPlaying) {
+      audioRef.current.pause();
+      handlePause();
+    } else {
+      audioRef.current.play().catch(err => {
+        console.error('Playback error:', err);
+        setError('Audio konnte nicht abgespielt werden');
+      });
+    }
+    setIsPlaying(!isPlaying);
   };
 
-  const totalSeconds = parseDuration(audioData.duration);
-  const currentSeconds = Math.floor((progress / 100) * totalSeconds);
-  const currentMinutes = Math.floor(currentSeconds / 60);
-  const currentSecs = currentSeconds % 60;
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+      setIsLoading(false);
+      
+      // Setze gespeicherte Position
+      const savedPosition = getAudioProgress(modulId);
+      if (savedPosition) {
+        audioRef.current.currentTime = savedPosition;
+      }
+    }
+  };
+
+  const handleSeek = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const percent = (e.clientX - rect.left) / rect.width;
+    const newTime = percent * duration;
+    
+    if (audioRef.current) {
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+      saveAudioProgress(modulId, newTime);
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+    saveAudioProgress(modulId, 0); // Reset beim Ende
+  };
+
+  const skip = (seconds) => {
+    if (audioRef.current) {
+      const newTime = Math.max(0, Math.min(duration, audioRef.current.currentTime + seconds));
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
+
+  const toggleMute = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  // Wenn keine Audio-URL vorhanden
+  if (!audioData.url) {
+    return (
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-200">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center text-white shadow-lg text-xl">
+            🎧
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-gray-900">{audioData.title}</h3>
+            <p className="text-sm text-gray-500">Audio wird bald verfügbar sein...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-200">
+      {/* Hidden Audio Element */}
+      <audio
+        ref={audioRef}
+        src={audioData.url}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onEnded={handleEnded}
+        onError={() => setError('Audio konnte nicht geladen werden')}
+        preload="metadata"
+      />
+
       <div className="flex items-center gap-4 mb-4">
         <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center text-white shadow-lg text-xl">
           🎧
         </div>
         <div className="flex-1">
           <h3 className="font-bold text-gray-900">{audioData.title}</h3>
-          <p className="text-sm text-gray-500">{audioData.duration} Minuten</p>
+          <p className="text-sm text-gray-500">
+            {isLoading ? 'Lädt...' : audioData.description}
+          </p>
         </div>
       </div>
-      
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={togglePlay}
-          className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-105 transition flex-shrink-0"
-        >
-          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-        </button>
-        
-        <div className="flex-1">
-          <div className="h-2 bg-amber-200 rounded-full overflow-hidden cursor-pointer">
-            <div 
-              className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-100"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <div className="flex justify-between mt-1 text-xs text-gray-500">
-            <span>{currentMinutes}:{String(currentSecs).padStart(2, '0')}</span>
-            <span>{audioData.duration}</span>
-          </div>
+
+      {error ? (
+        <div className="bg-red-100 text-red-700 rounded-lg p-3 text-sm">
+          {error}
         </div>
-        
-        <button className="p-2 text-gray-400 hover:text-gray-600">
-          <Volume2 className="w-5 h-5" />
-        </button>
-      </div>
-      
-      <p className="mt-3 text-sm text-gray-600">{audioData.description}</p>
+      ) : (
+        <>
+          {/* Controls */}
+          <div className="flex items-center gap-3 mb-3">
+            {/* Skip Back */}
+            <button 
+              onClick={() => skip(-10)}
+              className="p-2 text-gray-500 hover:text-gray-700 transition"
+              title="-10 Sekunden"
+            >
+              <SkipBack className="w-5 h-5" />
+            </button>
+
+            {/* Play/Pause */}
+            <button 
+              onClick={togglePlay}
+              disabled={isLoading}
+              className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-105 transition flex-shrink-0 disabled:opacity-50"
+            >
+              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+            </button>
+
+            {/* Skip Forward */}
+            <button 
+              onClick={() => skip(10)}
+              className="p-2 text-gray-500 hover:text-gray-700 transition"
+              title="+10 Sekunden"
+            >
+              <SkipForward className="w-5 h-5" />
+            </button>
+
+            {/* Progress Bar */}
+            <div className="flex-1">
+              <div 
+                className="h-2 bg-amber-200 rounded-full overflow-hidden cursor-pointer"
+                onClick={handleSeek}
+              >
+                <div 
+                  className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-100"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="flex justify-between mt-1 text-xs text-gray-500">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
+            </div>
+
+            {/* Volume */}
+            <button 
+              onClick={toggleMute}
+              className="p-2 text-gray-500 hover:text-gray-700 transition"
+            >
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* Resume indicator */}
+          {currentTime > 0 && !isPlaying && (
+            <p className="text-xs text-amber-600 mt-2">
+              ▶️ Fortsetzen bei {formatTime(currentTime)}
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -651,7 +807,7 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
             
             {/* Audio Player */}
             {lernhilfen?.audio && (
-              <AudioPlayer audioData={lernhilfen.audio} />
+              <AudioPlayer audioData={lernhilfen.audio} modulId={module.id} />
             )}
             
             {/* Grid für Karteikarten und Mind Map */}
