@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from './lib/AuthContext';
 import { useProgress, useQuizResults, useRollenspiele, useAllUsers, useFirmaUsers } from './lib/database';
 import AuthPage from './components/AuthPage';
 import AITutor from './components/AITutor';
+import ModuleDetail from './components/ModuleDetail';
 import { modules } from './modules';
 import { personas } from './personas';
 
@@ -652,66 +653,6 @@ function ArbeitgeberDashboard() {
             </div>
           );
         })}
-      </div>
-    </main>
-  );
-}
-
-// ============================================
-// MODULE DETAIL
-// ============================================
-function ModuleDetail({ module, onBack, onSelectTopic }) {
-  const { progress } = useProgress();
-
-  const isTopicCompleted = (topicId) => {
-    return progress.some(p => p.modul_id === module.id && p.topic_id === topicId && p.completed);
-  };
-
-  return (
-    <main className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-      <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base">
-        <ArrowLeft className="w-4 h-4" />
-        Zurück
-      </button>
-
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-6">
-        <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br ${module.color} rounded-xl flex items-center justify-center text-2xl sm:text-3xl`}>
-            {module.icon}
-          </div>
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{module.title}</h2>
-            <p className="text-gray-500 text-sm sm:text-base">{module.description}</p>
-          </div>
-        </div>
-
-        <div className="space-y-3 sm:space-y-4">
-          {module.topics.map(topic => {
-            const completed = isTopicCompleted(topic.id);
-            return (
-              <div 
-                key={topic.id}
-                onClick={() => onSelectTopic(topic)}
-                className={`p-3 sm:p-5 rounded-xl cursor-pointer transition border-2 ${
-                  completed 
-                    ? 'bg-green-50 border-green-200' 
-                    : 'bg-gray-50 border-transparent hover:bg-white hover:shadow-md hover:border-indigo-200'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    {completed && <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />}
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{topic.title}</h3>
-                      <p className="text-xs sm:text-sm text-gray-500">{topic.description}</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </main>
   );
