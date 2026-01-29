@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Environment Variables (WICHTIG - niemals committen!)
+.env
+.env.local
+.env.production
+.env.development
+
+# Build Output
+dist/
+build/
+
+# Netlify
+.netlify/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cache
+.cache/
