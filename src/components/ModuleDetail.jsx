@@ -83,7 +83,67 @@ function AudioPlayer({ audioData }) {
 // ============================================
 // KARTEIKARTEN KOMPONENTE
 // ============================================
-function Flashcards({ flashcardsData }) {
+function Flashcards({ flashcardsData, onOpenFullscreen }) {
+  const [currentCard, setCurrentCard] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [knownCards, setKnownCards] = useState([]);
+
+  // Prüfe ob Flashcards vorhanden sind
+  if (!flashcardsData || flashcardsData.length === 0) {
+    return (
+      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-200">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-white text-lg shadow-lg">
+            📇
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-900">Karteikarten</h3>
+            <p className="text-xs text-gray-500">Noch keine Karten verfügbar</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl p-6 text-center text-gray-500">
+          <p>Karteikarten werden bald hinzugefügt...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const card = flashcardsData[currentCard];
+
+  return (
+    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-200">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-white text-lg shadow-lg">
+            📇
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-900">Karteikarten</h3>
+            <p className="text-xs text-gray-500">{flashcardsData.length} Karten verfügbar</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Preview Card */}
+      <div className="bg-white rounded-xl p-4 mb-4 border border-emerald-100">
+        <p className="text-xs text-emerald-600 font-medium mb-2">VORSCHAU</p>
+        <p className="text-gray-800 text-sm line-clamp-2">{card.question}</p>
+      </div>
+
+      <button 
+        onClick={onOpenFullscreen}
+        className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-medium hover:from-emerald-600 hover:to-teal-700 transition shadow-lg text-sm"
+      >
+        Karteikarten üben →
+      </button>
+    </div>
+  );
+}
+
+// ============================================
+// KARTEIKARTEN FULLSCREEN MODAL
+// ============================================
+function FlashcardsModal({ flashcardsData, onClose }) {
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [knownCards, setKnownCards] = useState([]);
@@ -109,102 +169,144 @@ function Flashcards({ flashcardsData }) {
     nextCard();
   };
 
+  const resetCards = () => {
+    setCurrentCard(0);
+    setKnownCards([]);
+    setIsFlipped(false);
+  };
+
   const card = flashcardsData[currentCard];
+  const progress = Math.round((knownCards.length / flashcardsData.length) * 100);
 
   return (
-    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-200">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-white text-lg shadow-lg">
-            📇
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">📇</span>
+              <div>
+                <h2 className="font-bold">Karteikarten</h2>
+                <p className="text-emerald-100 text-sm">{knownCards.length} von {flashcardsData.length} gewusst ({progress}%)</p>
+              </div>
+            </div>
+            <button 
+              onClick={onClose}
+              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <div>
-            <h3 className="font-bold text-gray-900">Karteikarten</h3>
-            <p className="text-xs text-gray-500">
-              {currentCard + 1} / {flashcardsData.length} • {knownCards.length} gewusst
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-1">
-          {flashcardsData.map((_, i) => (
+          {/* Progress Bar */}
+          <div className="mt-3 bg-white/20 rounded-full h-2">
             <div 
-              key={i}
-              className={`w-1.5 h-1.5 rounded-full transition ${
-                i === currentCard ? 'bg-emerald-500 w-3' : 
-                knownCards.includes(i) ? 'bg-emerald-300' : 'bg-gray-300'
-              }`}
+              className="bg-white h-2 rounded-full transition-all duration-300" 
+              style={{ width: `${progress}%` }}
             />
-          ))}
-        </div>
-      </div>
-
-      {/* Flip Card */}
-      <div 
-        className="relative h-44 cursor-pointer perspective-1000"
-        onClick={() => setIsFlipped(!isFlipped)}
-        style={{ perspective: '1000px' }}
-      >
-        <div 
-          className="relative w-full h-full transition-transform duration-500"
-          style={{ 
-            transformStyle: 'preserve-3d',
-            transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
-          }}
-        >
-          {/* Front */}
-          <div 
-            className="absolute inset-0 bg-white rounded-xl p-4 shadow-sm border border-emerald-100 flex flex-col justify-center"
-            style={{ backfaceVisibility: 'hidden' }}
-          >
-            <p className="text-xs text-emerald-600 font-medium mb-2">FRAGE</p>
-            <p className="text-gray-800 font-medium text-center text-sm">{card.question}</p>
-            <p className="text-xs text-gray-400 mt-4 text-center">Klicken zum Umdrehen</p>
-          </div>
-          
-          {/* Back */}
-          <div 
-            className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-4 shadow-lg flex flex-col justify-center"
-            style={{ 
-              backfaceVisibility: 'hidden',
-              transform: 'rotateY(180deg)'
-            }}
-          >
-            <p className="text-xs text-emerald-100 font-medium mb-2">ANTWORT</p>
-            <p className="text-white font-medium text-center text-sm">{card.answer}</p>
           </div>
         </div>
-      </div>
 
-      {/* Navigation */}
-      <div className="flex items-center justify-between mt-4">
-        <button 
-          onClick={prevCard}
-          className="p-2 rounded-lg hover:bg-emerald-100 transition text-gray-600"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        
-        <div className="flex gap-2">
+        {/* Card Counter */}
+        <div className="px-6 py-3 bg-gray-50 border-b flex items-center justify-between">
+          <span className="text-sm text-gray-600">Karte {currentCard + 1} von {flashcardsData.length}</span>
           <button 
-            onClick={nextCard}
-            className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition"
+            onClick={resetCards}
+            className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
           >
-            Nochmal
-          </button>
-          <button 
-            onClick={markAsKnown}
-            className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 transition"
-          >
-            ✓ Gewusst!
+            Neustart
           </button>
         </div>
-        
-        <button 
-          onClick={nextCard}
-          className="p-2 rounded-lg hover:bg-emerald-100 transition text-gray-600"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
+
+        {/* Flip Card */}
+        <div className="p-6">
+          <div 
+            className="relative h-64 cursor-pointer"
+            onClick={() => setIsFlipped(!isFlipped)}
+            style={{ perspective: '1000px' }}
+          >
+            <div 
+              className="relative w-full h-full transition-transform duration-500"
+              style={{ 
+                transformStyle: 'preserve-3d',
+                transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+              }}
+            >
+              {/* Front - Question */}
+              <div 
+                className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 shadow-lg border border-gray-200 flex flex-col justify-center"
+                style={{ backfaceVisibility: 'hidden' }}
+              >
+                <p className="text-xs text-emerald-600 font-semibold mb-3 tracking-wide">FRAGE</p>
+                <p className="text-gray-800 font-medium text-center text-lg leading-relaxed">{card.question}</p>
+                <p className="text-sm text-gray-400 mt-6 text-center">👆 Tippen zum Umdrehen</p>
+              </div>
+              
+              {/* Back - Answer */}
+              <div 
+                className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 shadow-lg flex flex-col justify-center"
+                style={{ 
+                  backfaceVisibility: 'hidden',
+                  transform: 'rotateY(180deg)'
+                }}
+              >
+                <p className="text-xs text-emerald-100 font-semibold mb-3 tracking-wide">ANTWORT</p>
+                <p className="text-white font-medium text-center text-lg leading-relaxed">{card.answer}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <div className="px-6 pb-6">
+          <div className="flex items-center justify-between gap-4">
+            <button 
+              onClick={prevCard}
+              className="p-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition text-gray-600"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            
+            <div className="flex gap-3 flex-1 justify-center">
+              <button 
+                onClick={nextCard}
+                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition"
+              >
+                Nochmal üben
+              </button>
+              <button 
+                onClick={markAsKnown}
+                className="px-6 py-3 bg-emerald-500 text-white rounded-xl font-medium hover:bg-emerald-600 transition flex items-center gap-2"
+              >
+                <CheckCircle className="w-5 h-5" />
+                Gewusst!
+              </button>
+            </div>
+            
+            <button 
+              onClick={nextCard}
+              className="p-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition text-gray-600"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+
+        {/* Card Indicators */}
+        <div className="px-6 pb-4">
+          <div className="flex gap-1 justify-center flex-wrap">
+            {flashcardsData.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => { setCurrentCard(i); setIsFlipped(false); }}
+                className={`w-3 h-3 rounded-full transition ${
+                  i === currentCard ? 'bg-emerald-500 scale-125' : 
+                  knownCards.includes(i) ? 'bg-emerald-300' : 'bg-gray-300'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -495,6 +597,7 @@ function TopicsList({ module, onSelectTopic, progress }) {
 function ModuleDetail({ module, onBack, onSelectTopic }) {
   const { progress } = useProgress();
   const [showMindMap, setShowMindMap] = useState(false);
+  const [showFlashcards, setShowFlashcards] = useState(false);
   
   // Hole Lernhilfen für dieses Modul
   const lernhilfen = getLernhilfen(module.id);
@@ -554,7 +657,10 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
             {/* Grid für Karteikarten und Mind Map */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {lernhilfen?.flashcards && (
-                <Flashcards flashcardsData={lernhilfen.flashcards} />
+                <Flashcards 
+                  flashcardsData={lernhilfen.flashcards} 
+                  onOpenFullscreen={() => setShowFlashcards(true)}
+                />
               )}
               {lernhilfen?.mindmap && (
                 <MindMapPreview 
@@ -581,6 +687,14 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
         <MindMapModal 
           mindmapData={lernhilfen.mindmap} 
           onClose={() => setShowMindMap(false)} 
+        />
+      )}
+
+      {/* Flashcards Modal */}
+      {showFlashcards && lernhilfen?.flashcards && lernhilfen.flashcards.length > 0 && (
+        <FlashcardsModal 
+          flashcardsData={lernhilfen.flashcards} 
+          onClose={() => setShowFlashcards(false)} 
         />
       )}
     </div>
