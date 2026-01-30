@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ChevronRight, CheckCircle, ChevronLeft, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, Maximize2 } from 'lucide-react';
+import { ArrowLeft, ChevronRight, CheckCircle, ChevronLeft, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X } from 'lucide-react';
 import { useProgress, useAudioProgress } from '../lib/database';
 import { getLernhilfen } from '../modules/lernhilfen';
+import MindMapFlow from './MindMapFlow';
 
 // ============================================
 // AUDIO PLAYER KOMPONENTE
@@ -11,26 +12,63 @@ function AudioPlayer({ audioData, modulId }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  const { saveAudioProgress, getAudioProgress } = useAudioProgress();
+  const [hasRestoredPosition, setHasRestoredPosition] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
 
-  // Lade gespeicherten Fortschritt beim Start
-  useEffect(() => {
-    const savedPosition = getAudioProgress(modulId);
-    if (savedPosition && audioRef.current) {
-      audioRef.current.currentTime = savedPosition;
-      setCurrentTime(savedPosition);
+  const { audioProgress, loading: progressLoading, saveAudioProgress, getAudioProgress } = useAudioProgress();
+
+  const formatTime = (seconds) => {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+      setIsLoading(false);
     }
-  }, [modulId, getAudioProgress]);
+  };
 
-  // Speichere Fortschritt alle 5 Sekunden während der Wiedergabe
+  // Auto-load: Restore saved position when audio and progress data are ready
+  useEffect(() => {
+    // Wait for all data to be loaded
+    if (!progressLoading && !isLoading && audioRef.current && !hasRestoredPosition) {
+      const savedPosition = audioProgress[modulId] || 0;
+
+      if (savedPosition > 0) {
+        console.log('Auto-loading position:', savedPosition, 'for module:', modulId);
+        // Set both audio element and state to keep them in sync
+        audioRef.current.currentTime = savedPosition;
+        setCurrentTime(savedPosition);
+      }
+      setHasRestoredPosition(true);
+    }
+  }, [progressLoading, isLoading, audioProgress, modulId, hasRestoredPosition]);
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+    }
+    saveAudioProgress(modulId, 0);
+  };
+
+  // Save progress every 5 seconds while playing
   useEffect(() => {
     let saveInterval;
-    if (isPlaying) {
+    if (isPlaying && audioRef.current) {
       saveInterval = setInterval(() => {
         if (audioRef.current) {
           saveAudioProgress(modulId, audioRef.current.currentTime);
@@ -40,70 +78,52 @@ function AudioPlayer({ audioData, modulId }) {
     return () => clearInterval(saveInterval);
   }, [isPlaying, modulId, saveAudioProgress]);
 
-  // Speichere Fortschritt beim Pausieren
-  const handlePause = () => {
-    if (audioRef.current) {
-      saveAudioProgress(modulId, audioRef.current.currentTime);
-    }
-  };
+  const togglePlay = async () => {
+    if (!audioRef.current) return;
 
-  const togglePlay = () => {
-    if (!audioRef.current || !audioData.url) return;
-    
-    if (isPlaying) {
-      audioRef.current.pause();
-      handlePause();
-    } else {
-      audioRef.current.play().catch(err => {
-        console.error('Playback error:', err);
-        setError('Audio konnte nicht abgespielt werden');
-      });
-    }
-    setIsPlaying(!isPlaying);
-  };
+    try {
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+        // Save position when pausing
+        saveAudioProgress(modulId, audioRef.current.currentTime);
+      } else {
+        // Always restore saved position before playing
+        const savedPosition = getAudioProgress(modulId);
+        if (savedPosition > 0) {
+          audioRef.current.currentTime = savedPosition;
+          // Force update the state immediately
+          setCurrentTime(savedPosition);
+        }
 
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-    }
-  };
-
-  const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
-      setIsLoading(false);
-      
-      // Setze gespeicherte Position
-      const savedPosition = getAudioProgress(modulId);
-      if (savedPosition) {
-        audioRef.current.currentTime = savedPosition;
+        setIsBuffering(true);
+        await audioRef.current.play();
+        setIsPlaying(true);
+        setIsBuffering(false);
       }
+    } catch (err) {
+      console.error('Playback error:', err);
+      setError('Audio konnte nicht abgespielt werden');
+      setIsPlaying(false);
+      setIsBuffering(false);
     }
   };
 
   const handleSeek = (e) => {
+    if (!audioRef.current || !duration) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
+    const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     const newTime = percent * duration;
-    
-    if (audioRef.current) {
-      audioRef.current.currentTime = newTime;
-      setCurrentTime(newTime);
-      saveAudioProgress(modulId, newTime);
-    }
-  };
-
-  const handleEnded = () => {
-    setIsPlaying(false);
-    saveAudioProgress(modulId, 0); // Reset beim Ende
+    audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+    saveAudioProgress(modulId, newTime);
   };
 
   const skip = (seconds) => {
-    if (audioRef.current) {
-      const newTime = Math.max(0, Math.min(duration, audioRef.current.currentTime + seconds));
-      audioRef.current.currentTime = newTime;
-      setCurrentTime(newTime);
-    }
+    if (!audioRef.current) return;
+    const newTime = Math.max(0, Math.min(duration, audioRef.current.currentTime + seconds));
+    audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
   };
 
   const toggleMute = () => {
@@ -113,19 +133,12 @@ function AudioPlayer({ audioData, modulId }) {
     }
   };
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  // Wenn keine Audio-URL vorhanden
   if (!audioData.url) {
     return (
       <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-200">
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center text-white shadow-lg text-xl">
             🎧
           </div>
@@ -140,15 +153,17 @@ function AudioPlayer({ audioData, modulId }) {
 
   return (
     <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-200">
-      {/* Hidden Audio Element */}
       <audio
         ref={audioRef}
         src={audioData.url}
-        onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
+        onTimeUpdate={handleTimeUpdate}
         onEnded={handleEnded}
         onError={() => setError('Audio konnte nicht geladen werden')}
-        preload="metadata"
+        onWaiting={() => setIsBuffering(true)}
+        onCanPlay={() => setIsBuffering(false)}
+        onPlaying={() => setIsBuffering(false)}
+        preload="auto"
       />
 
       <div className="flex items-center gap-4 mb-4">
@@ -164,46 +179,34 @@ function AudioPlayer({ audioData, modulId }) {
       </div>
 
       {error ? (
-        <div className="bg-red-100 text-red-700 rounded-lg p-3 text-sm">
-          {error}
-        </div>
+        <div className="bg-red-100 text-red-700 rounded-lg p-3 text-sm">{error}</div>
       ) : (
         <>
-          {/* Controls */}
-          <div className="flex items-center gap-3 mb-3">
-            {/* Skip Back */}
-            <button 
-              onClick={() => skip(-10)}
-              className="p-2 text-gray-500 hover:text-gray-700 transition"
-              title="-10 Sekunden"
-            >
+          <div className="flex items-center gap-3">
+            <button onClick={() => skip(-10)} className="p-2 text-gray-500 hover:text-gray-700 transition">
               <SkipBack className="w-5 h-5" />
             </button>
 
-            {/* Play/Pause */}
-            <button 
+            <button
               onClick={togglePlay}
-              disabled={isLoading}
+              disabled={isLoading || isBuffering}
               className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-105 transition flex-shrink-0 disabled:opacity-50"
             >
-              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+              {isBuffering ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : isPlaying ? (
+                <Pause className="w-5 h-5" />
+              ) : (
+                <Play className="w-5 h-5 ml-0.5" />
+              )}
             </button>
 
-            {/* Skip Forward */}
-            <button 
-              onClick={() => skip(10)}
-              className="p-2 text-gray-500 hover:text-gray-700 transition"
-              title="+10 Sekunden"
-            >
+            <button onClick={() => skip(10)} className="p-2 text-gray-500 hover:text-gray-700 transition">
               <SkipForward className="w-5 h-5" />
             </button>
 
-            {/* Progress Bar */}
             <div className="flex-1">
-              <div 
-                className="h-2 bg-amber-200 rounded-full overflow-hidden cursor-pointer"
-                onClick={handleSeek}
-              >
+              <div className="h-2 bg-amber-200 rounded-full overflow-hidden cursor-pointer" onClick={handleSeek}>
                 <div 
                   className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-100"
                   style={{ width: `${progress}%` }}
@@ -215,21 +218,10 @@ function AudioPlayer({ audioData, modulId }) {
               </div>
             </div>
 
-            {/* Volume */}
-            <button 
-              onClick={toggleMute}
-              className="p-2 text-gray-500 hover:text-gray-700 transition"
-            >
+            <button onClick={toggleMute} className="p-2 text-gray-500 hover:text-gray-700 transition">
               {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
           </div>
-
-          {/* Resume indicator */}
-          {currentTime > 0 && !isPlaying && (
-            <p className="text-xs text-amber-600 mt-2">
-              ▶️ Fortsetzen bei {formatTime(currentTime)}
-            </p>
-          )}
         </>
       )}
     </div>
@@ -237,14 +229,9 @@ function AudioPlayer({ audioData, modulId }) {
 }
 
 // ============================================
-// KARTEIKARTEN KOMPONENTE
+// KARTEIKARTEN KOMPONENTE (Preview)
 // ============================================
 function Flashcards({ flashcardsData, onOpenFullscreen }) {
-  const [currentCard, setCurrentCard] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [knownCards, setKnownCards] = useState([]);
-
-  // Prüfe ob Flashcards vorhanden sind
   if (!flashcardsData || flashcardsData.length === 0) {
     return (
       <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-200">
@@ -264,7 +251,7 @@ function Flashcards({ flashcardsData, onOpenFullscreen }) {
     );
   }
 
-  const card = flashcardsData[currentCard];
+  const card = flashcardsData[0];
 
   return (
     <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-200">
@@ -280,7 +267,6 @@ function Flashcards({ flashcardsData, onOpenFullscreen }) {
         </div>
       </div>
 
-      {/* Preview Card */}
       <div className="bg-white rounded-xl p-4 mb-4 border border-emerald-100">
         <p className="text-xs text-emerald-600 font-medium mb-2">VORSCHAU</p>
         <p className="text-gray-800 text-sm line-clamp-2">{card.question}</p>
@@ -337,7 +323,6 @@ function FlashcardsModal({ flashcardsData, onClose }) {
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
-        {/* Header */}
         <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -354,27 +339,18 @@ function FlashcardsModal({ flashcardsData, onClose }) {
               <X className="w-5 h-5" />
             </button>
           </div>
-          {/* Progress Bar */}
           <div className="mt-3 bg-white/20 rounded-full h-2">
-            <div 
-              className="bg-white h-2 rounded-full transition-all duration-300" 
-              style={{ width: `${progress}%` }}
-            />
+            <div className="bg-white h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
           </div>
         </div>
 
-        {/* Card Counter */}
         <div className="px-6 py-3 bg-gray-50 border-b flex items-center justify-between">
           <span className="text-sm text-gray-600">Karte {currentCard + 1} von {flashcardsData.length}</span>
-          <button 
-            onClick={resetCards}
-            className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
-          >
+          <button onClick={resetCards} className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
             Neustart
           </button>
         </div>
 
-        {/* Flip Card */}
         <div className="p-6">
           <div 
             className="relative h-64 cursor-pointer"
@@ -388,7 +364,6 @@ function FlashcardsModal({ flashcardsData, onClose }) {
                 transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
               }}
             >
-              {/* Front - Question */}
               <div 
                 className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 shadow-lg border border-gray-200 flex flex-col justify-center"
                 style={{ backfaceVisibility: 'hidden' }}
@@ -398,13 +373,9 @@ function FlashcardsModal({ flashcardsData, onClose }) {
                 <p className="text-sm text-gray-400 mt-6 text-center">👆 Tippen zum Umdrehen</p>
               </div>
               
-              {/* Back - Answer */}
               <div 
                 className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 shadow-lg flex flex-col justify-center"
-                style={{ 
-                  backfaceVisibility: 'hidden',
-                  transform: 'rotateY(180deg)'
-                }}
+                style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
               >
                 <p className="text-xs text-emerald-100 font-semibold mb-3 tracking-wide">ANTWORT</p>
                 <p className="text-white font-medium text-center text-lg leading-relaxed">{card.answer}</p>
@@ -413,13 +384,9 @@ function FlashcardsModal({ flashcardsData, onClose }) {
           </div>
         </div>
 
-        {/* Navigation */}
         <div className="px-6 pb-6">
           <div className="flex items-center justify-between gap-4">
-            <button 
-              onClick={prevCard}
-              className="p-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition text-gray-600"
-            >
+            <button onClick={prevCard} className="p-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition text-gray-600">
               <ChevronLeft className="w-6 h-6" />
             </button>
             
@@ -439,16 +406,12 @@ function FlashcardsModal({ flashcardsData, onClose }) {
               </button>
             </div>
             
-            <button 
-              onClick={nextCard}
-              className="p-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition text-gray-600"
-            >
+            <button onClick={nextCard} className="p-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition text-gray-600">
               <ChevronRight className="w-6 h-6" />
             </button>
           </div>
         </div>
 
-        {/* Card Indicators */}
         <div className="px-6 pb-4">
           <div className="flex gap-1 justify-center flex-wrap">
             {flashcardsData.map((_, i) => (
@@ -469,7 +432,7 @@ function FlashcardsModal({ flashcardsData, onClose }) {
 }
 
 // ============================================
-// MIND MAP PREVIEW & MODAL
+// MIND MAP PREVIEW
 // ============================================
 function MindMapPreview({ mindmapData, onOpen }) {
   const topics = mindmapData.topics || [];
@@ -486,16 +449,12 @@ function MindMapPreview({ mindmapData, onOpen }) {
         </div>
       </div>
 
-      {/* Mini Preview */}
       <div className="bg-white rounded-xl p-3 mb-4 border border-violet-100">
         <svg viewBox="0 0 280 120" className="w-full h-24">
-          {/* Center */}
           <rect x="105" y="45" width="70" height="30" rx="15" fill="#8b5cf6"/>
           <text x="140" y="64" textAnchor="middle" fill="white" fontSize="7" fontWeight="bold">
             {mindmapData.centerLabel?.split(' ')[0] || 'Thema'}
           </text>
-          
-          {/* Branches - dynamisch basierend auf Topics */}
           {topics.slice(0, 6).map((topic, i) => {
             const angle = -Math.PI/2 + (i * 2 * Math.PI) / Math.min(topics.length, 6);
             const cx = 140 + 70 * Math.cos(angle);
@@ -521,174 +480,9 @@ function MindMapPreview({ mindmapData, onOpen }) {
 }
 
 // ============================================
-// MIND MAP MODAL (VOLLBILD)
+// MIND MAP MODAL
 // ============================================
-function MindMapModal({ mindmapData, onClose }) {
-  const [expandedTopic, setExpandedTopic] = useState(null);
-  const [hoveredNode, setHoveredNode] = useState(null);
-
-  const topics = mindmapData.topics || [];
-  
-  const width = 1000, height = 600;
-  const centerX = width / 2, centerY = height / 2;
-  const topicRadius = 160;
-
-  const getTopicPosition = (index, total) => {
-    const angle = -Math.PI / 2 + (index * 2 * Math.PI) / total;
-    return { 
-      x: centerX + topicRadius * Math.cos(angle), 
-      y: centerY + topicRadius * Math.sin(angle), 
-      angle 
-    };
-  };
-
-  const getDetailPositions = (topicPos, details, topicAngle) => {
-    const positions = [];
-    for (let i = 0; i < details.length; i++) {
-      const distance = 80 + i * 32;
-      positions.push({
-        x: topicPos.x + distance * Math.cos(topicAngle),
-        y: topicPos.y + distance * Math.sin(topicAngle),
-        label: details[i]
-      });
-    }
-    return positions;
-  };
-
-  return (
-    <div 
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div 
-        className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-violet-600 to-purple-600 text-white p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🧠</span>
-            <div>
-              <h2 className="font-bold">Mind Map</h2>
-              <p className="text-violet-200 text-sm">{mindmapData.centerLabel}</p>
-            </div>
-          </div>
-          <button 
-            onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        
-        <div className="p-2 bg-violet-50 text-xs text-violet-700 text-center">
-          Klicke auf ein Thema um Details zu sehen
-        </div>
-        
-        {/* SVG Mind Map */}
-        <div className="overflow-auto bg-gray-50" style={{ maxHeight: 'calc(90vh - 120px)' }}>
-          <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="mx-auto">
-            <defs>
-              <filter id="shadow">
-                <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15"/>
-              </filter>
-            </defs>
-
-            {/* Lines: Center -> Topics */}
-            {topics.map((topic, i) => {
-              const pos = getTopicPosition(i, topics.length);
-              const isExpanded = expandedTopic === topic.id;
-              return (
-                <line key={`line-${topic.id}`} x1={centerX} y1={centerY} x2={pos.x} y2={pos.y}
-                  stroke={topic.color} strokeWidth={isExpanded ? 3 : 2} strokeOpacity={isExpanded ? 0.6 : 0.25}
-                />
-              );
-            })}
-
-            {/* Lines: Topic -> Details */}
-            {expandedTopic && topics.map((topic, i) => {
-              if (topic.id !== expandedTopic) return null;
-              const topicPos = getTopicPosition(i, topics.length);
-              const details = getDetailPositions(topicPos, topic.details, topicPos.angle);
-              return details.map((dp, j) => {
-                const prevPos = j === 0 ? topicPos : details[j - 1];
-                return (
-                  <line key={`detail-line-${j}`} x1={prevPos.x} y1={prevPos.y} x2={dp.x} y2={dp.y}
-                    stroke={topic.color} strokeWidth="2" strokeOpacity="0.4"
-                  />
-                );
-              });
-            })}
-
-            {/* Details */}
-            {expandedTopic && topics.map((topic, i) => {
-              if (topic.id !== expandedTopic) return null;
-              const topicPos = getTopicPosition(i, topics.length);
-              const details = getDetailPositions(topicPos, topic.details, topicPos.angle);
-              return details.map((dp, j) => (
-                <g key={`detail-${j}`}>
-                  <rect 
-                    x={dp.x - 100} y={dp.y - 12} width={200} height={24} rx={12}
-                    fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1"
-                  />
-                  <text x={dp.x} y={dp.y + 4} textAnchor="middle" fill="#334155" fontSize="10" fontWeight="500">
-                    {dp.label}
-                  </text>
-                </g>
-              ));
-            })}
-
-            {/* Topics */}
-            {topics.map((topic, i) => {
-              const pos = getTopicPosition(i, topics.length);
-              const isExpanded = expandedTopic === topic.id;
-              const isOther = expandedTopic && expandedTopic !== topic.id;
-              return (
-                <g key={topic.id} 
-                  onClick={() => setExpandedTopic(isExpanded ? null : topic.id)}
-                  style={{ cursor: 'pointer', opacity: isOther ? 0.4 : 1 }}
-                >
-                  <rect 
-                    x={pos.x - 60} y={pos.y - 20} width={120} height={40} rx={20}
-                    fill={topic.color} filter="url(#shadow)"
-                    stroke={isExpanded ? '#fff' : 'transparent'} strokeWidth={isExpanded ? 2 : 0}
-                  />
-                  <text x={pos.x + 40} y={pos.y + 5} fill="rgba(255,255,255,0.9)" fontSize="14" fontWeight="bold">
-                    {isExpanded ? '−' : '+'}
-                  </text>
-                  <text x={pos.x - 5} y={pos.y + 5} textAnchor="middle" fill="#fff" fontSize="10" fontWeight="600">
-                    {topic.title}
-                  </text>
-                </g>
-              );
-            })}
-
-            {/* Center Node */}
-            <g>
-              <rect x={centerX - 70} y={centerY - 30} width={140} height={60} rx={30}
-                fill="url(#centerGrad)" filter="url(#shadow)"/>
-              <defs>
-                <linearGradient id="centerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#6366f1"/>
-                  <stop offset="100%" stopColor="#8b5cf6"/>
-                </linearGradient>
-              </defs>
-              <text x={centerX} y={centerY - 5} textAnchor="middle" fill="#fff" fontSize="11" fontWeight="700">
-                {mindmapData.centerLabel?.split(' ').slice(0, 2).join(' ')}
-              </text>
-              <text x={centerX} y={centerY + 10} textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="9">
-                {topics.length} Themen
-              </text>
-            </g>
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================
-// THEMEN LISTE (Lektionen)
+// THEMEN LISTE
 // ============================================
 function TopicsList({ module, onSelectTopic, progress }) {
   const isTopicCompleted = (topicId) => {
@@ -701,9 +495,7 @@ function TopicsList({ module, onSelectTopic, progress }) {
     <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
       <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
         📚 Lektionen
-        <span className="text-sm font-normal text-gray-500">
-          {completedCount}/{module.topics.length}
-        </span>
+        <span className="text-sm font-normal text-gray-500">{completedCount}/{module.topics.length}</span>
       </h3>
       
       <div className="space-y-2">
@@ -714,15 +506,11 @@ function TopicsList({ module, onSelectTopic, progress }) {
               key={topic.id}
               onClick={() => onSelectTopic(topic)}
               className={`p-3 rounded-xl flex items-center gap-3 cursor-pointer transition ${
-                completed 
-                  ? 'bg-green-50 border border-green-200' 
-                  : 'bg-gray-50 hover:bg-gray-100 border border-transparent'
+                completed ? 'bg-green-50 border border-green-200' : 'bg-gray-50 hover:bg-gray-100 border border-transparent'
               }`}
             >
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                completed 
-                  ? 'bg-green-500 text-white' 
-                  : 'bg-gray-200 text-gray-600'
+                completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
               }`}>
                 {completed ? '✓' : i + 1}
               </div>
@@ -731,18 +519,11 @@ function TopicsList({ module, onSelectTopic, progress }) {
                   {topic.title}
                 </span>
               </div>
-              <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <ChevronRight className={`w-4 h-4 flex-shrink-0 ${completed ? 'text-green-400' : 'text-gray-400'}`} />
             </div>
           );
         })}
       </div>
-      
-      <button 
-        onClick={() => module.topics[0] && onSelectTopic(module.topics[0])}
-        className="w-full mt-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition text-sm"
-      >
-        Quiz starten →
-      </button>
     </div>
   );
 }
@@ -755,10 +536,8 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
   const [showMindMap, setShowMindMap] = useState(false);
   const [showFlashcards, setShowFlashcards] = useState(false);
   
-  // Hole Lernhilfen für dieses Modul
   const lernhilfen = getLernhilfen(module.id);
   
-  // Berechne Fortschritt
   const completedTopics = module.topics.filter(t => 
     progress.some(p => p.modul_id === module.id && p.topic_id === t.id && p.completed)
   ).length;
@@ -766,13 +545,9 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className={`bg-gradient-to-r ${module.color} text-white`}>
         <div className="max-w-6xl mx-auto px-4 py-5">
-          <button 
-            onClick={onBack} 
-            className="flex items-center gap-2 text-white/80 hover:text-white mb-3 text-sm"
-          >
+          <button onClick={onBack} className="flex items-center gap-2 text-white/80 hover:text-white mb-3 text-sm">
             <ArrowLeft className="w-4 h-4" /> Zurück zum Dashboard
           </button>
           
@@ -787,71 +562,44 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
             </div>
           </div>
           
-          {/* Progress */}
           <div className="mt-4 bg-white/20 rounded-full h-2">
-            <div 
-              className="bg-white h-2 rounded-full transition-all" 
-              style={{ width: `${progressPercent}%` }}
-            />
+            <div className="bg-white h-2 rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
           </div>
           <p className="text-white/80 text-xs mt-1">{progressPercent}% abgeschlossen</p>
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Linke Spalte - Lernhilfen */}
           <div className="lg:col-span-2 space-y-5">
             <h2 className="text-lg font-bold text-gray-900">🎯 Lernhilfen</h2>
             
-            {/* Audio Player */}
             {lernhilfen?.audio && (
               <AudioPlayer audioData={lernhilfen.audio} modulId={module.id} />
             )}
             
-            {/* Grid für Karteikarten und Mind Map */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {lernhilfen?.flashcards && (
-                <Flashcards 
-                  flashcardsData={lernhilfen.flashcards} 
-                  onOpenFullscreen={() => setShowFlashcards(true)}
-                />
+                <Flashcards flashcardsData={lernhilfen.flashcards} onOpenFullscreen={() => setShowFlashcards(true)} />
               )}
               {lernhilfen?.mindmap && (
-                <MindMapPreview 
-                  mindmapData={lernhilfen.mindmap} 
-                  onOpen={() => setShowMindMap(true)} 
-                />
+                <MindMapPreview mindmapData={lernhilfen.mindmap} onOpen={() => setShowMindMap(true)} />
               )}
             </div>
           </div>
           
-          {/* Rechte Spalte - Themen */}
           <div>
-            <TopicsList 
-              module={module} 
-              onSelectTopic={onSelectTopic} 
-              progress={progress}
-            />
+            <TopicsList module={module} onSelectTopic={onSelectTopic} progress={progress} />
           </div>
         </div>
       </div>
 
-      {/* Mind Map Modal */}
       {showMindMap && lernhilfen?.mindmap && (
-        <MindMapModal 
-          mindmapData={lernhilfen.mindmap} 
-          onClose={() => setShowMindMap(false)} 
-        />
+        <MindMapFlow mindmapData={lernhilfen.mindmap} onClose={() => setShowMindMap(false)} />
       )}
 
-      {/* Flashcards Modal */}
       {showFlashcards && lernhilfen?.flashcards && lernhilfen.flashcards.length > 0 && (
-        <FlashcardsModal 
-          flashcardsData={lernhilfen.flashcards} 
-          onClose={() => setShowFlashcards(false)} 
-        />
+        <FlashcardsModal flashcardsData={lernhilfen.flashcards} onClose={() => setShowFlashcards(false)} />
       )}
     </div>
   );
