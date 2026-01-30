@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, ChevronRight, CheckCircle, ChevronLeft, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X } from 'lucide-react';
 import { useProgress, useAudioProgress } from '../lib/database';
 import { getLernhilfen } from '../modules/lernhilfen';
-import MindMapFlow from './MindMapFlow';
+import MindMapMarkmap from './MindMapMarkmap';
 
 // ============================================
 // AUDIO PLAYER KOMPONENTE
@@ -234,17 +234,17 @@ function AudioPlayer({ audioData, modulId }) {
 function Flashcards({ flashcardsData, onOpenFullscreen }) {
   if (!flashcardsData || flashcardsData.length === 0) {
     return (
-      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-200">
+      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-white text-lg shadow-lg">
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
             📇
           </div>
-          <div>
-            <h3 className="font-bold text-gray-900">Karteikarten</h3>
-            <p className="text-xs text-gray-500">Noch keine Karten verfügbar</p>
+          <div className="flex-1">
+            <h3 className="font-bold text-gray-900 text-lg">Karteikarten</h3>
+            <p className="text-sm text-gray-600">Noch keine Karten verfügbar</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 text-center text-gray-500">
+        <div className="bg-white rounded-xl p-6 text-center text-gray-500 flex-1 flex items-center justify-center">
           <p>Karteikarten werden bald hinzugefügt...</p>
         </div>
       </div>
@@ -254,29 +254,28 @@ function Flashcards({ flashcardsData, onOpenFullscreen }) {
   const card = flashcardsData[0];
 
   return (
-    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-200">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-white text-lg shadow-lg">
-            📇
-          </div>
-          <div>
-            <h3 className="font-bold text-gray-900">Karteikarten</h3>
-            <p className="text-xs text-gray-500">{flashcardsData.length} Karten verfügbar</p>
-          </div>
+    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+          📇
+        </div>
+        <div className="flex-1">
+          <h3 className="font-bold text-gray-900 text-lg">Karteikarten</h3>
+          <p className="text-sm text-emerald-600">{flashcardsData.length} Karten verfügbar</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl p-4 mb-4 border border-emerald-100">
-        <p className="text-xs text-emerald-600 font-medium mb-2">VORSCHAU</p>
-        <p className="text-gray-800 text-sm line-clamp-2">{card.question}</p>
+      <div className="bg-white rounded-xl p-5 mb-4 border border-emerald-100 flex-1 flex flex-col justify-center min-h-[140px]">
+        <p className="text-xs text-emerald-600 font-semibold mb-3 uppercase tracking-wide">Vorschau</p>
+        <p className="text-gray-800 font-medium leading-relaxed line-clamp-3">{card.question}</p>
       </div>
 
-      <button 
+      <button
         onClick={onOpenFullscreen}
-        className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-medium hover:from-emerald-600 hover:to-teal-700 transition shadow-lg text-sm"
+        className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
       >
-        Karteikarten üben →
+        Karteikarten üben
+        <span className="text-lg">→</span>
       </button>
     </div>
   );
@@ -436,44 +435,73 @@ function FlashcardsModal({ flashcardsData, onClose }) {
 // ============================================
 function MindMapPreview({ mindmapData, onOpen }) {
   const topics = mindmapData.topics || [];
-  
+
   return (
-    <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl p-5 border border-violet-200">
+    <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl p-6 border border-violet-200 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl flex items-center justify-center text-white text-lg shadow-lg">
+        <div className="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
           🧠
         </div>
-        <div>
-          <h3 className="font-bold text-gray-900">Mind Map</h3>
-          <p className="text-xs text-gray-500">Visualisiere die Zusammenhänge</p>
+        <div className="flex-1">
+          <h3 className="font-bold text-gray-900 text-lg">Mind Map</h3>
+          <p className="text-sm text-violet-600">Visualisiere die Zusammenhänge</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl p-3 mb-4 border border-violet-100">
-        <svg viewBox="0 0 280 120" className="w-full h-24">
-          <rect x="105" y="45" width="70" height="30" rx="15" fill="#8b5cf6"/>
-          <text x="140" y="64" textAnchor="middle" fill="white" fontSize="7" fontWeight="bold">
-            {mindmapData.centerLabel?.split(' ')[0] || 'Thema'}
+      <div className="bg-white rounded-xl p-4 mb-4 border border-violet-100 flex-1 flex items-center justify-center min-h-[140px]">
+        <svg viewBox="0 0 280 140" className="w-full h-full max-h-36">
+          {/* Center node */}
+          <circle cx="140" cy="70" r="32" fill="url(#centerGrad)" filter="url(#glow)"/>
+          <text x="140" y="75" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">
+            Grundlagen
           </text>
-          {topics.slice(0, 6).map((topic, i) => {
-            const angle = -Math.PI/2 + (i * 2 * Math.PI) / Math.min(topics.length, 6);
-            const cx = 140 + 70 * Math.cos(angle);
-            const cy = 60 + 40 * Math.sin(angle);
+
+          {/* Topic nodes */}
+          {topics.slice(0, 7).map((topic, i) => {
+            const angle = -Math.PI/2 + (i * 2 * Math.PI) / Math.min(topics.length, 7);
+            const cx = 140 + 80 * Math.cos(angle);
+            const cy = 70 + 55 * Math.sin(angle);
             return (
               <g key={topic.id}>
-                <line x1="140" y1="60" x2={cx} y2={cy} stroke={topic.color} strokeWidth="1.5" strokeOpacity="0.5"/>
-                <rect x={cx - 25} y={cy - 10} width="50" height="20" rx="10" fill={topic.color} fillOpacity="0.2" stroke={topic.color} strokeWidth="1"/>
+                <line
+                  x1="140" y1="70" x2={cx} y2={cy}
+                  stroke={topic.color}
+                  strokeWidth="2"
+                  strokeOpacity="0.4"
+                />
+                <ellipse
+                  cx={cx} cy={cy}
+                  rx="28" ry="12"
+                  fill={topic.color}
+                  fillOpacity="0.8"
+                />
               </g>
             );
           })}
+
+          {/* Gradient definitions */}
+          <defs>
+            <linearGradient id="centerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#8b5cf6"/>
+              <stop offset="100%" stopColor="#a855f7"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
         </svg>
       </div>
 
-      <button 
+      <button
         onClick={onOpen}
-        className="w-full py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl font-medium hover:from-violet-600 hover:to-purple-700 transition shadow-lg text-sm"
+        className="w-full py-3.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl font-semibold hover:from-violet-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
       >
-        Mind Map öffnen →
+        Mind Map öffnen
+        <span className="text-lg">→</span>
       </button>
     </div>
   );
@@ -569,15 +597,20 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <div className="lg:col-span-2 space-y-5">
-            <h2 className="text-lg font-bold text-gray-900">🎯 Lernhilfen</h2>
-            
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white text-xl shadow-lg">
+                🎯
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">Lernhilfen</h2>
+            </div>
+
             {lernhilfen?.audio && (
               <AudioPlayer audioData={lernhilfen.audio} modulId={module.id} />
             )}
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {lernhilfen?.flashcards && (
                 <Flashcards flashcardsData={lernhilfen.flashcards} onOpenFullscreen={() => setShowFlashcards(true)} />
@@ -587,7 +620,7 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
               )}
             </div>
           </div>
-          
+
           <div>
             <TopicsList module={module} onSelectTopic={onSelectTopic} progress={progress} />
           </div>
@@ -595,7 +628,7 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
       </div>
 
       {showMindMap && lernhilfen?.mindmap && (
-        <MindMapFlow mindmapData={lernhilfen.mindmap} onClose={() => setShowMindMap(false)} />
+        <MindMapMarkmap mindmapData={lernhilfen.mindmap} onClose={() => setShowMindMap(false)} />
       )}
 
       {showFlashcards && lernhilfen?.flashcards && lernhilfen.flashcards.length > 0 && (
