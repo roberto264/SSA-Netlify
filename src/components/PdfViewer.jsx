@@ -192,28 +192,47 @@ export default function PdfViewer({ pdfData, modulId, onClose }) {
     const maxAttempts = 15; // 15 * 100ms = 1500ms max
 
     const tryScroll = () => {
-      const element = document.getElementById(`highlight-${highlight.id}`);
+      // Find the PDF page element
+      const pageElement = document.querySelector(`[data-page-number="${highlight.page_index + 1}"]`);
 
-      if (element) {
-        // Element found, scroll to it after small delay to ensure page is rendered
-        console.log('Found element after', attempts * 100, 'ms');
+      if (pageElement) {
+        console.log('Found page after', attempts * 100, 'ms');
 
-        // Small delay to ensure PDF page is fully rendered before scrolling
+        // Small delay to ensure PDF page is fully rendered
         setTimeout(() => {
-          element.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-            inline: 'nearest'
-          });
+          // Get the position from highlight data
+          const firstArea = highlight.highlight_areas[0];
+          const topPercent = firstArea.top; // Position in % from top of page
+
+          // Calculate absolute position
+          const pageHeight = pageElement.offsetHeight;
+          const highlightTop = (topPercent / 100) * pageHeight;
+
+          // Find the scroll container
+          const scrollContainer = pageElement.closest('.rpv-core__inner-pages');
+
+          if (scrollContainer) {
+            const pageTop = pageElement.offsetTop;
+            const containerHeight = scrollContainer.offsetHeight;
+            const targetScrollTop = pageTop + highlightTop - (containerHeight / 2);
+
+            console.log('Scrolling to:', { pageTop, highlightTop, targetScrollTop });
+
+            scrollContainer.scrollTo({
+              top: targetScrollTop,
+              behavior: 'smooth'
+            });
+          }
+
           showMessage(`Springe zu Seite ${highlight.page_index + 1}`);
         }, 150);
       } else if (attempts < maxAttempts) {
-        // Element not found yet, try again
+        // Page not found yet, try again
         attempts++;
         setTimeout(tryScroll, 100);
       } else {
         // Max attempts reached
-        console.warn('Highlight element not found after', maxAttempts * 100, 'ms');
+        console.warn('Page element not found after', maxAttempts * 100, 'ms');
         showMessage(`Springe zu Seite ${highlight.page_index + 1}`);
       }
     };
