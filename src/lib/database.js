@@ -488,3 +488,155 @@ export function usePdfHighlights(modulId) {
     refresh: fetchHighlights
   };
 }
+
+// ============================================
+// FLASHCARD PROGRESS HOOK
+// ============================================
+
+export function useFlashcardProgress(modulId) {
+  const { user } = useAuth();
+  const [progress, setProgress] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user && modulId) {
+      fetchProgress();
+    }
+  }, [user, modulId]);
+
+  const fetchProgress = async () => {
+    if (!user || !modulId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('flashcard_progress')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('modul_id', modulId);
+
+      if (error) throw error;
+
+      // Convert array to object keyed by card_id
+      const progressMap = {};
+      (data || []).forEach(item => {
+        progressMap[item.card_id] = {
+          mastered: item.mastered,
+          timesReviewed: item.times_reviewed,
+          lastReviewed: item.last_reviewed_at
+        };
+      });
+      setProgress(progressMap);
+    } catch (error) {
+      console.error('Error fetching flashcard progress:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const markAsReviewed = async (cardId) => {
+    if (!user || !modulId) return;
+
+    try {
+      const currentProgress = progress[cardId];
+      const timesReviewed = (currentProgress?.timesReviewed || 0) + 1;
+
+      const { data, error } = await supabase
+        .from('flashcard_progress')
+        .upsert({
+          user_id: user.id,
+          modul_id: modulId,
+          card_id: cardId,
+          times_reviewed: timesReviewed,
+          last_reviewed_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,modul_id,card_id'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setProgress(prev => ({
+        ...prev,
+        [cardId]: {
+          mastered: data.mastered,
+          timesReviewed: data.times_reviewed,
+          lastReviewed: data.last_reviewed_at
+        }
+      }));
+    } catch (error) {
+      console.error('Error marking flashcard as reviewed:', error);
+    }
+  };
+
+  const toggleMastered = async (cardId) => {
+    if (!user || !modulId) return;
+
+    try {
+      const currentProgress = progress[cardId];
+      const newMasteredState = !(currentProgress?.mastered || false);
+
+      const { data, error } = await supabase
+        .from('flashcard_progress')
+        .upsert({
+          user_id: user.id,
+          modul_id: modulId,
+          card_id: cardId,
+          mastered: newMasteredState,
+          times_reviewed: currentProgress?.timesReviewed || 0,
+          last_reviewed_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,modul_id,card_id'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setProgress(prev => ({
+        ...prev,
+        [cardId]: {
+          mastered: data.mastered,
+          timesReviewed: data.times_reviewed,
+          lastReviewed: data.last_reviewed_at
+        }
+      }));
+
+      return data.mastered;
+    } catch (error) {
+      console.error('Error toggling flashcard mastered state:', error);
+      throw error;
+    }
+  };
+
+  const getCardProgress = (cardId) => {
+    return progress[cardId] || {
+      mastered: false,
+      timesReviewed: 0,
+      lastReviewed: null
+    };
+  };
+
+  const getModuleStats = () => {
+    const totalCards = Object.keys(progress).length;
+    const masteredCards = Object.values(progress).filter(p => p.mastered).length;
+    const reviewedCards = Object.values(progress).filter(p => p.timesReviewed > 0).length;
+
+    return {
+      total: totalCards,
+      mastered: masteredCards,
+      reviewed: reviewedCards,
+      percentageMastered: totalCards > 0 ? Math.round((masteredCards / totalCards) * 100) : 0
+    };
+  };
+
+  return {
+    progress,
+    loading,
+    markAsReviewed,
+    toggleMastered,
+    getCardProgress,
+    getModuleStats,
+    refresh: fetchProgress
+  };
+}

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, ChevronRight, CheckCircle, ChevronLeft, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X } from 'lucide-react';
-import { useProgress, useAudioProgress } from '../lib/database';
+import { useProgress, useAudioProgress, useFlashcardProgress } from '../lib/database';
 import { getLernhilfen } from '../modules/lernhilfen';
 import MindMapMarkmap from './MindMapMarkmap';
 import PdfViewer from './PdfViewer';
@@ -285,10 +285,21 @@ function Flashcards({ flashcardsData, onOpenFullscreen }) {
 // ============================================
 // KARTEIKARTEN FULLSCREEN MODAL
 // ============================================
-function FlashcardsModal({ flashcardsData, onClose }) {
+function FlashcardsModal({ flashcardsData, modulId, onClose }) {
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [knownCards, setKnownCards] = useState([]);
+  const { progress, markAsReviewed, toggleMastered, getCardProgress, getModuleStats } = useFlashcardProgress(modulId);
+
+  // Generate card ID if not present
+  const getCardId = (card, index) => {
+    return card.id || `modul${modulId}-card-${index}`;
+  };
+
+  // Track when a card is viewed
+  useEffect(() => {
+    const cardId = getCardId(flashcardsData[currentCard], currentCard);
+    markAsReviewed(cardId);
+  }, [currentCard, flashcardsData, modulId]);
 
   const nextCard = () => {
     setIsFlipped(false);
@@ -304,21 +315,24 @@ function FlashcardsModal({ flashcardsData, onClose }) {
     }, 150);
   };
 
-  const markAsKnown = () => {
-    if (!knownCards.includes(currentCard)) {
-      setKnownCards([...knownCards, currentCard]);
-    }
+  const markAsKnown = async () => {
+    const cardId = getCardId(flashcardsData[currentCard], currentCard);
+    await toggleMastered(cardId);
     nextCard();
   };
 
   const resetCards = () => {
     setCurrentCard(0);
-    setKnownCards([]);
     setIsFlipped(false);
   };
 
   const card = flashcardsData[currentCard];
-  const progress = Math.round((knownCards.length / flashcardsData.length) * 100);
+  const stats = getModuleStats();
+  const progressPercent = stats.percentageMastered;
+
+  // Check if current card is mastered
+  const currentCardId = getCardId(card, currentCard);
+  const isCardMastered = getCardProgress(currentCardId).mastered;
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
@@ -329,10 +343,10 @@ function FlashcardsModal({ flashcardsData, onClose }) {
               <span className="text-2xl">📇</span>
               <div>
                 <h2 className="font-bold">Karteikarten</h2>
-                <p className="text-emerald-100 text-sm">{knownCards.length} von {flashcardsData.length} gewusst ({progress}%)</p>
+                <p className="text-emerald-100 text-sm">{stats.mastered} von {flashcardsData.length} gemeistert ({progressPercent}%)</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={onClose}
               className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition"
             >
@@ -340,7 +354,7 @@ function FlashcardsModal({ flashcardsData, onClose }) {
             </button>
           </div>
           <div className="mt-3 bg-white/20 rounded-full h-2">
-            <div className="bg-white h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+            <div className="bg-white h-2 rounded-full transition-all duration-300" style={{ width: `${progressPercent}%` }} />
           </div>
         </div>
 
@@ -391,18 +405,22 @@ function FlashcardsModal({ flashcardsData, onClose }) {
             </button>
             
             <div className="flex gap-3 flex-1 justify-center">
-              <button 
+              <button
                 onClick={nextCard}
                 className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition"
               >
                 Nochmal üben
               </button>
-              <button 
+              <button
                 onClick={markAsKnown}
-                className="px-6 py-3 bg-emerald-500 text-white rounded-xl font-medium hover:bg-emerald-600 transition flex items-center gap-2"
+                className={`px-6 py-3 rounded-xl font-medium transition flex items-center gap-2 ${
+                  isCardMastered
+                    ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-500'
+                    : 'bg-emerald-500 text-white hover:bg-emerald-600'
+                }`}
               >
                 <CheckCircle className="w-5 h-5" />
-                Gewusst!
+                {isCardMastered ? 'Gemeistert ✓' : 'Gewusst!'}
               </button>
             </div>
             
@@ -414,16 +432,21 @@ function FlashcardsModal({ flashcardsData, onClose }) {
 
         <div className="px-6 pb-4">
           <div className="flex gap-1 justify-center flex-wrap">
-            {flashcardsData.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => { setCurrentCard(i); setIsFlipped(false); }}
-                className={`w-3 h-3 rounded-full transition ${
-                  i === currentCard ? 'bg-emerald-500 scale-125' : 
-                  knownCards.includes(i) ? 'bg-emerald-300' : 'bg-gray-300'
-                }`}
-              />
-            ))}
+            {flashcardsData.map((c, i) => {
+              const cardId = getCardId(c, i);
+              const cardProgress = getCardProgress(cardId);
+              return (
+                <button
+                  key={i}
+                  onClick={() => { setCurrentCard(i); setIsFlipped(false); }}
+                  className={`w-3 h-3 rounded-full transition ${
+                    i === currentCard ? 'bg-emerald-500 scale-125' :
+                    cardProgress.mastered ? 'bg-emerald-300' : 'bg-gray-300'
+                  }`}
+                  title={cardProgress.mastered ? 'Gemeistert' : 'Noch nicht gemeistert'}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
@@ -698,7 +721,7 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
       )}
 
       {showFlashcards && lernhilfen?.flashcards && lernhilfen.flashcards.length > 0 && (
-        <FlashcardsModal flashcardsData={lernhilfen.flashcards} onClose={() => setShowFlashcards(false)} />
+        <FlashcardsModal flashcardsData={lernhilfen.flashcards} modulId={module.id} onClose={() => setShowFlashcards(false)} />
       )}
 
       {showPdf && lernhilfen?.pdf && (
