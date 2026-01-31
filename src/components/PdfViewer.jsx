@@ -187,58 +187,41 @@ export default function PdfViewer({ pdfData, modulId, onClose }) {
     console.log('Jumping to highlight on page:', highlight.page_index);
     jumpToPage(highlight.page_index);
 
-    // Try to find and scroll to the element with retries for better performance
+    // Try to find the highlight element and scroll to it
     let attempts = 0;
-    const maxAttempts = 15; // 15 * 100ms = 1500ms max
+    const maxAttempts = 20; // 20 * 100ms = 2000ms max
 
     const tryScroll = () => {
-      // Find the PDF page element
-      const pageElement = document.querySelector(`[data-page-number="${highlight.page_index + 1}"]`);
+      const element = document.getElementById(`highlight-${highlight.id}`);
+      console.log(`Attempt ${attempts}: Looking for highlight-${highlight.id}, found:`, !!element);
 
-      if (pageElement) {
-        console.log('Found page after', attempts * 100, 'ms');
+      if (element) {
+        console.log('Found highlight element after', attempts * 100, 'ms');
 
-        // Small delay to ensure PDF page is fully rendered
+        // Wait a bit more for page to settle, then scroll
         setTimeout(() => {
-          // Get the position from highlight data
-          const firstArea = highlight.highlight_areas[0];
-          const topPercent = firstArea.top; // Position in % from top of page
-
-          // Calculate absolute position
-          const pageHeight = pageElement.offsetHeight;
-          const highlightTop = (topPercent / 100) * pageHeight;
-
-          // Find the scroll container
-          const scrollContainer = pageElement.closest('.rpv-core__inner-pages');
-
-          if (scrollContainer) {
-            const pageTop = pageElement.offsetTop;
-            const containerHeight = scrollContainer.offsetHeight;
-            const targetScrollTop = pageTop + highlightTop - (containerHeight / 2);
-
-            console.log('Scrolling to:', { pageTop, highlightTop, targetScrollTop });
-
-            scrollContainer.scrollTo({
-              top: targetScrollTop,
-              behavior: 'smooth'
-            });
-          }
-
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest'
+          });
+          console.log('Scrolled to highlight');
           showMessage(`Springe zu Seite ${highlight.page_index + 1}`);
-        }, 150);
+        }, 200);
       } else if (attempts < maxAttempts) {
-        // Page not found yet, try again
+        // Element not found yet, try again
         attempts++;
         setTimeout(tryScroll, 100);
       } else {
         // Max attempts reached
-        console.warn('Page element not found after', maxAttempts * 100, 'ms');
-        showMessage(`Springe zu Seite ${highlight.page_index + 1}`);
+        console.warn('Highlight element not found after', maxAttempts * 100, 'ms');
+        console.log('Looking for ID:', `highlight-${highlight.id}`);
+        showMessage(`Highlight nicht gefunden`);
       }
     };
 
-    // Start trying after a small initial delay
-    setTimeout(tryScroll, 50);
+    // Start trying after initial delay for page navigation
+    setTimeout(tryScroll, 300);
   };
 
   // Show temporary message
