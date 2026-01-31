@@ -6,6 +6,7 @@
 
 import { getFlashcards } from './flashcards';
 import { getMindmaps } from './mindmaps';
+import { getPdfs } from './pdfs';
 
 export const lernhilfen = {
   // ============================================
@@ -27,6 +28,11 @@ export const lernhilfen = {
     // Mindmap wird aus separater Datei geladen
     get mindmap() {
       return getMindmaps(1);
+    },
+
+    // PDF wird aus separater Datei geladen
+    get pdf() {
+      return getPdfs(1);
     }
   },
 
@@ -47,6 +53,10 @@ export const lernhilfen = {
 
     get mindmap() {
       return getMindmaps(2);
+    },
+
+    get pdf() {
+      return getPdfs(2);
     }
   },
 
@@ -67,6 +77,10 @@ export const lernhilfen = {
 
     get mindmap() {
       return getMindmaps(3);
+    },
+
+    get pdf() {
+      return getPdfs(3);
     }
   },
 
@@ -87,6 +101,10 @@ export const lernhilfen = {
 
     get mindmap() {
       return getMindmaps(4);
+    },
+
+    get pdf() {
+      return getPdfs(4);
     }
   },
 
@@ -107,6 +125,10 @@ export const lernhilfen = {
 
     get mindmap() {
       return getMindmaps(5);
+    },
+
+    get pdf() {
+      return getPdfs(5);
     }
   }
 };

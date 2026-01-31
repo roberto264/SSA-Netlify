@@ -374,3 +374,117 @@ export function useAudioProgress() {
 
   return { audioProgress, loading, saveAudioProgress, getAudioProgress, refresh: fetchAudioProgress };
 }
+
+// ============================================
+// PDF HIGHLIGHTS HOOK
+// ============================================
+
+export function usePdfHighlights(modulId) {
+  const { user } = useAuth();
+  const [highlights, setHighlights] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user && modulId) {
+      fetchHighlights();
+    }
+  }, [user, modulId]);
+
+  const fetchHighlights = async () => {
+    if (!user || !modulId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('pdf_highlights')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('module_id', modulId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setHighlights(data || []);
+    } catch (error) {
+      console.error('Error fetching highlights:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveHighlight = async (pageIndex, highlightAreas, color, selectedText = '', note = '') => {
+    if (!user || !modulId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('pdf_highlights')
+        .insert({
+          user_id: user.id,
+          module_id: modulId,
+          page_index: pageIndex,
+          highlight_areas: highlightAreas,
+          color: color,
+          selected_text: selectedText,
+          note: note
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setHighlights(prev => [...prev, data]);
+      return data;
+    } catch (error) {
+      console.error('Error saving highlight:', error);
+      throw error;
+    }
+  };
+
+  const deleteHighlight = async (highlightId) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('pdf_highlights')
+        .delete()
+        .eq('id', highlightId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setHighlights(prev => prev.filter(h => h.id !== highlightId));
+    } catch (error) {
+      console.error('Error deleting highlight:', error);
+      throw error;
+    }
+  };
+
+  const updateHighlightNote = async (highlightId, note) => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('pdf_highlights')
+        .update({ note: note })
+        .eq('id', highlightId)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setHighlights(prev => prev.map(h => h.id === highlightId ? data : h));
+      return data;
+    } catch (error) {
+      console.error('Error updating highlight note:', error);
+      throw error;
+    }
+  };
+
+  return {
+    highlights,
+    loading,
+    saveHighlight,
+    deleteHighlight,
+    updateHighlightNote,
+    refresh: fetchHighlights
+  };
+}

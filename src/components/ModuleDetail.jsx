@@ -3,6 +3,7 @@ import { ArrowLeft, ChevronRight, CheckCircle, ChevronLeft, Play, Pause, Volume2
 import { useProgress, useAudioProgress } from '../lib/database';
 import { getLernhilfen } from '../modules/lernhilfen';
 import MindMapMarkmap from './MindMapMarkmap';
+import PdfViewer from './PdfViewer';
 
 // ============================================
 // AUDIO PLAYER KOMPONENTE
@@ -450,35 +451,6 @@ function MindMapPreview({ mindmapData, onOpen }) {
 
       <div className="bg-white rounded-xl p-4 mb-4 border border-violet-100 flex-1 flex items-center justify-center min-h-[140px]">
         <svg viewBox="0 0 280 140" className="w-full h-full max-h-36">
-          {/* Center node */}
-          <circle cx="140" cy="70" r="32" fill="url(#centerGrad)" filter="url(#glow)"/>
-          <text x="140" y="75" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">
-            Grundlagen
-          </text>
-
-          {/* Topic nodes */}
-          {topics.slice(0, 7).map((topic, i) => {
-            const angle = -Math.PI/2 + (i * 2 * Math.PI) / Math.min(topics.length, 7);
-            const cx = 140 + 80 * Math.cos(angle);
-            const cy = 70 + 55 * Math.sin(angle);
-            return (
-              <g key={topic.id}>
-                <line
-                  x1="140" y1="70" x2={cx} y2={cy}
-                  stroke={topic.color}
-                  strokeWidth="2"
-                  strokeOpacity="0.4"
-                />
-                <ellipse
-                  cx={cx} cy={cy}
-                  rx="28" ry="12"
-                  fill={topic.color}
-                  fillOpacity="0.8"
-                />
-              </g>
-            );
-          })}
-
           {/* Gradient definitions */}
           <defs>
             <linearGradient id="centerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -493,6 +465,41 @@ function MindMapPreview({ mindmapData, onOpen }) {
               </feMerge>
             </filter>
           </defs>
+
+          {/* Lines in background */}
+          {topics.slice(0, 7).map((topic, i) => {
+            const angle = -Math.PI/2 + (i * 2 * Math.PI) / Math.min(topics.length, 7);
+            const cx = 140 + 80 * Math.cos(angle);
+            const cy = 70 + 55 * Math.sin(angle);
+            return (
+              <line
+                key={`line-${topic.id}`}
+                x1="140" y1="70" x2={cx} y2={cy}
+                stroke={topic.color}
+                strokeWidth="2"
+                strokeOpacity="0.3"
+              />
+            );
+          })}
+
+          {/* Topic nodes */}
+          {topics.slice(0, 7).map((topic, i) => {
+            const angle = -Math.PI/2 + (i * 2 * Math.PI) / Math.min(topics.length, 7);
+            const cx = 140 + 80 * Math.cos(angle);
+            const cy = 70 + 55 * Math.sin(angle);
+            return (
+              <ellipse
+                key={topic.id}
+                cx={cx} cy={cy}
+                rx="28" ry="12"
+                fill={topic.color}
+                fillOpacity="0.8"
+              />
+            );
+          })}
+
+          {/* Center node without text */}
+          <circle cx="140" cy="70" r="32" fill="url(#centerGrad)" filter="url(#glow)"/>
         </svg>
       </div>
 
@@ -501,6 +508,57 @@ function MindMapPreview({ mindmapData, onOpen }) {
         className="w-full py-3.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl font-semibold hover:from-violet-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
       >
         Mind Map öffnen
+        <span className="text-lg">→</span>
+      </button>
+    </div>
+  );
+}
+
+// ============================================
+// PDF PREVIEW
+// ============================================
+function PdfPreview({ pdfData, onOpen }) {
+  const topics = pdfData.topics || [];
+
+  return (
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+          📄
+        </div>
+        <div className="flex-1">
+          <h3 className="font-bold text-gray-900 text-lg">Unterlagen</h3>
+          <p className="text-sm text-blue-600">Komplette Schulungsmaterialien</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl p-4 mb-4 border border-blue-100 flex-1 flex flex-col justify-center min-h-[140px]">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-semibold text-blue-600">📖</span>
+            <span className="font-medium">{pdfData.title}</span>
+          </div>
+          <div className="pl-6 space-y-1">
+            {topics.slice(0, 3).map((topic, i) => (
+              <div key={i} className="text-xs text-gray-500 flex items-start gap-2">
+                <span className="text-blue-400 mt-0.5">•</span>
+                <span className="line-clamp-1">{topic}</span>
+              </div>
+            ))}
+            {topics.length > 3 && (
+              <div className="text-xs text-blue-500 font-medium pl-3">
+                + {topics.length - 3} weitere Themen
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <button
+        onClick={onOpen}
+        className="w-full py-3.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+      >
+        Unterlagen öffnen
         <span className="text-lg">→</span>
       </button>
     </div>
@@ -520,13 +578,13 @@ function TopicsList({ module, onSelectTopic, progress }) {
   const completedCount = module.topics.filter(t => isTopicCompleted(t.id)).length;
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+    <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm h-full flex flex-col">
       <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-        📚 Lektionen
+        📚 Quiz
         <span className="text-sm font-normal text-gray-500">{completedCount}/{module.topics.length}</span>
       </h3>
-      
-      <div className="space-y-2">
+
+      <div className="space-y-2 flex-1 overflow-y-auto">
         {module.topics.map((topic, i) => {
           const completed = isTopicCompleted(topic.id);
           return (
@@ -563,7 +621,8 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
   const { progress } = useProgress();
   const [showMindMap, setShowMindMap] = useState(false);
   const [showFlashcards, setShowFlashcards] = useState(false);
-  
+  const [showPdf, setShowPdf] = useState(false);
+
   const lernhilfen = getLernhilfen(module.id);
   
   const completedTopics = module.topics.filter(t => 
@@ -598,15 +657,15 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white text-xl shadow-lg">
-                🎯
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">Lernhilfen</h2>
-            </div>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white text-xl shadow-lg">
+            🎯
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">Lernhilfen</h2>
+        </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-fr">
+          <div className="lg:col-span-2 flex flex-col gap-6">
             {lernhilfen?.audio && (
               <AudioPlayer audioData={lernhilfen.audio} modulId={module.id} />
             )}
@@ -621,8 +680,15 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
             </div>
           </div>
 
-          <div>
-            <TopicsList module={module} onSelectTopic={onSelectTopic} progress={progress} />
+          <div className="flex flex-col gap-6 min-h-full">
+            {lernhilfen?.pdf && (
+              <div className="flex-[0.45]">
+                <PdfPreview pdfData={lernhilfen.pdf} onOpen={() => setShowPdf(true)} />
+              </div>
+            )}
+            <div className="flex-[0.55]">
+              <TopicsList module={module} onSelectTopic={onSelectTopic} progress={progress} />
+            </div>
           </div>
         </div>
       </div>
@@ -633,6 +699,10 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
 
       {showFlashcards && lernhilfen?.flashcards && lernhilfen.flashcards.length > 0 && (
         <FlashcardsModal flashcardsData={lernhilfen.flashcards} onClose={() => setShowFlashcards(false)} />
+      )}
+
+      {showPdf && lernhilfen?.pdf && (
+        <PdfViewer pdfData={lernhilfen.pdf} modulId={module.id} onClose={() => setShowPdf(false)} />
       )}
     </div>
   );
