@@ -1,0 +1,17 @@
+{
+  "id": "swiss-solar-academy",
+  "name": "Swiss Solar Academy",
+  "tagline": "Powered by Gama AG",
+  "theme": {
+    "primary": "#4F46E5",
+    "accent": "#F59E0B",
+    "logo": "/logos/gama.svg"
+  },
+  "features": {
+    "voiceChat": true,
+    "flashcards": true,
+    "mindmaps": true,
+    "certificates": true,
+    "aiTutor": true
+  }
+}

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, ChevronRight, CheckCircle, ChevronLeft, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X } from 'lucide-react';
 import { useProgress, useAudioProgress, useFlashcardProgress } from '../lib/database';
-import { getLernhilfen } from '../modules/lernhilfen';
+import { getLernhilfen } from '../lib/contentLoader';
 import MindMapMarkmap from './MindMapMarkmap';
 import PdfViewer from './PdfViewer';
 

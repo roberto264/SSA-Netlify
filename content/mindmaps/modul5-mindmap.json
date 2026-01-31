@@ -1,0 +1,11 @@
+{
+  "moduleId": 5,
+  "centerLabel": "Wirtschaftlichkeit",
+  "topics": [
+    { "id": "kosten", "title": "Investitionskosten", "color": "#6366f1", "details": ["Module (30-40%)", "Wechselrichter (15-20%)", "Montage (20-25%)", "Planung & Admin (10-15%)"] },
+    { "id": "foerderung", "title": "Förderprogramme", "color": "#22c55e", "details": ["Einmalvergütung (EIV)", "Kantonale Förderung", "Gemeinde-Beiträge", "Steuerabzug"] },
+    { "id": "ertrag", "title": "Ertragsseite", "color": "#f97316", "details": ["Eigenverbrauchsersparnis", "Einspeisevergütung", "HKN-Verkauf", "Steuerersparnis"] },
+    { "id": "rechnung", "title": "Stromrechnung", "color": "#8b5cf6", "details": ["Energiepreis", "Netznutzung", "Abgaben & Steuern", "Hoch-/Niedertarif"] },
+    { "id": "kennzahlen", "title": "Kennzahlen", "color": "#a855f7", "details": ["Amortisationszeit", "Rendite (ROI)", "Gestehungskosten (LCOE)", "Eigenverbrauchsquote"] }
+  ]
+}

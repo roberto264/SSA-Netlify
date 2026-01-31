@@ -1,0 +1,7 @@
+{
+  "id": 2,
+  "title": "Systemkomponenten",
+  "icon": "🔧",
+  "color": "from-purple-500 to-purple-600",
+  "description": "Module, Wechselrichter, Speicher"
+}

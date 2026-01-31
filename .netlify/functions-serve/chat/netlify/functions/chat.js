@@ -1,3 +1,5 @@
+"use strict";
+
 // netlify/functions/chat.js
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {

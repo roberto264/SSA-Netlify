@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Send, Mic, Loader2, Brain, BookOpen, Target, TrendingUp } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { useProgress, useQuizResults, useRollenspiele } from '../lib/database';
-import { modules } from '../modules';
+import { modules } from '../lib/contentLoader';
 
 export default function AITutor({ onBack }) {
   const { profile } = useAuth();

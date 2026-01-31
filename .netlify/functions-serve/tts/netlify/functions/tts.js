@@ -1,3 +1,5 @@
+"use strict";
+
 // netlify/functions/tts.js
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {

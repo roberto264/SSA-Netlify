@@ -1,3 +1,5 @@
+"use strict";
+
 // netlify/functions/transcribe.js
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
