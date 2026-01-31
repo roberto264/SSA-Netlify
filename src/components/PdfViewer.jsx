@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Worker, Viewer } from '@react-pdf-viewer/core';
+import { Worker, Viewer, ViewMode, SpecialZoomLevel } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import { highlightPlugin, MessageIcon, Trigger } from '@react-pdf-viewer/highlight';
 import { pageNavigationPlugin } from '@react-pdf-viewer/page-navigation';
@@ -12,6 +12,24 @@ import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import '@react-pdf-viewer/highlight/lib/styles/index.css';
 
 export default function PdfViewer({ pdfData, modulId, onClose }) {
+  // Add custom styles to hide rotate buttons
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      /* Hide rotate menu items */
+      button[aria-label*="Rotate"],
+      button[aria-label*="rotate"],
+      .rpv-rotate-backward-button,
+      .rpv-rotate-forward-button,
+      [data-testid*="rotate"] {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
   const [message, setMessage] = useState('');
   const [selectedColor, setSelectedColor] = useState('#FFEB3B');
   const [showHighlightsList, setShowHighlightsList] = useState(false);
@@ -118,9 +136,9 @@ export default function PdfViewer({ pdfData, modulId, onClose }) {
   // Create default layout plugin
   const defaultLayoutPluginInstance = defaultLayoutPlugin({
     sidebarTabs: (defaultTabs) => [
-      defaultTabs[0], // Thumbnails
-      defaultTabs[1], // Bookmarks
+      defaultTabs[0], // Thumbnails only
     ],
+    defaultViewMode: ViewMode.DualPage,
   });
 
   // Handle adding new highlight
@@ -282,6 +300,7 @@ export default function PdfViewer({ pdfData, modulId, onClose }) {
               <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
                 <Viewer
                   fileUrl={pdfData.file}
+                  defaultScale={SpecialZoomLevel.PageWidth}
                   plugins={[defaultLayoutPluginInstance, highlightPluginInstance, pageNavigationPluginInstance]}
                   theme={{
                     theme: 'light',
