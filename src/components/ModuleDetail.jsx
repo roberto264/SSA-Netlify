@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, ChevronRight, CheckCircle, ChevronLeft, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X } from 'lucide-react';
 import { useProgress, useAudioProgress, useFlashcardProgress } from '../lib/database';
 import { getLernhilfen } from '../lib/contentLoader';
-import MindMapMarkmap from './MindMapMarkmap';
-import PdfViewer from './PdfViewer';
+import MindMapMarkmap from './mindmap/MindMapMarkmap';
+import PdfViewer from './pdf/PdfViewer';
 
 // ============================================
 // AUDIO PLAYER KOMPONENTE
@@ -144,8 +144,8 @@ function AudioPlayer({ audioData, modulId }) {
             🎧
           </div>
           <div className="flex-1">
-            <h3 className="font-bold text-gray-900">{audioData.title}</h3>
-            <p className="text-sm text-gray-500">Audio wird bald verfügbar sein...</p>
+            <h3 className="font-bold text-slate-800">{audioData.title}</h3>
+            <p className="text-sm text-slate-500">Audio wird bald verfügbar sein...</p>
           </div>
         </div>
       </div>
@@ -172,8 +172,8 @@ function AudioPlayer({ audioData, modulId }) {
           🎧
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-gray-900">{audioData.title}</h3>
-          <p className="text-sm text-gray-500">
+          <h3 className="font-bold text-slate-800">{audioData.title}</h3>
+          <p className="text-sm text-slate-500">
             {isLoading ? 'Lädt...' : audioData.description}
           </p>
         </div>
@@ -184,7 +184,7 @@ function AudioPlayer({ audioData, modulId }) {
       ) : (
         <>
           <div className="flex items-center gap-3">
-            <button onClick={() => skip(-10)} className="p-2 text-gray-500 hover:text-gray-700 transition">
+            <button onClick={() => skip(-10)} className="p-2 text-slate-500 hover:text-slate-700 transition">
               <SkipBack className="w-5 h-5" />
             </button>
 
@@ -202,7 +202,7 @@ function AudioPlayer({ audioData, modulId }) {
               )}
             </button>
 
-            <button onClick={() => skip(10)} className="p-2 text-gray-500 hover:text-gray-700 transition">
+            <button onClick={() => skip(10)} className="p-2 text-slate-500 hover:text-slate-700 transition">
               <SkipForward className="w-5 h-5" />
             </button>
 
@@ -213,13 +213,13 @@ function AudioPlayer({ audioData, modulId }) {
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <div className="flex justify-between mt-1 text-xs text-gray-500">
+              <div className="flex justify-between mt-1 text-xs text-slate-500">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
             </div>
 
-            <button onClick={toggleMute} className="p-2 text-gray-500 hover:text-gray-700 transition">
+            <button onClick={toggleMute} className="p-2 text-slate-500 hover:text-slate-700 transition">
               {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
           </div>
@@ -241,11 +241,11 @@ function Flashcards({ flashcardsData, onOpenFullscreen }) {
             📇
           </div>
           <div className="flex-1">
-            <h3 className="font-bold text-gray-900 text-lg">Karteikarten</h3>
-            <p className="text-sm text-gray-600">Noch keine Karten verfügbar</p>
+            <h3 className="font-bold text-slate-800 text-lg">Karteikarten</h3>
+            <p className="text-sm text-slate-600">Noch keine Karten verfügbar</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 text-center text-gray-500 flex-1 flex items-center justify-center">
+        <div className="bg-white rounded-xl p-6 text-center text-slate-500 flex-1 flex items-center justify-center">
           <p>Karteikarten werden bald hinzugefügt...</p>
         </div>
       </div>
@@ -261,14 +261,14 @@ function Flashcards({ flashcardsData, onOpenFullscreen }) {
           📇
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-gray-900 text-lg">Karteikarten</h3>
+          <h3 className="font-bold text-slate-800 text-lg">Karteikarten</h3>
           <p className="text-sm text-emerald-600">{flashcardsData.length} Karten verfügbar</p>
         </div>
       </div>
 
       <div className="bg-white rounded-xl p-5 mb-4 border border-emerald-100 flex-1 flex flex-col justify-center min-h-[140px]">
         <p className="text-xs text-emerald-600 font-semibold mb-3 uppercase tracking-wide">Vorschau</p>
-        <p className="text-gray-800 font-medium leading-relaxed line-clamp-3">{card.question}</p>
+        <p className="text-slate-800 font-medium leading-relaxed line-clamp-3">{card.question}</p>
       </div>
 
       <button
@@ -358,8 +358,8 @@ function FlashcardsModal({ flashcardsData, modulId, onClose }) {
           </div>
         </div>
 
-        <div className="px-6 py-3 bg-gray-50 border-b flex items-center justify-between">
-          <span className="text-sm text-gray-600">Karte {currentCard + 1} von {flashcardsData.length}</span>
+        <div className="px-6 py-3 bg-slate-50 border-b flex items-center justify-between">
+          <span className="text-sm text-slate-600">Karte {currentCard + 1} von {flashcardsData.length}</span>
           <button onClick={resetCards} className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
             Neustart
           </button>
@@ -379,12 +379,12 @@ function FlashcardsModal({ flashcardsData, modulId, onClose }) {
               }}
             >
               <div 
-                className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 shadow-lg border border-gray-200 flex flex-col justify-center"
+                className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 shadow-lg border border-slate-200 flex flex-col justify-center"
                 style={{ backfaceVisibility: 'hidden' }}
               >
                 <p className="text-xs text-emerald-600 font-semibold mb-3 tracking-wide">FRAGE</p>
-                <p className="text-gray-800 font-medium text-center text-lg leading-relaxed">{card.question}</p>
-                <p className="text-sm text-gray-400 mt-6 text-center">👆 Tippen zum Umdrehen</p>
+                <p className="text-slate-800 font-medium text-center text-lg leading-relaxed">{card.question}</p>
+                <p className="text-sm text-slate-400 mt-6 text-center">👆 Tippen zum Umdrehen</p>
               </div>
               
               <div 
@@ -400,14 +400,14 @@ function FlashcardsModal({ flashcardsData, modulId, onClose }) {
 
         <div className="px-6 pb-6">
           <div className="flex items-center justify-between gap-4">
-            <button onClick={prevCard} className="p-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition text-gray-600">
+            <button onClick={prevCard} className="p-3 rounded-xl bg-slate-100 hover:bg-slate-200 transition text-slate-600">
               <ChevronLeft className="w-6 h-6" />
             </button>
             
             <div className="flex gap-3 flex-1 justify-center">
               <button
                 onClick={nextCard}
-                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition"
+                className="px-6 py-3 bg-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-300 transition"
               >
                 Nochmal üben
               </button>
@@ -424,7 +424,7 @@ function FlashcardsModal({ flashcardsData, modulId, onClose }) {
               </button>
             </div>
             
-            <button onClick={nextCard} className="p-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition text-gray-600">
+            <button onClick={nextCard} className="p-3 rounded-xl bg-slate-100 hover:bg-slate-200 transition text-slate-600">
               <ChevronRight className="w-6 h-6" />
             </button>
           </div>
@@ -441,7 +441,7 @@ function FlashcardsModal({ flashcardsData, modulId, onClose }) {
                   onClick={() => { setCurrentCard(i); setIsFlipped(false); }}
                   className={`w-3 h-3 rounded-full transition ${
                     i === currentCard ? 'bg-emerald-500 scale-125' :
-                    cardProgress.mastered ? 'bg-emerald-300' : 'bg-gray-300'
+                    cardProgress.mastered ? 'bg-emerald-300' : 'bg-slate-300'
                   }`}
                   title={cardProgress.mastered ? 'Gemeistert' : 'Noch nicht gemeistert'}
                 />
@@ -467,7 +467,7 @@ function MindMapPreview({ mindmapData, onOpen }) {
           🧠
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-gray-900 text-lg">Mind Map</h3>
+          <h3 className="font-bold text-slate-800 text-lg">Mind Map</h3>
           <p className="text-sm text-violet-600">Visualisiere die Zusammenhänge</p>
         </div>
       </div>
@@ -550,20 +550,20 @@ function PdfPreview({ pdfData, onOpen }) {
           📄
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-gray-900 text-lg">Unterlagen</h3>
+          <h3 className="font-bold text-slate-800 text-lg">Unterlagen</h3>
           <p className="text-sm text-blue-600">Komplette Schulungsmaterialien</p>
         </div>
       </div>
 
       <div className="bg-white rounded-xl p-4 mb-4 border border-blue-100 flex-1 flex flex-col justify-center min-h-[140px]">
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-slate-600">
             <span className="font-semibold text-blue-600">📖</span>
             <span className="font-medium">{pdfData.title}</span>
           </div>
           <div className="pl-6 space-y-1">
             {topics.slice(0, 3).map((topic, i) => (
-              <div key={i} className="text-xs text-gray-500 flex items-start gap-2">
+              <div key={i} className="text-xs text-slate-500 flex items-start gap-2">
                 <span className="text-blue-400 mt-0.5">•</span>
                 <span className="line-clamp-1">{topic}</span>
               </div>
@@ -601,10 +601,10 @@ function TopicsList({ module, onSelectTopic, progress }) {
   const completedCount = module.topics.filter(t => isTopicCompleted(t.id)).length;
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm h-full flex flex-col">
-      <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+    <div className="bg-white rounded-2xl p-5 border border-slate-200 card-shadow h-full flex flex-col">
+      <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
         📚 Quiz
-        <span className="text-sm font-normal text-gray-500">{completedCount}/{module.topics.length}</span>
+        <span className="text-sm font-normal text-slate-500">{completedCount}/{module.topics.length}</span>
       </h3>
 
       <div className="space-y-2 flex-1 overflow-y-auto">
@@ -615,20 +615,20 @@ function TopicsList({ module, onSelectTopic, progress }) {
               key={topic.id}
               onClick={() => onSelectTopic(topic)}
               className={`p-3 rounded-xl flex items-center gap-3 cursor-pointer transition ${
-                completed ? 'bg-green-50 border border-green-200' : 'bg-gray-50 hover:bg-gray-100 border border-transparent'
+                completed ? 'bg-green-50 border border-green-200' : 'bg-slate-50 hover:bg-slate-100 border border-transparent'
               }`}
             >
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
+                completed ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-600'
               }`}>
                 {completed ? '✓' : i + 1}
               </div>
               <div className="flex-1 min-w-0">
-                <span className={`text-sm block truncate ${completed ? 'text-green-800' : 'text-gray-700'}`}>
+                <span className={`text-sm block truncate ${completed ? 'text-green-800' : 'text-slate-700'}`}>
                   {topic.title}
                 </span>
               </div>
-              <ChevronRight className={`w-4 h-4 flex-shrink-0 ${completed ? 'text-green-400' : 'text-gray-400'}`} />
+              <ChevronRight className={`w-4 h-4 flex-shrink-0 ${completed ? 'text-green-400' : 'text-slate-400'}`} />
             </div>
           );
         })}
@@ -654,7 +654,7 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
   const progressPercent = Math.round((completedTopics / module.topics.length) * 100);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <div className={`bg-gradient-to-r ${module.color} text-white`}>
         <div className="max-w-6xl mx-auto px-4 py-5">
           <button onClick={onBack} className="flex items-center gap-2 text-white/80 hover:text-white mb-3 text-sm">
@@ -684,7 +684,7 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white text-xl shadow-lg">
             🎯
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Lernhilfen</h2>
+          <h2 className="text-2xl font-bold text-slate-800">Lernhilfen</h2>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-fr">

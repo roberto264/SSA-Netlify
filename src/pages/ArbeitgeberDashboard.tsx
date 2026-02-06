@@ -15,7 +15,7 @@ export function ArbeitgeberDashboard() {
 
   if (loading) {
     return (
-      <main className="max-w-7xl mx-auto px-6 py-8 flex items-center justify-center">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
       </main>
     );
@@ -26,51 +26,61 @@ export function ArbeitgeberDashboard() {
     : 0;
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-8">
-      <div className="bg-gradient-to-r from-indigo-950 to-indigo-600 rounded-2xl p-8 mb-8 text-white">
-        <h2 className="text-3xl font-bold mb-2">{profile?.firma} - Team Übersicht</h2>
-        <p className="text-indigo-200">{users.length} Mitarbeiter in Ausbildung</p>
-        <div className="grid grid-cols-3 gap-6 mt-6">
-          <div className="bg-white/10 rounded-xl p-4">
-            <p className="text-indigo-200 text-sm">Ø Fortschritt</p>
-            <p className="text-3xl font-bold">{avgProgress}%</p>
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+      {/* Hero */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 md:p-8 mb-6 text-white animate-slide-in">
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">{profile?.firma || 'Firma'}</h1>
+        <p className="text-indigo-100 mb-4">Mitarbeiter-Fortschritt im Überblick</p>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-white/10 rounded-xl p-4 text-center">
+            <div className="text-3xl font-bold">{users.length}</div>
+            <div className="text-sm text-indigo-100">Mitarbeiter</div>
           </div>
-          <div className="bg-white/10 rounded-xl p-4">
-            <p className="text-indigo-200 text-sm">Quiz bestanden</p>
-            <p className="text-3xl font-bold">{users.reduce((acc, u) => acc + (u.quiz_ergebnisse?.filter(q => q.passed).length || 0), 0)}</p>
+          <div className="bg-white/10 rounded-xl p-4 text-center">
+            <div className="text-3xl font-bold">{avgProgress}%</div>
+            <div className="text-sm text-indigo-100">Ø Fortschritt</div>
           </div>
-          <div className="bg-white/10 rounded-xl p-4">
-            <p className="text-indigo-200 text-sm">Rollenspiele</p>
-            <p className="text-3xl font-bold">{users.reduce((acc, u) => acc + (u.rollenspiel_sessions?.length || 0), 0)}</p>
+          <div className="bg-white/10 rounded-xl p-4 text-center">
+            <div className="text-3xl font-bold">{users.reduce((acc, u) => acc + (u.quiz_ergebnisse?.filter(q => q.passed).length || 0), 0)}</div>
+            <div className="text-sm text-indigo-100">Quiz bestanden</div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        {users.map(user => {
+      {/* Employee Grid */}
+      <h2 className="text-xl font-bold text-slate-800 mb-4">Mitarbeiter</h2>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {users.length === 0 ? (
+          <div className="col-span-full bg-white rounded-2xl p-8 card-shadow text-center">
+            <p className="text-slate-500">Noch keine Mitarbeiter registriert</p>
+          </div>
+        ) : users.map(user => {
           const userProgress = calculateUserProgress(user);
+          const initials = user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || '?';
           return (
-            <div key={user.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div key={user.id} className="bg-white rounded-2xl p-5 card-shadow">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
-                  {user.name?.split(' ').map(n => n[0]).join('') || '?'}
+                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold">
+                  {initials}
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">{user.name}</p>
-                  <p className="text-xs text-gray-500">{user.email}</p>
+                  <h3 className="font-semibold text-slate-800">{user.name || 'Benutzer'}</h3>
+                  <p className="text-xs text-slate-500">{user.email}</p>
                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Fortschritt</span>
-                  <span className="font-medium">{userProgress}%</span>
+              <div className="mb-3">
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-slate-500">Fortschritt</span>
+                  <span className="font-medium text-slate-800">{userProgress}%</span>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-2">
-                  <div className={`h-2 rounded-full ${userProgress === 100 ? 'bg-green-500' : 'bg-indigo-600'}`} style={{ width: `${userProgress}%` }}></div>
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full progress-bar-animate ${userProgress === 100 ? 'bg-green-500' : 'bg-indigo-500'}`} style={{ width: `${userProgress}%` }}></div>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Quiz</span>
-                  <span>{user.quiz_ergebnisse?.filter(q => q.passed).length || 0} bestanden</span>
+              </div>
+              <div className="flex gap-4 text-sm">
+                <div>
+                  <span className="text-slate-500">Quiz:</span>
+                  <span className="font-medium text-slate-800 ml-1">{user.quiz_ergebnisse?.filter(q => q.passed).length || 0} bestanden</span>
                 </div>
               </div>
             </div>

@@ -54,54 +54,91 @@ export function QuizPage() {
 
   if (showResult) {
     const percentage = Math.round((score / topic.questions.length) * 100);
+    const passed = percentage >= 70;
     return (
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 sm:p-8 text-center">
-          <div className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full flex items-center justify-center ${percentage >= 70 ? 'bg-green-100' : 'bg-red-100'}`}>
-            {percentage >= 70 ? <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" /> : <XCircle className="w-8 h-8 sm:w-10 sm:h-10 text-red-600" />}
+      <main className="max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="bg-white rounded-2xl card-shadow p-6 sm:p-8 text-center animate-slide-in">
+          <div className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full flex items-center justify-center ${passed ? 'text-amber-500' : 'text-red-500'}`}>
+            {passed ? <Trophy className="w-12 h-12 sm:w-16 sm:h-16" /> : <XCircle className="w-12 h-12 sm:w-16 sm:h-16" />}
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{percentage >= 70 ? 'Bestanden!' : 'Nicht bestanden'}</h2>
-          <p className="text-gray-500 mb-4 sm:mb-6">{score}/{topic.questions.length} richtig ({percentage}%)</p>
-          <button onClick={goBack} className="px-4 sm:px-6 py-2.5 sm:py-3 bg-indigo-600 text-white rounded-lg font-medium text-sm sm:text-base">Zurück zum Modul</button>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">
+            {passed ? 'Gratulation! 🎉' : 'Nicht bestanden'}
+          </h2>
+          <p className="text-slate-600 mb-6">
+            {passed ? 'Du hast das Quiz erfolgreich bestanden!' : 'Versuch es noch einmal, du schaffst das!'}
+          </p>
+          <div className={`text-5xl font-bold mb-2 ${passed ? 'text-green-500' : 'text-red-500'}`}>{percentage}%</div>
+          <p className="text-slate-500 mb-6">{score} von {topic.questions.length} richtig</p>
+          <div className="space-y-3">
+            <button onClick={() => { setCurrentQuestion(0); setSelectedAnswer(null); setAnswered(false); setScore(0); setAnswers([]); setShowResult(false); }}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition-all">
+              Quiz wiederholen
+            </button>
+            <button onClick={goBack}
+              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl transition-all">
+              Zurück zum Modul
+            </button>
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-      <button onClick={goBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base">
-        <ArrowLeft className="w-4 h-4" /> Zurück
+    <main className="max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+      <button onClick={goBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-800 mb-4 transition-colors text-sm sm:text-base">
+        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" /> Zurück
       </button>
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-6">
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h3 className="font-bold text-gray-900 text-sm sm:text-base">{topic.title}</h3>
-          <span className="text-xs sm:text-sm text-gray-500">{currentQuestion + 1}/{topic.questions.length}</span>
+      <div className="bg-white rounded-2xl card-shadow p-4 sm:p-6 animate-slide-in">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-sm text-slate-500">Frage {currentQuestion + 1} von {topic.questions.length}</span>
+          <div className="h-2 flex-1 mx-4 bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-full bg-indigo-500 rounded-full progress-bar-animate" style={{ width: `${((currentQuestion + 1) / topic.questions.length) * 100}%` }}></div>
+          </div>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-2 mb-4 sm:mb-6">
-          <div className="bg-indigo-600 h-2 rounded-full" style={{ width: `${((currentQuestion + 1) / topic.questions.length) * 100}%` }}></div>
+
+        <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-6">{question.question}</h2>
+
+        <div className="space-y-3">
+          {question.options.map((option, index) => {
+            const isCorrect = index === question.correct;
+            const wasSelected = selectedAnswer === index;
+            let classes = 'bg-slate-50 hover:bg-slate-100 border-slate-200';
+            if (answered) {
+              if (isCorrect) classes = 'bg-green-100 border-green-500 text-green-800';
+              else if (wasSelected) classes = 'bg-red-100 border-red-500 text-red-800';
+            }
+            return (
+              <button
+                key={index}
+                onClick={() => handleAnswer(index)}
+                disabled={answered}
+                className={`w-full p-3 sm:p-4 rounded-xl border-2 ${classes} text-left transition-all ${answered ? 'cursor-default' : ''}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className={`w-8 h-8 rounded-lg flex items-center justify-center font-medium text-sm ${
+                    answered && isCorrect ? 'bg-green-500 text-white' :
+                    answered && wasSelected ? 'bg-red-500 text-white' :
+                    'bg-slate-200 text-slate-600'
+                  }`}>
+                    {answered && isCorrect ? '✓' : answered && wasSelected ? '✗' : String.fromCharCode(65 + index)}
+                  </span>
+                  <span className="font-medium text-sm sm:text-base">{option}</span>
+                </div>
+              </button>
+            );
+          })}
         </div>
-        <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">{question.question}</h4>
-        <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-          {question.options.map((option, index) => (
-            <button key={index} onClick={() => handleAnswer(index)} disabled={answered}
-              className={`w-full p-3 sm:p-4 text-left rounded-xl border-2 transition text-sm sm:text-base ${
-                answered
-                  ? index === question.correct ? 'border-green-500 bg-green-50'
-                    : index === selectedAnswer ? 'border-red-500 bg-red-50' : 'border-gray-200'
-                  : 'border-gray-200 hover:border-indigo-300'
-              }`}>
-              {option}
-            </button>
-          ))}
-        </div>
+
         {answered && (
           <>
-            <div className={`p-3 sm:p-4 rounded-xl mb-4 sm:mb-6 ${selectedAnswer === question.correct ? 'bg-green-50' : 'bg-amber-50'}`}>
-              <p className="text-xs sm:text-sm">{question.explanation}</p>
+            <div className={`mt-4 p-3 sm:p-4 rounded-xl border ${selectedAnswer === question.correct ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+              <p className={`text-xs sm:text-sm ${selectedAnswer === question.correct ? 'text-green-800' : 'text-amber-800'}`}>
+                <strong>Erklärung:</strong> {question.explanation}
+              </p>
             </div>
-            <button onClick={handleNext} className="w-full py-2.5 sm:py-3 bg-indigo-600 text-white rounded-lg font-medium text-sm sm:text-base">
-              {currentQuestion < topic.questions.length - 1 ? 'Weiter' : 'Ergebnis'}
+            <button onClick={handleNext} className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition-all">
+              {currentQuestion < topic.questions.length - 1 ? 'Nächste Frage' : 'Ergebnis anzeigen'}
             </button>
           </>
         )}

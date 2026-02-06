@@ -7,10 +7,22 @@
       "description": "Aufbau, Typen und Funktion",
       "questions": [
         {
-          "question": "Welcher Zelltyp hat den höchsten Wirkungsgrad?",
-          "options": ["Polykristallin", "Monokristallin", "Dünnschicht", "Organisch"],
+          "question": "Welcher physikalische Prozess beschreibt die direkte Umwandlung von Sonnenlicht in elektrische Energie in einer Solarzelle?",
+          "options": ["Der Piezoeffekt", "Der Photovoltaikeffekt", "Der Thermoeffekt", "Der Elektromagnetische Effekt"],
           "correct": 1,
-          "explanation": "Monokristalline Zellen haben den höchsten Wirkungsgrad (bis 22% im Standardmodul)."
+          "explanation": "Der Photovoltaikeffekt beschreibt, wie Photonen Elektronen in Halbleitermaterialien wie Silizium in Bewegung setzen und so einen Stromfluss erzeugen."
+        },
+        {
+          "question": "Welche Modultechnologie wird aufgrund ihrer hohen Effizienz von 18-28% aktuell am häufigsten eingesetzt?",
+          "options": ["Polykristalline Module", "Monokristalline Module", "Dünnschicht-Module", "Amorphe Module"],
+          "correct": 1,
+          "explanation": "Monokristalline Module bieten den höchsten Wirkungsgrad und zeichnen sich durch eine dunkle, homogene Oberfläche aus."
+        },
+        {
+          "question": "Was ist ein entscheidender Vorteil von Glas-Glas-Modulen gegenüber herkömmlichen Glas-Folie-Modulen?",
+          "options": ["Niedrigerer Preis", "Höhere Stabilität und Eignung für anspruchsvolle Umgebungen", "Leichteres Gewicht", "Einfachere Installation"],
+          "correct": 1,
+          "explanation": "Die beidseitige Verglasung schützt die Solarzellen besser vor mechanischen Belastungen und Umwelteinflüssen."
         },
         {
           "question": "Was passiert bei Teilverschattung eines Moduls?",
@@ -19,7 +31,7 @@
           "explanation": "Bei Teilverschattung kann die Leistung des gesamten Strings überproportional einbrechen (Hot-Spot-Effekt)."
         },
         {
-          "question": "Wie lange beträgt die typische Leistungsgarantie?",
+          "question": "Wie lange beträgt die typische Leistungsgarantie bei Solarmodulen?",
           "options": ["10 Jahre", "15 Jahre", "25 Jahre", "30 Jahre"],
           "correct": 2,
           "explanation": "Die meisten Hersteller geben 25 Jahre Leistungsgarantie (mind. 80% der Nennleistung)."
@@ -35,7 +47,7 @@
     {
       "id": "wechselrichter",
       "title": "Wechselrichter",
-      "description": "Typen und Anwendungen",
+      "description": "Typen, Funktionen und Anwendungen",
       "questions": [
         {
           "question": "Was ist die Hauptfunktion eines Wechselrichters?",
@@ -44,22 +56,59 @@
           "explanation": "Der Wechselrichter wandelt den Gleichstrom (DC) der Module in netzkonformen Wechselstrom (AC)."
         },
         {
-          "question": "Wann sind Moduloptimierer sinnvoll?",
-          "options": ["Immer", "Bei Verschattung", "Nie", "Nur bei Grossanlagen"],
+          "question": "Welche elektrische Spannung und Frequenz liefert ein Wechselrichter typischerweise für das Hausnetz?",
+          "options": ["230 V bei 60 Hz", "400 V bei 50 Hz", "110 V bei 50 Hz", "380 V bei 60 Hz"],
           "correct": 1,
-          "explanation": "Moduloptimierer sind besonders bei Verschattungsproblemen oder unterschiedlichen Ausrichtungen sinnvoll."
+          "explanation": "400 V bei 50 Hz entspricht den Standardwerten für das öffentliche Stromnetz und die Hausversorgung in Europa."
+        },
+        {
+          "question": "Was beschreibt die Funktion des 'MPP-Trackings' bei einem Wechselrichter?",
+          "options": ["Die GPS-Ortung der Solaranlage", "Die kontinuierliche Anpassung zur Maximierung der Energieausbeute", "Die Überwachung der Netzfrequenz", "Die Temperaturmessung der Module"],
+          "correct": 1,
+          "explanation": "Das Maximum Power Point Tracking sorgt dafür, dass die Solarmodule bei jedem Sonnenstand im optimalen Betriebspunkt arbeiten."
+        },
+        {
+          "question": "Welcher Wechselrichtertyp eignet sich am besten für komplexe Dächer mit Teilverschattung einzelner Module?",
+          "options": ["String-Wechselrichter", "Mikro-Wechselrichter", "Hybrid-Wechselrichter", "Zentralwechselrichter"],
+          "correct": 1,
+          "explanation": "Da jedes Modul seinen eigenen Wechselrichter hat, beeinflusst die Verschattung eines Moduls nicht die Leistung der anderen."
+        },
+        {
+          "question": "Wie hoch ist die typische Lebensdauer eines Wechselrichters im Vergleich zu Solarmodulen?",
+          "options": ["5-8 Jahre", "10-15 Jahre", "20-25 Jahre", "25-30 Jahre"],
+          "correct": 1,
+          "explanation": "Aufgrund der thermischen Belastung der Elektronik ist die Lebensdauer kürzer als die der Module, die oft über 25 Jahre halten."
         },
         {
           "question": "Wo wird ein Hybridwechselrichter eingesetzt?",
           "options": ["Ohne Batterie", "Mit Batterie", "Nur gewerblich", "Nur bei Inselbetrieb"],
           "correct": 1,
           "explanation": "Hybridwechselrichter werden in Systemen mit Batteriespeicher eingesetzt und managen PV, Batterie und Netz."
+        }
+      ]
+    },
+    {
+      "id": "optimierer",
+      "title": "Optimierer",
+      "description": "Modul-Level-Optimierung und Monitoring",
+      "questions": [
+        {
+          "question": "Welchen Vorteil bietet der Einsatz von Optimierern in einer Photovoltaikanlage?",
+          "options": ["Reduzierung der Installationskosten", "Detaillierte Fehleranalyse für jedes einzelne Modul", "Erhöhung der Modulspannung", "Vereinfachung der Verkabelung"],
+          "correct": 1,
+          "explanation": "Optimierer ermöglichen ein Monitoring auf Modulebene, was die Lokalisierung von Defekten erheblich erleichtert."
         },
         {
-          "question": "Was bedeutet \"MPP-Tracking\"?",
-          "options": ["GPS-Ortung", "Optimale Leistungspunktsuche", "Fehlererkennung", "Fernüberwachung"],
+          "question": "Wann sind Moduloptimierer besonders sinnvoll?",
+          "options": ["Immer", "Bei Verschattung", "Nie", "Nur bei Grossanlagen"],
           "correct": 1,
-          "explanation": "MPP-Tracking (Maximum Power Point) findet kontinuierlich den optimalen Arbeitspunkt der Module."
+          "explanation": "Moduloptimierer sind besonders bei Verschattungsproblemen oder unterschiedlichen Ausrichtungen sinnvoll."
+        },
+        {
+          "question": "Welche Sicherheitsfunktion bieten moderne Optimierer?",
+          "options": ["Blitzschutz", "Automatische Modulabschaltung bei Gefahr", "Brandmeldung", "Diebstahlschutz"],
+          "correct": 1,
+          "explanation": "Optimierer können die Modulspannung im Notfall auf ein sicheres Niveau reduzieren (Rapid Shutdown)."
         }
       ]
     },
@@ -69,22 +118,34 @@
       "description": "Technologien und Dimensionierung",
       "questions": [
         {
-          "question": "Welche Batterietechnologie wird heute hauptsächlich verwendet?",
-          "options": ["Blei-Säure", "Lithium-Ionen", "Salzwasser", "Nickel-Cadmium"],
+          "question": "Welches Speichermedium gilt aktuell als Standard in Photovoltaikanlagen aufgrund seiner hohen Energiedichte?",
+          "options": ["Blei-Säure-Batterie", "Lithium-Ionen-Batterie", "Nickel-Cadmium-Batterie", "Salzwasser-Batterie"],
           "correct": 1,
-          "explanation": "Lithium-Ionen-Batterien (meist LiFePO4) dominieren den Markt wegen hoher Effizienz und Lebensdauer."
+          "explanation": "Lithium-Ionen-Technologie bietet das beste Verhältnis von Gewicht, Platzbedarf und Zyklenfestigkeit für Heimanwendungen."
         },
         {
-          "question": "Was ist eine sinnvolle Speichergrösse für ein EFH?",
+          "question": "Warum weist eine DC-gekoppelte Batterie in der Regel einen höheren Wirkungsgrad auf als eine AC-gekoppelte?",
+          "options": ["Weil DC-Batterien billiger sind", "Weil weniger Umwandlungsschritte zwischen DC und AC nötig sind", "Weil DC-Speicher mehr Kapazität haben", "Weil das Hausnetz mit DC arbeitet"],
+          "correct": 1,
+          "explanation": "Da der Solarstrom bereits als Gleichstrom (DC) vorliegt, kann er direkt mit minimalen Verlusten in die Batterie fliessen."
+        },
+        {
+          "question": "Was ist eine sinnvolle Speichergrösse für ein Einfamilienhaus?",
           "options": ["1-2 kWh", "5-10 kWh", "20-30 kWh", "50+ kWh"],
           "correct": 1,
           "explanation": "Für ein Einfamilienhaus sind 5-10 kWh meist ausreichend, um den Abend- und Nachtverbrauch zu decken."
         },
         {
-          "question": "Was bedeutet \"Notstromfähigkeit\"?",
+          "question": "Was bedeutet \"Notstromfähigkeit\" bei einem Batteriespeicher?",
           "options": ["Schnelles Laden", "Stromversorgung bei Netzausfall", "Doppelte Kapazität", "Outdoor-tauglich"],
           "correct": 1,
           "explanation": "Notstromfähige Systeme können bei Netzausfall wichtige Verbraucher weiter mit Strom versorgen."
+        },
+        {
+          "question": "Wie lange ist die typische Lebensdauer eines Lithium-Ionen-Batteriespeichers?",
+          "options": ["3-5 Jahre", "10-15 Jahre", "20-25 Jahre", "30+ Jahre"],
+          "correct": 1,
+          "explanation": "Lithium-Ionen-Batterien halten typischerweise 10-15 Jahre, abhängig von der Nutzung und Anzahl der Ladezyklen."
         }
       ]
     },
@@ -104,6 +165,12 @@
           "options": ["Schnellladen", "Laden nur mit Solarstrom-Überschuss", "Laden in der Nacht", "Laden am Arbeitsplatz"],
           "correct": 1,
           "explanation": "Beim PV-Überschussladen wird das E-Auto nur mit dem überschüssigen Solarstrom geladen, der sonst eingespeist würde."
+        },
+        {
+          "question": "Was ermöglicht das Lastmanagement bei einer Wallbox?",
+          "options": ["Schnelleres Laden", "Intelligente Verteilung der verfügbaren Leistung", "Höhere Spannung", "Gratis Laden"],
+          "correct": 1,
+          "explanation": "Lastmanagement verteilt die verfügbare Leistung intelligent, um Überlastung des Hausanschlusses zu vermeiden."
         }
       ]
     }

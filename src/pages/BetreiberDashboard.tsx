@@ -33,93 +33,95 @@ function UserProfile({ user, onBack }) {
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-8">
-      <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6">
-        <ArrowLeft className="w-4 h-4" /> Zurück zur Übersicht
+    <main className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+      <button onClick={onBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-800 mb-4 transition-colors">
+        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" /> Zurück zur Übersicht
       </button>
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+
+      <div className="bg-white rounded-2xl p-6 card-shadow mb-6 animate-slide-in">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xl">
-              {user.name?.split(' ').map(n => n[0]).join('') || '?'}
+            <div className="w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xl">
+              {user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || '?'}
             </div>
             <div>
-              <h3 className="font-bold text-xl text-gray-900">{user.name}</h3>
-              <p className="text-gray-500">{user.firma} • {user.email}</p>
+              <h1 className="text-2xl font-bold text-slate-800">{user.name || 'Benutzer'}</h1>
+              <p className="text-slate-500">{user.firma} - {user.email}</p>
             </div>
           </div>
           <div className="text-right">
             <p className="text-4xl font-bold text-indigo-600">{calculateProgress()}%</p>
-            <p className="text-sm text-gray-500">Gesamtfortschritt</p>
+            <p className="text-sm text-slate-500">Gesamtfortschritt</p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6">
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-blue-600" /> Modulfortschritt
-            </h4>
-            <div className="space-y-3">
-              {modules.map(module => (
-                <div key={module.id}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">{module.title}</span>
-                    <span className="font-medium">{getModuleProgress(module.id)}%</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div className={`h-2 rounded-full ${getModuleProgress(module.id) === 100 ? 'bg-green-500' : 'bg-indigo-600'}`} style={{ width: `${getModuleProgress(module.id)}%` }}></div>
-                  </div>
+
+        <h3 className="font-semibold text-slate-800 mb-4">Modulfortschritt</h3>
+        <div className="space-y-3">
+          {modules.map(module => {
+            const prog = getModuleProgress(module.id);
+            return (
+              <div key={module.id}>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-slate-700">{module.icon} {module.title}</span>
+                  <span className="font-medium">{prog}%</span>
                 </div>
-              ))}
-            </div>
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className={`h-full bg-gradient-to-r ${module.color} rounded-full progress-bar-animate`} style={{ width: `${prog}%` }}></div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Soft Skills */}
+        <div className="bg-white rounded-2xl p-6 card-shadow">
+          <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <MessageCircle className="w-4 h-4 text-indigo-600" /> Soft-Skills Bewertung
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between"><span className="text-sm text-slate-700">Gesprächsführung</span><StarRating rating={avgSoftSkills.gesprachsfuhrung} /></div>
+            <div className="flex items-center justify-between"><span className="text-sm text-slate-700">Aktives Zuhören</span><StarRating rating={avgSoftSkills.aktives_zuhoren} /></div>
+            <div className="flex items-center justify-between"><span className="text-sm text-slate-700">Klarheit</span><StarRating rating={avgSoftSkills.klarheit} /></div>
+            <div className="flex items-center justify-between"><span className="text-sm text-slate-700">Einwandbehandlung</span><StarRating rating={avgSoftSkills.einwand_behandlung} /></div>
+            <div className="flex items-center justify-between"><span className="text-sm text-slate-700">Empathie</span><StarRating rating={avgSoftSkills.empathie} /></div>
+            <div className="flex items-center justify-between"><span className="text-sm text-slate-700">Überzeugungskraft</span><StarRating rating={avgSoftSkills.uberzeugungskraft} /></div>
           </div>
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <MessageCircle className="w-4 h-4 text-indigo-600" /> Kommunikation
-            </h4>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Gesprächsführung</span><StarRating rating={avgSoftSkills.gesprachsfuhrung} /></div>
-              <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Aktives Zuhören</span><StarRating rating={avgSoftSkills.aktives_zuhoren} /></div>
-              <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Klarheit</span><StarRating rating={avgSoftSkills.klarheit} /></div>
-              <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Einwandbehandlung</span><StarRating rating={avgSoftSkills.einwand_behandlung} /></div>
-            </div>
-            <h4 className="font-semibold text-gray-900 mb-4 mt-6 flex items-center gap-2">
-              <Target className="w-4 h-4 text-amber-600" /> Verkaufstalent
-            </h4>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Empathie</span><StarRating rating={avgSoftSkills.empathie} /></div>
-              <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Überzeugungskraft</span><StarRating rating={avgSoftSkills.uberzeugungskraft} /></div>
-            </div>
+        </div>
+
+        {/* Quiz & Roleplay */}
+        <div className="bg-white rounded-2xl p-6 card-shadow">
+          <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-amber-600" /> Aktivitäten
+          </h3>
+
+          <h4 className="text-sm font-medium text-slate-600 mb-2">Quiz-Ergebnisse</h4>
+          <div className="space-y-2 mb-4">
+            {(!user.quiz_ergebnisse || user.quiz_ergebnisse.length === 0) ? (
+              <p className="text-sm text-slate-400">Noch keine Quiz absolviert</p>
+            ) : (user.quiz_ergebnisse || []).slice(0, 5).map((quiz, i) => (
+              <div key={i} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
+                <span className="text-sm text-slate-700">{modules.find(m => m.id === quiz.modul_id)?.title || 'Unbekannt'}</span>
+                <span className={`text-sm font-medium ${quiz.passed ? 'text-green-600' : 'text-red-600'}`}>{quiz.score}/{quiz.max_score}</span>
+              </div>
+            ))}
           </div>
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-600" /> Quiz-Ergebnisse
-            </h4>
-            <div className="space-y-2 mb-6">
-              {(user.quiz_ergebnisse || []).slice(0, 5).map((quiz, i) => (
-                <div key={i} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                  <span className="text-sm">{modules.find(m => m.id === quiz.modul_id)?.title || 'Unbekannt'}</span>
-                  <span className={`text-sm font-medium ${quiz.passed ? 'text-green-600' : 'text-red-600'}`}>{quiz.score}/{quiz.max_score}</span>
-                </div>
-              ))}
-              {(!user.quiz_ergebnisse || user.quiz_ergebnisse.length === 0) && (
-                <p className="text-sm text-gray-500">Noch keine Quiz absolviert</p>
-              )}
-            </div>
-            <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <MessageCircle className="w-4 h-4 text-purple-600" /> Rollenspiele ({sessions.length})
-            </h4>
-            <div className="space-y-2">
-              {sessions.slice(0, 3).map((session, i) => (
-                <div key={i} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                  <span className="text-sm">{personas.find(p => p.id === session.persona_id)?.name || session.persona_id}</span>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    session.rating === 'gut' ? 'bg-green-100 text-green-700' :
-                    session.rating === 'mittel' ? 'bg-amber-100 text-amber-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>{session.rating || 'Offen'}</span>
-                </div>
-              ))}
-            </div>
+
+          <h4 className="text-sm font-medium text-slate-600 mb-2">Rollenspiele ({sessions.length})</h4>
+          <div className="space-y-2">
+            {sessions.length === 0 ? (
+              <p className="text-sm text-slate-400">Noch keine Rollenspiele</p>
+            ) : sessions.slice(0, 3).map((session, i) => (
+              <div key={i} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
+                <span className="text-sm text-slate-700">{personas.find(p => p.id === session.persona_id)?.name || session.persona_id}</span>
+                <span className={`text-xs px-2 py-1 rounded-full ${
+                  session.rating === 'gut' ? 'bg-green-100 text-green-700' :
+                  session.rating === 'mittel' ? 'bg-amber-100 text-amber-700' :
+                  'bg-red-100 text-red-700'
+                }`}>{session.rating || 'Offen'}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -153,95 +155,133 @@ export function BetreiberDashboard() {
 
   if (loading) {
     return (
-      <main className="max-w-7xl mx-auto px-6 py-8 flex items-center justify-center">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
       </main>
     );
   }
 
+  const avgProgress = users.length > 0
+    ? Math.round(users.reduce((acc, u) => acc + calculateUserProgress(u), 0) / users.length)
+    : 0;
+
   return (
-    <main className="max-w-7xl mx-auto px-6 py-8">
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500 mb-1">Aktive Lernende</p>
-          <p className="text-3xl font-bold text-gray-900">{users.length}</p>
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-2xl p-5 card-shadow">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
+              <BarChart3 className="w-5 h-5" />
+            </div>
+            <span className="text-2xl font-bold text-slate-800">{users.length}</span>
+          </div>
+          <p className="text-sm text-slate-500">Benutzer gesamt</p>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500 mb-1">Firmen</p>
-          <p className="text-3xl font-bold text-gray-900">{firmen.length}</p>
+        <div className="bg-white rounded-2xl p-5 card-shadow">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+              <Target className="w-5 h-5" />
+            </div>
+            <span className="text-2xl font-bold text-slate-800">{firmen.length}</span>
+          </div>
+          <p className="text-sm text-slate-500">Firmen</p>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500 mb-1">Ø Fortschritt</p>
-          <p className="text-3xl font-bold text-gray-900">
-            {users.length > 0 ? Math.round(users.reduce((acc, u) => acc + calculateUserProgress(u), 0) / users.length) : 0}%
-          </p>
+        <div className="bg-white rounded-2xl p-5 card-shadow">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+              <Trophy className="w-5 h-5" />
+            </div>
+            <span className="text-2xl font-bold text-slate-800">{avgProgress}%</span>
+          </div>
+          <p className="text-sm text-slate-500">Ø Fortschritt</p>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500 mb-1">Quiz bestanden</p>
-          <p className="text-3xl font-bold text-green-600">
-            {users.reduce((acc, u) => acc + (u.quiz_ergebnisse?.filter(q => q.passed).length || 0), 0)}
-          </p>
+        <div className="bg-white rounded-2xl p-5 card-shadow">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600">
+              <MessageCircle className="w-5 h-5" />
+            </div>
+            <span className="text-2xl font-bold text-green-600">
+              {users.reduce((acc, u) => acc + (u.quiz_ergebnisse?.filter(q => q.passed).length || 0), 0)}
+            </span>
+          </div>
+          <p className="text-sm text-slate-500">Quiz bestanden</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-          <h3 className="font-bold text-gray-900">Alle Lernenden</h3>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input type="text" placeholder="Suchen..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg text-sm w-40" />
+      {/* User Table */}
+      <div className="bg-white rounded-2xl card-shadow overflow-hidden">
+        <div className="p-4 border-b border-slate-100">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Benutzer suchen..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 focus:border-indigo-500 transition-colors"
+              />
             </div>
-            <select value={filterFirma} onChange={(e) => setFilterFirma(e.target.value)} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm">
+            <select
+              value={filterFirma}
+              onChange={(e) => setFilterFirma(e.target.value)}
+              className="px-4 py-2 rounded-xl border border-slate-200 focus:border-indigo-500 transition-colors"
+            >
               <option value="alle">Alle Firmen</option>
               {firmen.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
           </div>
         </div>
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr className="text-left text-xs font-medium text-gray-500 uppercase">
-              <th className="px-5 py-3">Lernender</th>
-              <th className="px-5 py-3">Firma</th>
-              <th className="px-5 py-3">Fortschritt</th>
-              <th className="px-5 py-3">Quiz</th>
-              <th className="px-5 py-3">Rollenspiele</th>
-              <th className="px-5 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {filteredUsers.map(user => {
-              const userProgress = calculateUserProgress(user);
-              return (
-                <tr key={user.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedUser(user)}>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-medium text-sm">
-                        {user.name?.split(' ').map(n => n[0]).join('') || '?'}
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Name</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Firma</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Fortschritt</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Quiz</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Rollenspiele</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredUsers.map(user => {
+                const userProgress = calculateUserProgress(user);
+                return (
+                  <tr key={user.id} className="hover:bg-slate-50 cursor-pointer" onClick={() => setSelectedUser(user)}>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold text-xs">
+                          {user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || '?'}
+                        </div>
+                        <div>
+                          <span className="font-medium text-slate-800">{user.name || 'Unbekannt'}</span>
+                          <p className="text-xs text-slate-500">{user.email}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-900">{user.name || 'Unbekannt'}</p>
-                        <p className="text-xs text-gray-500">{user.email}</p>
+                    </td>
+                    <td className="px-4 py-3 text-slate-600 text-sm">{user.firma || '-'}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full ${userProgress === 100 ? 'bg-green-500' : 'bg-indigo-500'}`} style={{ width: `${userProgress}%` }}></div>
+                        </div>
+                        <span className="text-sm text-slate-600">{userProgress}%</span>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-sm text-gray-600">{user.firma || '-'}</td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 bg-gray-100 rounded-full h-2">
-                        <div className={`h-2 rounded-full ${userProgress === 100 ? 'bg-green-500' : 'bg-indigo-600'}`} style={{ width: `${userProgress}%` }}></div>
-                      </div>
-                      <span className="text-xs font-medium">{userProgress}%</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-sm">{user.quiz_ergebnisse?.filter(q => q.passed).length || 0} bestanden</td>
-                  <td className="px-5 py-4 text-sm">{user.rollenspiel_sessions?.length || 0}</td>
-                  <td className="px-5 py-4"><button className="text-indigo-600 text-sm font-medium">Details →</button></td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                    <td className="px-4 py-3 text-slate-600 text-sm">{user.quiz_ergebnisse?.filter(q => q.passed).length || 0}</td>
+                    <td className="px-4 py-3 text-slate-600 text-sm">{user.rollenspiel_sessions?.length || 0}</td>
+                    <td className="px-4 py-3">
+                      <button className="text-indigo-600 hover:text-indigo-800 font-medium text-sm">Details →</button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
   );

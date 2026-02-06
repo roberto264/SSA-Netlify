@@ -23,6 +23,7 @@ import modul5Quizzes from '@content/quizzes/modul5-quizzes.json';
 
 // Flashcards
 import modul1Flashcards from '@content/flashcards/modul1-flashcards.json';
+import modul2Flashcards from '@content/flashcards/modul2-flashcards.json';
 
 // Mindmaps
 import modul1Mindmap from '@content/mindmaps/modul1-mindmap.json';
@@ -81,6 +82,7 @@ export function getQuizByTopicId(topicId: string): TopicQuiz | undefined {
 // ============================================
 const flashcardsMap: Record<number, Flashcard[]> = {
   1: modul1Flashcards.cards as Flashcard[],
+  2: modul2Flashcards.cards as Flashcard[],
 };
 
 export function getFlashcards(moduleId: number): Flashcard[] {
@@ -132,6 +134,21 @@ const pdfsMap: Record<number, PdfData> = {
       'Solarstromproduktion',
     ],
   },
+  2: {
+    title: 'Systemkomponenten Photovoltaik',
+    description: 'Komplette Schulungsunterlagen für Modul 2',
+    file: '/pdfs/Modul_02_Systemkomponente_Swiss_Solar_Academy.pdf',
+    topics: [
+      'Das Photovoltaikmodul',
+      'Der Wechselrichter',
+      'Der Optimierer',
+      'Die Batterie',
+      'Die Notstrombox',
+      'Der Eigenverbrauchsmanager',
+      'Die Ladestation',
+      'Der Generatoranschlusskasten',
+    ],
+  },
 };
 
 export function getPdfs(moduleId: number): PdfData | null {
@@ -156,10 +173,10 @@ interface LernhilfenData {
 const lernhilfenMap: Record<number, LernhilfenData> = {
   1: {
     audio: {
-      title: 'Audio-Zusammenfassung',
+      title: 'Vom Stausee zum Flaschenhals im Keller',
       duration: '15:13',
       url: '/audio/modul1-grundlagen.mp3',
-      description: 'Höre dir die wichtigsten Konzepte an - perfekt für unterwegs! 🚗',
+      description: 'Höre dir die wichtigsten Konzepte an - perfekt für unterwegs!',
     },
     get flashcards() { return getFlashcards(1); },
     get mindmap() { return getMindmaps(1); },
@@ -167,10 +184,10 @@ const lernhilfenMap: Record<number, LernhilfenData> = {
   },
   2: {
     audio: {
-      title: 'Audio-Zusammenfassung',
-      duration: '15:20',
-      url: null,
-      description: 'Lerne alle Komponenten einer PV-Anlage kennen! 🔧',
+      title: 'Der Weg vom Sonnenstrahl zum Hausstrom',
+      duration: '16:28',
+      url: '/audio/modul2-systemkomponente.mp3',
+      description: 'Lerne alle Komponenten einer PV-Anlage kennen!',
     },
     get flashcards() { return getFlashcards(2); },
     get mindmap() { return getMindmaps(2); },

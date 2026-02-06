@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send, Mic, Loader2, Brain, BookOpen, Target, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Send, Mic, Loader2, Brain, BookOpen, Target, TrendingUp, Volume2, VolumeX } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { useProgress, useQuizResults, useRollenspiele } from '../lib/database';
 import { modules } from '../lib/contentLoader';
@@ -9,15 +9,20 @@ export default function AITutor({ onBack }) {
   const { progress } = useProgress();
   const { results: quizResults } = useQuizResults();
   const { sessions: rollenspielSessions } = useRollenspiele();
-  
+
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(true);
+  const [ttsEnabled, setTtsEnabled] = useState(true);
+  const [audioLevels, setAudioLevels] = useState(new Array(20).fill(0));
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const messagesEndRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
+  const analyzerRef = useRef(null);
+  const animationFrameRef = useRef(null);
 
   // Berechne Lernstand-Analyse
   const analyzeProgress = () => {
@@ -48,16 +53,16 @@ export default function AITutor({ onBack }) {
     // Quiz-Analyse
     const failedQuizzes = quizResults.filter(q => !q.passed);
     const passedQuizzes = quizResults.filter(q => q.passed);
-    
+
     failedQuizzes.forEach(quiz => {
       const module = modules.find(m => m.id === quiz.modul_id);
       const topic = module?.topics.find(t => t.id === quiz.topic_id);
       if (topic && !weakAreas.find(w => w.name === topic.title)) {
-        weakAreas.push({ 
-          type: 'quiz', 
-          name: topic.title, 
+        weakAreas.push({
+          type: 'quiz',
+          name: topic.title,
           module: module?.title,
-          reason: `Quiz nicht bestanden (${quiz.score}/${quiz.max_score})` 
+          reason: `Quiz nicht bestanden (${quiz.score}/${quiz.max_score})`
         });
       }
     });
@@ -81,16 +86,16 @@ export default function AITutor({ onBack }) {
 
     const weakSoftSkills = Object.entries(avgSoftSkills)
       .filter(([_, value]) => value > 0 && value < 3)
-      .map(([key, value]) => ({ 
-        name: formatSoftSkill(key), 
-        score: value 
+      .map(([key, value]) => ({
+        name: formatSoftSkill(key),
+        score: value
       }));
 
     const strongSoftSkills = Object.entries(avgSoftSkills)
       .filter(([_, value]) => value >= 4)
-      .map(([key, value]) => ({ 
-        name: formatSoftSkill(key), 
-        score: value 
+      .map(([key, value]) => ({
+        name: formatSoftSkill(key),
+        score: value
       }));
 
     return {
@@ -129,7 +134,7 @@ export default function AITutor({ onBack }) {
   // System Prompt für den AI Tutor
   const generateSystemPrompt = () => {
     const a = analysis;
-    
+
     return `Du bist ein freundlicher und motivierender AI-Tutor der Swiss Solar Academy. Dein Name ist "Solar-Coach".
 
 WICHTIG: Du sprichst Deutsch (Schweizer Hochdeutsch) und duzt den Lernenden.
@@ -185,25 +190,25 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
   const generateGreeting = () => {
     const a = analyzeProgress();
     const name = profile?.name?.split(' ')[0] || 'Lernender';
-    
+
     let greeting = `Hallo ${name}! 👋 Ich bin dein persönlicher Solar-Coach.\n\n`;
-    
+
     greeting += `**Dein Lernstand:** ${a.overallProgress}% abgeschlossen\n\n`;
-    
+
     if (a.weakAreas.length > 0) {
       greeting += `Ich sehe, dass du bei **${a.weakAreas[0].name}** noch Unterstützung gebrauchen könntest. `;
     }
-    
+
     if (a.strongAreas.length > 0) {
       greeting += `Super gemacht bei **${a.strongAreas[0].name}**! 🎉\n\n`;
     }
-    
+
     greeting += `Was möchtest du heute lernen? Ich kann dir:\n`;
     greeting += `• Ein Thema erklären\n`;
     greeting += `• Verständnisfragen stellen\n`;
     greeting += `• Bei schwierigen Konzepten helfen\n\n`;
     greeting += `Womit sollen wir anfangen?`;
-    
+
     return greeting;
   };
 
@@ -226,21 +231,23 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
       const data = await response.json();
       const reply = data.choices[0].message.content;
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
-      
+
       // Optional: TTS
-      try {
-        const ttsResponse = await fetch('/.netlify/functions/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: reply, voice: 'nova' })
-        });
-        const ttsData = await ttsResponse.json();
-        if (ttsData.audio) {
-          const audioBlob = new Blob([Uint8Array.from(atob(ttsData.audio), c => c.charCodeAt(0))], { type: 'audio/mpeg' });
-          new Audio(URL.createObjectURL(audioBlob)).play();
+      if (ttsEnabled) {
+        try {
+          const ttsResponse = await fetch('/.netlify/functions/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: reply, voice: 'nova' })
+          });
+          const ttsData = await ttsResponse.json();
+          if (ttsData.audio) {
+            const audioBlob = new Blob([Uint8Array.from(atob(ttsData.audio), c => c.charCodeAt(0))], { type: 'audio/mpeg' });
+            new Audio(URL.createObjectURL(audioBlob)).play();
+          }
+        } catch (e) {
+          console.log('TTS not available');
         }
-      } catch (e) {
-        console.log('TTS not available');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -253,24 +260,83 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+
+      // Set up audio analyzer for visualization
+      const audioContext = new AudioContext();
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyzer = audioContext.createAnalyser();
+      analyzer.fftSize = 64;
+      source.connect(analyzer);
+      analyzerRef.current = analyzer;
+
+      // Start visualization loop
+      const updateLevels = () => {
+        if (!analyzerRef.current) return;
+        const dataArray = new Uint8Array(analyzerRef.current.frequencyBinCount);
+        analyzerRef.current.getByteFrequencyData(dataArray);
+
+        // Take 20 samples for the bars
+        const levels = [];
+        const step = Math.floor(dataArray.length / 20);
+        for (let i = 0; i < 20; i++) {
+          levels.push(dataArray[i * step] / 255);
+        }
+        setAudioLevels(levels);
+        animationFrameRef.current = requestAnimationFrame(updateLevels);
+      };
+      updateLevels();
+
+      // Find a supported MIME type for recording
+      const mimeTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/ogg;codecs=opus',
+        'audio/wav'
+      ];
+      let selectedMimeType = '';
+      for (const mimeType of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(mimeType)) {
+          selectedMimeType = mimeType;
+          break;
+        }
+      }
+      console.log('Using MIME type:', selectedMimeType || 'default');
+
+      const options = selectedMimeType ? { mimeType: selectedMimeType } : {};
+      mediaRecorderRef.current = new MediaRecorder(stream, options);
       chunksRef.current = [];
       mediaRecorderRef.current.ondataavailable = (e) => chunksRef.current.push(e.data);
       mediaRecorderRef.current.onstop = async () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        // Stop visualization
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
+        setAudioLevels(new Array(20).fill(0));
+
+        const actualMimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
+        console.log('Actual recorded MIME type:', actualMimeType);
+        const blob = new Blob(chunksRef.current, { type: actualMimeType });
         const reader = new FileReader();
         reader.onloadend = async () => {
           const base64 = reader.result.split(',')[1];
+          setIsTranscribing(true);
           try {
             const response = await fetch('/.netlify/functions/transcribe', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ audio: base64 })
+              body: JSON.stringify({ audio: base64, mimeType: actualMimeType })
             });
             const data = await response.json();
-            if (data.text) sendMessage(data.text);
+            if (data.text) {
+              sendMessage(data.text);
+            } else if (data.error) {
+              console.error('Transcription error:', data.error);
+            }
           } catch (error) {
-            console.error('Error:', error);
+            console.error('Transcribe fetch error:', error);
+          } finally {
+            setIsTranscribing(false);
           }
         };
         reader.readAsDataURL(blob);
@@ -278,7 +344,7 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
       mediaRecorderRef.current.start();
       setIsRecording(true);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Recording error:', error);
     }
   };
 
@@ -287,137 +353,186 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
       setIsRecording(false);
+      analyzerRef.current = null;
     }
   };
 
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-      <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base">
-        <ArrowLeft className="w-4 h-4" />
-        Zurück zum Dashboard
-      </button>
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col lg:flex-row gap-4 h-[calc(100vh-64px)]">
+      {/* Sidebar */}
+      <div className="lg:w-80 bg-white rounded-2xl card-shadow p-5 lg:h-full overflow-y-auto scrollbar-thin order-2 lg:order-1">
+        <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-indigo-600" />
+          Dein Lernprofil
+        </h3>
 
-      <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Analyse Sidebar - hidden on mobile, shown as collapsed section */}
-        <div className="lg:col-span-1 space-y-4 order-2 lg:order-1">
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5">
-            <h3 className="font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
-              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
-              Dein Lernstand
-            </h3>
-            
-            <div className="mb-3 sm:mb-4">
-              <div className="flex justify-between text-xs sm:text-sm mb-1">
-                <span>Gesamtfortschritt</span>
-                <span className="font-bold">{analysis.overallProgress}%</span>
+        <div className="mb-4">
+          <div className="flex justify-between text-sm mb-1">
+            <span className="text-slate-600">Gesamtfortschritt</span>
+            <span className="font-bold text-slate-800">{analysis.overallProgress}%</span>
+          </div>
+          <div className="w-full bg-slate-100 rounded-full h-2">
+            <div className="bg-indigo-600 h-2 rounded-full progress-bar-animate" style={{ width: `${analysis.overallProgress}%` }}></div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          {analysis.moduleProgress.map(m => (
+            <div key={m.id}>
+              <div className="flex items-center justify-between text-sm mb-1">
+                <span className="text-slate-700">{m.icon} {m.title.split(' ').slice(0, 2).join(' ')}</span>
+                <span className="text-xs text-slate-500">{m.percent}%</span>
               </div>
-              <div className="w-full bg-gray-100 rounded-full h-2">
-                <div className="bg-indigo-600 h-2 rounded-full" style={{ width: `${analysis.overallProgress}%` }}></div>
+              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className={`h-full bg-gradient-to-r ${m.color} rounded-full`} style={{ width: `${m.percent}%` }}></div>
               </div>
             </div>
+          ))}
+        </div>
 
-            <div className="space-y-1.5 sm:space-y-2">
-              {analysis.moduleProgress.map(m => (
-                <div key={m.id} className="flex items-center justify-between text-xs sm:text-sm">
-                  <span className="text-gray-600">{m.icon} {m.title}</span>
-                  <span className={`font-medium ${m.percent === 100 ? 'text-green-600' : m.percent > 0 ? 'text-indigo-600' : 'text-gray-400'}`}>
-                    {m.percent}%
-                  </span>
-                </div>
+        {analysis.weakAreas.length > 0 && (
+          <div className="mt-6 pt-6 border-t border-slate-100">
+            <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+              <Target className="w-4 h-4 text-amber-600" />
+              Fokus-Bereiche
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {analysis.weakAreas.slice(0, 3).map((area, i) => (
+                <span key={i} className="px-3 py-1 bg-amber-100 text-amber-700 rounded-lg text-xs font-medium">{area.name}</span>
               ))}
             </div>
           </div>
+        )}
 
-          {analysis.weakAreas.length > 0 && (
-            <div className="bg-amber-50 rounded-xl border border-amber-200 p-4 sm:p-5 hidden sm:block">
-              <h3 className="font-bold text-amber-800 mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
-                <Target className="w-4 h-4 sm:w-5 sm:h-5" />
-                Fokus-Bereiche
-              </h3>
-              <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-amber-700">
-                {analysis.weakAreas.slice(0, 3).map((area, i) => (
-                  <li key={i}>• {area.name}</li>
-                ))}
-              </ul>
+        {analysis.strongAreas.length > 0 && (
+          <div className="mt-4">
+            <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-green-600" />
+              Stärken
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {analysis.strongAreas.slice(0, 3).map((area, i) => (
+                <span key={i} className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">{area.name}</span>
+              ))}
             </div>
-          )}
+          </div>
+        )}
+      </div>
 
-          {analysis.strongAreas.length > 0 && (
-            <div className="bg-green-50 rounded-xl border border-green-200 p-4 sm:p-5 hidden sm:block">
-              <h3 className="font-bold text-green-800 mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
-                <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
-                Stärken
-              </h3>
-              <ul className="space-y-2 text-sm text-green-700">
-                {analysis.strongAreas.slice(0, 3).map((area, i) => (
-                  <li key={i}>✓ {area.name}</li>
-                ))}
+      {/* Chat Area */}
+      <div className="flex-1 flex flex-col bg-white rounded-2xl card-shadow overflow-hidden order-1 lg:order-2">
+        <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-4 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                <Brain className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="font-bold">Solar-Coach</h2>
+                <p className="text-sm text-white/80">Dein persönlicher Lernassistent</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setTtsEnabled(!ttsEnabled)}
+              className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center hover:bg-white/30 transition-colors"
+              title={ttsEnabled ? 'Sprache ausschalten' : 'Sprache einschalten'}
+            >
+              {ttsEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 p-3 sm:p-4 overflow-y-auto scrollbar-thin">
+          {messages.length === 0 ? (
+            <div className="bg-amber-50 rounded-2xl p-4 mb-4">
+              <p className="text-amber-800">Hallo {profile?.name?.split(' ')[0] || 'Lernender'}! 👋</p>
+              <p className="text-amber-700 mt-2">Basierend auf deinem Fortschritt empfehle ich dir, dich auf folgende Bereiche zu konzentrieren:</p>
+              <ul className="mt-2 space-y-1 text-amber-700">
+                <li>- Vertiefung der Wirtschaftlichkeitsberechnung</li>
+                <li>- Übung von Einwandbehandlung im Kundengespräch</li>
               </ul>
+              <p className="text-amber-700 mt-2">Wie kann ich dir heute helfen?</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[90%] sm:max-w-[80%] p-3 rounded-2xl ${
+                    msg.role === 'user'
+                      ? 'bg-indigo-600 text-white rounded-br-md'
+                      : 'bg-amber-50 text-amber-800 rounded-bl-md'
+                  }`}>
+                    <div className="whitespace-pre-wrap text-xs sm:text-sm">{msg.content}</div>
+                  </div>
+                </div>
+              ))}
+              {isProcessing && (
+                <div className="flex justify-start">
+                  <div className="bg-amber-50 p-3 rounded-2xl rounded-bl-md">
+                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-amber-500" />
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
             </div>
           )}
         </div>
 
-        {/* Chat */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden order-1 lg:order-2">
-          <div className="p-3 sm:p-4 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-amber-100 flex items-center gap-2 sm:gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-500 rounded-xl flex items-center justify-center">
-              <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-900 text-sm sm:text-base">Solar-Coach</h3>
-              <p className="text-xs sm:text-sm text-gray-500">Dein persönlicher AI-Tutor</p>
-            </div>
-          </div>
-
-          <div className="h-64 sm:h-96 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[90%] sm:max-w-[85%] p-2.5 sm:p-3 rounded-xl ${
-                  msg.role === 'user' 
-                    ? 'bg-indigo-600 text-white' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  <div className="whitespace-pre-wrap text-xs sm:text-sm">{msg.content}</div>
-                </div>
-              </div>
-            ))}
-            {isProcessing && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 p-2.5 sm:p-3 rounded-xl">
-                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-gray-500" />
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <div className="p-3 sm:p-4 border-t border-gray-100 flex items-center gap-2 sm:gap-3">
+        <div className="p-3 sm:p-4 border-t border-slate-100">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onMouseDown={startRecording}
               onMouseUp={stopRecording}
               onMouseLeave={stopRecording}
               onTouchStart={startRecording}
               onTouchEnd={stopRecording}
-              className={`p-2.5 sm:p-3 rounded-full transition flex-shrink-0 ${isRecording ? 'bg-red-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+              className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-colors flex-shrink-0 ${
+                isRecording ? 'bg-red-500 text-white' : 'bg-amber-100 text-amber-600 hover:bg-amber-200'
+              }`}
             >
               <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <input
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage(inputText)}
-              placeholder="Frag mich etwas..."
-              className="flex-1 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
-            />
+
+            {/* Audio Waveform or Input */}
+            {isRecording ? (
+              <div className="flex-1 h-12 bg-red-50 rounded-xl flex items-center justify-center gap-[2px] px-4">
+                {audioLevels.map((level, i) => (
+                  <div
+                    key={i}
+                    className="w-1 bg-red-500 rounded-full transition-all duration-75"
+                    style={{
+                      height: `${Math.max(4, level * 40)}px`,
+                    }}
+                  />
+                ))}
+              </div>
+            ) : isTranscribing ? (
+              <div className="flex-1 h-12 bg-amber-50 rounded-xl flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
+                <span className="text-sm text-amber-600">Wird transkribiert...</span>
+              </div>
+            ) : (
+              <input
+                type="text"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendMessage(inputText)}
+                placeholder="Frage stellen..."
+                className="flex-1 px-3 sm:px-4 py-3 rounded-xl border border-slate-200 focus:border-amber-500 transition-colors text-sm sm:text-base"
+              />
+            )}
+
             <button
               onClick={() => sendMessage(inputText)}
-              disabled={isProcessing || !inputText.trim()}
-              className="p-2.5 sm:p-3 bg-amber-500 text-white rounded-full hover:bg-amber-600 disabled:opacity-50 transition flex-shrink-0"
+              disabled={isProcessing || !inputText.trim() || isRecording || isTranscribing}
+              className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-500 rounded-xl flex items-center justify-center text-white hover:bg-amber-600 transition-colors disabled:opacity-50 flex-shrink-0"
             >
               <Send className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
+          <p className="text-xs text-slate-400 mt-2 text-center">
+            {isRecording ? 'Aufnahme läuft... Loslassen zum Senden' : 'Halte den Mikrofon-Button gedrückt zum Aufnehmen'}
+          </p>
         </div>
       </div>
     </main>

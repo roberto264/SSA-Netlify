@@ -1,16 +1,34 @@
-exports.handler = async (event) => {
+export const handler = async (event) => {
+  // CORS headers for all responses
+  const headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
+  }
+
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-  
+
   if (!OPENAI_API_KEY) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'API Key not configured' }) };
+    console.error('OPENAI_API_KEY not configured');
+    return { statusCode: 500, headers, body: JSON.stringify({ error: { message: 'API Key not configured' } }) };
   }
 
   try {
     const { messages, systemPrompt } = JSON.parse(event.body);
+
+    if (!messages || !systemPrompt) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: { message: 'Missing messages or systemPrompt' } }) };
+    }
+
+    console.log('Sending request to OpenAI...');
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -29,17 +47,30 @@ exports.handler = async (event) => {
       })
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenAI API error:', response.status, errorText);
+      return {
+        statusCode: response.status,
+        headers,
+        body: JSON.stringify({ error: { message: `OpenAI API error: ${response.status}` } })
+      };
+    }
+
     const data = await response.json();
-    
+    console.log('OpenAI response received');
+
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(data)
     };
   } catch (error) {
+    console.error('Function error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      headers,
+      body: JSON.stringify({ error: { message: error.message } })
     };
   }
 };

@@ -4,7 +4,7 @@ import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import { highlightPlugin, MessageIcon, Trigger } from '@react-pdf-viewer/highlight';
 import { pageNavigationPlugin } from '@react-pdf-viewer/page-navigation';
 import { X, Trash2, ChevronRight, ChevronLeft } from 'lucide-react';
-import { usePdfHighlights } from '../lib/database';
+import { usePdfHighlights } from '../../lib/database';
 
 // Import styles
 import '@react-pdf-viewer/core/lib/styles/index.css';
