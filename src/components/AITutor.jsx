@@ -228,8 +228,8 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
           systemPrompt: generateSystemPrompt()
         })
       });
-      const data = await response.json();
-      const reply = data.choices[0].message.content;
+      const result = await response.json();
+      const reply = result.data?.choices?.[0]?.message?.content || result.choices?.[0]?.message?.content;
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
 
       // Optional: TTS
@@ -240,9 +240,10 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text: reply, voice: 'nova' })
           });
-          const ttsData = await ttsResponse.json();
-          if (ttsData.audio) {
-            const audioBlob = new Blob([Uint8Array.from(atob(ttsData.audio), c => c.charCodeAt(0))], { type: 'audio/mpeg' });
+          const ttsResult = await ttsResponse.json();
+          const audioBase64 = ttsResult.data?.audio || ttsResult.audio;
+          if (audioBase64) {
+            const audioBlob = new Blob([Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0))], { type: 'audio/mpeg' });
             new Audio(URL.createObjectURL(audioBlob)).play();
           }
         } catch (e) {
@@ -327,11 +328,12 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ audio: base64, mimeType: actualMimeType })
             });
-            const data = await response.json();
-            if (data.text) {
-              sendMessage(data.text);
-            } else if (data.error) {
-              console.error('Transcription error:', data.error);
+            const result = await response.json();
+            const text = result.data?.text || result.text;
+            if (text) {
+              sendMessage(text);
+            } else if (result.error) {
+              console.error('Transcription error:', result.error);
             }
           } catch (error) {
             console.error('Transcribe fetch error:', error);

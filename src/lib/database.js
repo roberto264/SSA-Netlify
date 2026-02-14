@@ -171,18 +171,33 @@ export function useRollenspiele() {
     }
   };
 
-  const saveSession = async (personaId, messages, rating, aiFeedback, softSkills) => {
+  const saveSession = async (personaId, messages, rating, aiFeedback, softSkills, zenData = null) => {
     try {
+      const insertData = {
+        user_id: user.id,
+        persona_id: personaId,
+        messages,
+        rating,
+        ai_feedback: aiFeedback,
+        ...softSkills
+      };
+
+      if (zenData) {
+        insertData.session_type = 'zen';
+        insertData.duration_seconds = zenData.duration_seconds;
+        insertData.exchange_count = zenData.exchange_count;
+        insertData.speaking_ratio = zenData.speaking_ratio;
+        insertData.user_question_count = zenData.user_question_count;
+        insertData.user_question_quality = zenData.user_question_quality;
+        insertData.sentiment_score = zenData.sentiment_score;
+        insertData.tonalitaet = zenData.tonalitaet;
+        insertData.interruption_count = zenData.interruption_count || 0;
+        insertData.dem_kunden_reingeredet = zenData.dem_kunden_reingeredet;
+      }
+
       const { data, error } = await supabase
         .from('rollenspiel_sessions')
-        .insert({
-          user_id: user.id,
-          persona_id: personaId,
-          messages,
-          rating,
-          ai_feedback: aiFeedback,
-          ...softSkills
-        })
+        .insert(insertData)
         .select()
         .single();
 

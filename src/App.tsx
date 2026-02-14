@@ -11,6 +11,7 @@ import { ModuleDetailPage } from './pages/ModuleDetailPage';
 import { QuizPage } from './pages/QuizPage';
 import { PersonaSelectionPage } from './pages/PersonaSelectionPage';
 import { VoiceChatPage } from './pages/VoiceChatPage';
+import { ZenModePage } from './pages/ZenModePage';
 import AITutor from './components/AITutor';
 import { Loader2 } from 'lucide-react';
 
@@ -129,6 +130,16 @@ function AppRoutes() {
             <AppLayout>
               <VoiceChatPage />
             </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Protected - Zen Mode (fullscreen, no AppLayout) */}
+      <Route
+        path="/roleplay/:personaId/zen"
+        element={
+          <ProtectedRoute>
+            <ZenModePage />
           </ProtectedRoute>
         }
       />

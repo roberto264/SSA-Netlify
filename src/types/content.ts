@@ -118,6 +118,8 @@ export interface ModuleMindmap {
 // ============================================
 // PERSONAS
 // ============================================
+export type VoiceType = 'onyx' | 'nova' | 'fable' | 'echo';
+
 export interface PersonaCaseStudy {
   situation: string;
   concerns: string[];
@@ -126,6 +128,7 @@ export interface PersonaCaseStudy {
 }
 
 export interface Persona {
+  schemaVersion: number;
   id: string;
   name: string;
   firstName: string;
@@ -134,8 +137,40 @@ export interface Persona {
   difficulty: string;
   tags: string[];
   image: string;
-  voiceType: string;
+  voiceType: VoiceType;
   summary: string;
   caseStudy: PersonaCaseStudy;
   systemPrompt: string;
+  zenModePrompt?: string;
+}
+
+// ============================================
+// ZEN MODE FEEDBACK
+// ============================================
+export interface ZenFeedback {
+  // Existing soft skills (1-5)
+  gesprachsfuhrung: number;
+  aktives_zuhoren: number;
+  klarheit: number;
+  einwand_behandlung: number;
+  empathie: number;
+  uberzeugungskraft: number;
+  gesamtbewertung: 'schwach' | 'mittel' | 'gut';
+  feedback: string;
+  staerken: string[];
+  verbesserungen: string[];
+  // Zen-specific metrics
+  user_question_count: number;
+  user_question_quality: number;
+  sentiment_score: number;
+  tonalitaet: string;
+  gefragte_fragen_analyse: string;
+  // Interruption metrics
+  interruption_count: number;
+  dem_kunden_reingeredet: number; // 1-5 (5 = keine Unterbrechungen)
+  unterbrechungs_analyse: string;
+  // Computed metrics (from frontend/backend)
+  speaking_ratio: number;
+  duration_seconds: number;
+  exchange_count: number;
 }

@@ -1,9 +1,18 @@
-import { ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { personas } from '../lib/contentLoader';
+import { ZenModeConfirmDialog } from '../components/ZenModeConfirmDialog';
 
 export function PersonaSelectionPage() {
   const navigate = useNavigate();
+  const [zenPersona, setZenPersona] = useState<string | null>(null);
+  const [zenPersonaName, setZenPersonaName] = useState('');
+
+  const handleZenClick = (personaId: string, personaName: string) => {
+    setZenPersona(personaId);
+    setZenPersonaName(personaName);
+  };
 
   return (
     <main className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
@@ -17,12 +26,11 @@ export function PersonaSelectionPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {personas.map(persona => (
-          <button
+          <div
             key={persona.id}
-            onClick={() => navigate(`/roleplay/${persona.id}`)}
-            className="bg-white rounded-2xl p-4 sm:p-6 card-shadow text-left hover:shadow-lg transition-all group"
+            className="bg-white rounded-2xl p-4 sm:p-6 card-shadow hover:shadow-lg transition-all group"
           >
-            <div className="flex items-start gap-3 sm:gap-4">
+            <div className="flex items-start gap-3 sm:gap-4 mb-4">
               <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-100 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl group-hover:scale-110 transition-transform flex-shrink-0">
                 {persona.image}
               </div>
@@ -45,9 +53,38 @@ export function PersonaSelectionPage() {
                 </div>
               </div>
             </div>
-          </button>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-3 border-t border-slate-100">
+              <button
+                onClick={() => navigate(`/roleplay/${persona.id}`)}
+                className="flex-1 py-2.5 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-medium hover:bg-indigo-100 transition-colors"
+              >
+                Übungsmodus
+              </button>
+              <button
+                onClick={() => handleZenClick(persona.id, persona.name)}
+                className="flex-1 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-sm font-medium hover:bg-emerald-100 transition-colors border border-emerald-200 flex items-center justify-center gap-1.5"
+              >
+                <Brain className="w-4 h-4" />
+                Kundengespräch
+              </button>
+            </div>
+          </div>
         ))}
       </div>
+
+      {/* Zen Mode Confirmation Dialog */}
+      {zenPersona && (
+        <ZenModeConfirmDialog
+          personaName={zenPersonaName}
+          onConfirm={() => {
+            navigate(`/roleplay/${zenPersona}/zen`);
+            setZenPersona(null);
+          }}
+          onCancel={() => setZenPersona(null)}
+        />
+      )}
     </main>
   );
 }

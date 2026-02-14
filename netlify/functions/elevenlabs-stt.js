@@ -8,10 +8,10 @@ export const handler = async (event) => {
     return error(405, 'METHOD_NOT_ALLOWED', 'Method Not Allowed');
   }
 
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-  if (!OPENAI_API_KEY) {
-    console.error('OPENAI_API_KEY not configured');
-    return error(500, 'CONFIG_ERROR', 'API Key not configured');
+  const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+  if (!ELEVENLABS_API_KEY) {
+    console.error('ELEVENLABS_API_KEY not configured');
+    return error(500, 'CONFIG_ERROR', 'ElevenLabs API Key not configured');
   }
 
   try {
@@ -21,11 +21,9 @@ export const handler = async (event) => {
       return error(400, 'INVALID_INPUT', 'No audio data provided');
     }
 
-    console.log('Received audio data, length:', audio.length);
-    console.log('MIME type:', mimeType);
+    console.log('Received audio for ElevenLabs STT, length:', audio.length);
 
     const binaryData = Buffer.from(audio, 'base64');
-    console.log('Binary data size:', binaryData.length, 'bytes');
 
     const mimeToExt = {
       'audio/webm': 'webm',
@@ -36,9 +34,8 @@ export const handler = async (event) => {
       'audio/wav': 'wav',
       'audio/mpeg': 'mp3'
     };
-    const extension = mimeToExt[mimeType] || 'webm';
-    const contentType = mimeType?.split(';')[0] || 'audio/webm';
-    console.log('Using extension:', extension, 'content-type:', contentType);
+    const extension = mimeToExt[mimeType] || 'wav';
+    const contentType = mimeType?.split(';')[0] || 'audio/wav';
 
     const boundary = '----FormBoundary' + Math.random().toString(36).substring(2);
 
@@ -49,23 +46,20 @@ export const handler = async (event) => {
     ];
 
     const formEnd = `\r\n--${boundary}\r\n` +
-      `Content-Disposition: form-data; name="model"\r\n\r\n` +
-      `whisper-1\r\n` +
-      `--${boundary}\r\n` +
-      `Content-Disposition: form-data; name="language"\r\n\r\n` +
-      `de\r\n` +
+      `Content-Disposition: form-data; name="model_id"\r\n\r\n` +
+      `scribe_v2\r\n` +
       `--${boundary}--\r\n`;
 
     const formStart = Buffer.from(formParts.join(''), 'utf8');
     const formEndBuffer = Buffer.from(formEnd, 'utf8');
     const fullBody = Buffer.concat([formStart, binaryData, formEndBuffer]);
 
-    console.log('Sending to Whisper API...');
+    console.log('Sending to ElevenLabs Scribe v2...');
 
-    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    const response = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'xi-api-key': ELEVENLABS_API_KEY,
         'Content-Type': `multipart/form-data; boundary=${boundary}`
       },
       body: fullBody
@@ -74,15 +68,15 @@ export const handler = async (event) => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Whisper API error:', response.status, data);
-      return error(response.status, 'OPENAI_ERROR', data.error?.message || 'Transcription failed');
+      console.error('ElevenLabs STT error:', response.status, data);
+      return error(response.status, 'ELEVENLABS_ERROR', data.detail?.message || 'Transcription failed');
     }
 
-    console.log('Transcription result:', data.text?.substring(0, 50) + '...');
+    console.log('ElevenLabs STT result:', data.text?.substring(0, 50) + '...');
 
     return success({ text: data.text });
   } catch (err) {
-    console.error('Transcribe error:', err);
+    console.error('ElevenLabs STT error:', err);
     return error(500, 'INTERNAL_ERROR', err.message);
   }
 };
