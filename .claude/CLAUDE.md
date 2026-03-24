@@ -163,10 +163,13 @@ CORRECT:
 ## Project Context
 
 - **Project:** SSA-Netlify (Soft-Skill-Akademie)
-- **Stack:** React 18.2, TypeScript, Vite 5.0, TailwindCSS 3.4, Netlify Functions, Supabase, OpenAI
+- **Stack:** React 18.2, TypeScript, Vite 7.3, TailwindCSS 3.4, Netlify Functions, Supabase, OpenAI, Stripe
 - **Routing:** React Router DOM 7.13
 - **AI:** OpenAI (gpt-4o for chat, gpt-4o-mini for analysis, whisper, tts), ElevenLabs (TTS/STT primary)
-- **Last updated:** 2026-03-23
+- **Payment:** Stripe (B2B per-seat subscriptions)
+- **Monitoring:** Sentry (error tracking), Upstash Redis (rate limiting)
+- **Testing:** Vitest (unit), Playwright (e2e)
+- **Last updated:** 2026-03-24
 
 ## Deployment Rules
 
@@ -178,12 +181,22 @@ CORRECT:
 ## File Structure
 ```
 src/
-  components/     # UI components
-  pages/          # Route pages
-  lib/            # Core utilities (supabase, auth, database)
-  types/          # TypeScript interfaces
-content/          # JSON data (modules, quizzes, personas)
-netlify/functions/ # Serverless backend
+  components/          # UI components
+    billing/           # SubscriptionCard, SeatManager
+    ui/                # shadcn/ui components
+  pages/               # Route pages (lazy-loaded)
+  hooks/               # Custom hooks (useConversationSession, useVAD)
+  lib/                 # Core utilities (supabase, auth, database, api, voiceConfig)
+  types/               # TypeScript interfaces (content.ts, database.ts)
+  __tests__/           # Vitest unit tests
+content/               # JSON data (modules, quizzes, personas)
+netlify/functions/     # Serverless backend
+  _shared/             # auth.js, response.js, validate.js, rateLimit.js, subscription.js
+  stripe-*.js          # Stripe checkout, webhook, portal
+  user-export.js       # DSGVO data export
+  user-delete.js       # DSGVO account deletion
+supabase/migrations/   # SQL migrations (run manually in Supabase)
+e2e/                   # Playwright E2E tests
 ```
 
 ## Verification Checklists
@@ -197,8 +210,10 @@ netlify/functions/ # Serverless backend
 ### After Function Changes:
 - [ ] Function logs show in `netlify dev` terminal
 - [ ] Test endpoint: `curl http://localhost:8888/.netlify/functions/[name]`
-- [ ] Check CORS headers in response
+- [ ] Check CORS headers in response (must NOT be `*`)
 - [ ] Verify JSON response structure
+- [ ] Verify JWT auth required (401 without token)
+- [ ] Verify rate limiting works (429 after limit)
 
 ### After Database Changes:
 - [ ] Check Supabase RLS policies
@@ -212,31 +227,60 @@ netlify/functions/ # Serverless backend
 - **Dev Command**: `netlify dev` (NOT npm run dev!)
 - **Dev URL**: http://localhost:8888
 - **Build Command**: `npm run build`
+- **Test Command**: `npm test` (Vitest unit tests)
+- **E2E Command**: `npm run test:e2e` (Playwright, requires `netlify dev` running)
+
+## Required Environment Variables
+See `.env.example` for full list. Key ones:
+- `OPENAI_API_KEY`, `ELEVENLABS_API_KEY` — AI providers
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` — Frontend Supabase
+- `SUPABASE_SERVICE_ROLE_KEY` — Backend auth verification
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID` — Billing
+- `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — Rate limiting
+- `SITE_URL` — Production domain (for CORS + Stripe redirects)
+- `VITE_SENTRY_DSN` — Error tracking (optional)
 
 ## Current Status
 
-- **Last completed:** AI-Kundengespräche Bugfix-Session (7 Fixes)
-- **Next step:** Funktionale Tests der Gespräche in Zen/Practice Mode
-- **Build status:** working
+- **Last completed:** Production-Readiness (6 Phasen): Security, Stripe B2B, DSGVO, Testing, Monitoring, Performance
+- **Next step:** Migrationen in Supabase ausführen, Stripe-Test einrichten, Sentry DSN konfigurieren
+- **Build status:** working (code-split, ~41 unit tests passing)
 
 ## TODO
 
-- [ ] Funktionale Tests der AI-Gespräche durchführen (Zen + Practice Mode)
-- [ ] Streaming-Chat aktivieren (aktuell immer non-streaming, `streamChatResponse` existiert aber wird nicht genutzt)
-- [ ] Retry-Logic bei temporären Netzwerkfehlern im Chat einbauen
+- [ ] Supabase-Migrationen ausführen (add_subscriptions_and_billing.sql, migrate_firma_to_fk.sql, add_firma_trial_trigger.sql)
+- [ ] Stripe-Account einrichten + STRIPE_PRICE_ID erstellen
+- [ ] Upstash Redis einrichten + Keys in Netlify Env setzen
+- [ ] SUPABASE_SERVICE_ROLE_KEY in Netlify Env setzen
+- [ ] Sentry-Projekt erstellen + VITE_SENTRY_DSN setzen
+- [ ] SITE_URL auf Production-Domain setzen
+- [ ] Playwright Browser installieren (`npx playwright install`)
+- [ ] Datenschutztext & AGB durch Juristen prüfen lassen
+- [ ] Streaming-Chat aktivieren (optional, aktuell non-streaming)
+- [ ] Retry-Logic bei temporären Netzwerkfehlern im Chat (optional)
 
 ## Architecture Decisions
 
-- **2026-03-23:** `speechServices.ts` entfernt (Dead Code) — alle TTS/STT-Aufrufe laufen über `voiceConfig.ts` (`elevenLabsTTS`, `elevenLabsSTT`)
-- **2026-03-23:** `sendTextMessage` in `useConversationSession.ts` hat jetzt `isSendingRef` Lock gegen Race Conditions (VAD + manueller Send gleichzeitig)
-- **2026-03-23:** TTS-Unterbrechung dispatcht `TTS_DONE` + Audio-Cleanup bevor `SPEECH_START` → State-Machine bleibt konsistent
-- **2026-03-23:** `[GESPRAECH_ENDE]` Token wird überall mit globalem Regex `/\[GESPRAECH_ENDE\]/g` entfernt (chat.js non-streaming + streaming, analyze.js)
+- **2026-03-23:** `speechServices.ts` entfernt (Dead Code) — alle TTS/STT über `voiceConfig.ts`
+- **2026-03-23:** `sendTextMessage` hat `isSendingRef` Lock gegen Race Conditions
+- **2026-03-23:** TTS-Unterbrechung dispatcht `TTS_DONE` + Audio-Cleanup vor `SPEECH_START`
+- **2026-03-23:** `[GESPRAECH_ENDE]` Token überall mit globalem Regex entfernt
+- **2026-03-24:** Security Hardening — JWT-Auth auf allen Functions (`_shared/auth.js`), dynamisches CORS (`_shared/response.js`), Input-Validierung (`_shared/validate.js`), Rate-Limiting (`_shared/rateLimit.js`)
+- **2026-03-24:** Alle Frontend-API-Calls über `authFetch()` (`src/lib/api.ts`) — fügt automatisch JWT-Token hinzu
+- **2026-03-24:** Stripe B2B Integration — `stripe-checkout.js`, `stripe-webhook.js`, `stripe-portal.js`, Subscription-Check Middleware (`_shared/subscription.js`)
+- **2026-03-24:** `profiles.firma_id` als UUID FK auf `firmen.id` (parallel zu legacy `firma` TEXT)
+- **2026-03-24:** DSGVO: Daten-Export (`user-export.js`), Soft-Delete (`user-delete.js`), Cookie-Consent, AGB-Checkbox
+- **2026-03-24:** Audit-Logging: jeder authentifizierte API-Call wird in `audit_log` geloggt (fire-and-forget)
+- **2026-03-24:** Code-Splitting: alle Pages lazy-loaded, manualChunks für vendor-libs (react, supabase, pdf, charts, ui)
+- **2026-03-24:** Sentry ErrorBoundary wraps gesamte App, console.log Cleanup (~40 Statements entfernt)
 
 ## Known Issues
 
-- **Streaming nicht aktiv:** `chat.js` unterstützt SSE-Streaming, aber `useConversationSession` sendet immer `stream: false` (kein `stream` Parameter). `streamChatResponse()` in voiceConfig existiert nicht, nur in gelöschter speechServices.ts. Streaming-Integration wäre ein separates Feature.
-- **Keine Retry-Logic:** Ein einzelner Netzwerkfehler beendet das Gespräch. Kein automatischer Retry.
-- **Kein User-Feedback bei STT-Fehlschlag:** Wenn Transkription fehlschlägt (zu leise, Gibberish), passiert im Practice-Mode nichts Sichtbares für den User.
+- **Streaming nicht aktiv:** `chat.js` unterstützt SSE-Streaming, aber Frontend sendet immer non-streaming.
+- **Keine Retry-Logic:** Ein Netzwerkfehler beendet das Gespräch.
+- **`profiles.firma` (TEXT) noch nicht entfernt:** Legacy-Feld bleibt parallel zu `firma_id` bestehen bis alle Referenzen umgestellt sind. `useFirmaUsers()` nutzt noch `firma` Text.
+- **ModuleDetailPage Chunk gross (903 kB):** Enthält PDF-Viewer + Mindmap. Könnte weiter aufgesplittet werden.
+- **npm audit: 25 HIGH vulnerabilities** in pdfjs-dist Kette — kein Update verfügbar.
 
 ## For Full Project Details
 See `.claude/PROJECT.md` for:

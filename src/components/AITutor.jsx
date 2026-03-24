@@ -218,8 +218,8 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
             const audioBlob = new Blob([Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0))], { type: 'audio/mpeg' });
             new Audio(URL.createObjectURL(audioBlob)).play();
           }
-        } catch (e) {
-          console.log('TTS not available');
+        } catch {
+          // TTS not available, continue without audio
         }
       }
     } catch (error) {

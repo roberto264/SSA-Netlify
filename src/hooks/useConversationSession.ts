@@ -256,7 +256,6 @@ export function useConversationSession({
         currentAudioRef.current = null;
       }
       interruptionCountRef.current += 1;
-      console.log(`Interruption #${interruptionCountRef.current}`);
       // Transition state from 'speaking' to 'idle' so SPEECH_START can work
       dispatch({ type: 'TTS_DONE' });
     }

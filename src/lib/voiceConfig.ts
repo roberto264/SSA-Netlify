@@ -63,7 +63,6 @@ export async function elevenLabsTTS(text: string, voiceType: string, signal?: Ab
 
 /** OpenAI Whisper STT fallback */
 async function openAiSTT(audioBase64: string, mimeType: string, signal?: AbortSignal): Promise<string> {
-  console.log('STT | using OpenAI Whisper fallback');
   const response = await authFetch('/.netlify/functions/transcribe', {
     method: 'POST',
     body: JSON.stringify({ audio: audioBase64, mimeType }),
@@ -90,7 +89,6 @@ export async function elevenLabsSTT(audioBase64: string, mimeType = 'audio/wav',
     const onCallerAbort = () => timeoutController.abort();
     signal?.addEventListener('abort', onCallerAbort, { once: true });
 
-    console.log('STT | trying ElevenLabs Scribe...');
     const response = await authFetch('/.netlify/functions/elevenlabs-stt', {
       method: 'POST',
       body: JSON.stringify({ audio: audioBase64, mimeType }),
@@ -107,7 +105,6 @@ export async function elevenLabsSTT(audioBase64: string, mimeType = 'audio/wav',
 
     const result = await response.json();
     const text = result.data?.text || result.text || '';
-    console.log('STT | ElevenLabs result:', text.substring(0, 50));
     return text;
   } catch (err) {
     // Re-throw if the CALLER aborted (unmount/navigation)

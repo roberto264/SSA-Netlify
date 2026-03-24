@@ -151,14 +151,12 @@ export function useVAD({
     const myGeneration = generationRef.current;
 
     try {
-      console.log('VAD | starting microphone...');
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true }
       });
 
       if (generationRef.current !== myGeneration) {
         stream.getTracks().forEach(t => t.stop());
-        console.log('VAD | discarding stale stream (generation mismatch)');
         return;
       }
 
@@ -250,7 +248,6 @@ export function useVAD({
       mute.connect(ctx.destination);
 
       setIsListening(true);
-      console.log('VAD | listening (energy-based, sampleRate=' + sampleRate + ')');
     } catch (err) {
       console.error('VAD initialization failed:', err);
       if (generationRef.current === myGeneration) {

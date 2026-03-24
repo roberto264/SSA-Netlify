@@ -88,15 +88,11 @@ export default function PdfViewer({ pdfData, modulId, onClose }) {
       </div>
     ),
     renderHighlights: (props) => {
-      console.log('Rendering highlights for page:', props.pageIndex, 'Total highlights:', highlights.length);
-
       return (
         <div>
           {highlights
             .filter(highlight => highlight.page_index === props.pageIndex)
             .map((highlight) => {
-              console.log('Rendering highlight:', highlight.id, 'Areas:', highlight.highlight_areas);
-
               if (!highlight.highlight_areas || !Array.isArray(highlight.highlight_areas)) {
                 return null;
               }
@@ -144,32 +140,16 @@ export default function PdfViewer({ pdfData, modulId, onClose }) {
   // Handle adding new highlight
   const handleAddHighlight = async (props, color, colorName) => {
     try {
-      console.log('Full props:', props);
-      console.log('props.highlightAreas:', props.highlightAreas);
-      console.log('selectedText from props:', props.selectedText);
-
       // Use highlightAreas from props (for multi-line selections) or fall back to selectionRegion
       const highlightAreas = props.highlightAreas || [props.selectionRegion];
       const pageIndex = props.selectionRegion.pageIndex;
-
-      console.log('Using highlightAreas:', highlightAreas);
-
-      console.log('Final highlightAreas:', highlightAreas);
 
       // Extract the selected text from window selection
       const selection = window.getSelection();
       const textContent = selection ? selection.toString().trim() : '';
 
-      console.log('Creating highlight:', {
-        pageIndex,
-        textContent,
-        color,
-        highlightAreas
-      });
-
       // Save to database with selected text
-      const result = await saveHighlight(pageIndex, highlightAreas, color, textContent);
-      console.log('Highlight saved successfully:', result);
+      await saveHighlight(pageIndex, highlightAreas, color, textContent);
       showMessage(`${colorName} Highlight erstellt! 🎨`);
     } catch (error) {
       console.error('Error adding highlight:', error);
@@ -202,7 +182,6 @@ export default function PdfViewer({ pdfData, modulId, onClose }) {
 
   // Jump to highlight
   const jumpToHighlight = (highlight) => {
-    console.log('Jumping to highlight on page:', highlight.page_index);
     jumpToPage(highlight.page_index);
 
     // Try to find the highlight element and scroll to it
@@ -211,11 +190,8 @@ export default function PdfViewer({ pdfData, modulId, onClose }) {
 
     const tryScroll = () => {
       const element = document.getElementById(`highlight-${highlight.id}`);
-      console.log(`Attempt ${attempts}: Looking for highlight-${highlight.id}, found:`, !!element);
 
       if (element) {
-        console.log('Found highlight element after', attempts * 100, 'ms');
-
         // Wait a bit more for page to settle, then scroll
         setTimeout(() => {
           element.scrollIntoView({
@@ -223,7 +199,6 @@ export default function PdfViewer({ pdfData, modulId, onClose }) {
             block: 'center',
             inline: 'nearest'
           });
-          console.log('Scrolled to highlight');
           showMessage(`Springe zu Seite ${highlight.page_index + 1}`);
         }, 200);
       } else if (attempts < maxAttempts) {
@@ -232,8 +207,6 @@ export default function PdfViewer({ pdfData, modulId, onClose }) {
         setTimeout(tryScroll, 100);
       } else {
         // Max attempts reached
-        console.warn('Highlight element not found after', maxAttempts * 100, 'ms');
-        console.log('Looking for ID:', `highlight-${highlight.id}`);
         showMessage(`Highlight nicht gefunden`);
       }
     };

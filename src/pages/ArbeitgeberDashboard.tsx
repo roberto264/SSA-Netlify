@@ -7,14 +7,15 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import SubscriptionCard from '@/components/billing/SubscriptionCard';
 import SeatManager from '@/components/billing/SeatManager';
+import type { UserWithData } from '@/types/database';
 
 export function ArbeitgeberDashboard() {
   const { profile } = useAuth();
   const { users, loading } = useFirmaUsers(profile?.firma);
   const { firma, loading: firmaLoading } = useFirmaSubscription();
 
-  const calculateUserProgress = (user: any) => {
-    const completed = user.modul_fortschritt?.filter((p: any) => p.completed).length || 0;
+  const calculateUserProgress = (user: UserWithData) => {
+    const completed = user.modul_fortschritt?.filter((p) => p.completed).length || 0;
     const total = modules.reduce((acc, m) => acc + m.topics.length, 0);
     return total > 0 ? Math.round((completed / total) * 100) : 0;
   };
@@ -43,7 +44,7 @@ export function ArbeitgeberDashboard() {
             {[
               { value: users.length, label: 'Mitarbeiter' },
               { value: `${avgProgress}%`, label: 'Ø Fortschritt' },
-              { value: users.reduce((acc, u) => acc + (u.quiz_ergebnisse?.filter((q: any) => q.passed).length || 0), 0), label: 'Quiz bestanden' },
+              { value: users.reduce((acc, u) => acc + (u.quiz_ergebnisse?.filter((q: { passed: boolean }) => q.passed).length || 0), 0), label: 'Quiz bestanden' },
             ].map(({ value, label }) => (
               <div key={label} className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center">
                 <div className="text-2xl sm:text-3xl font-bold">{value}</div>
@@ -72,7 +73,7 @@ export function ArbeitgeberDashboard() {
                 <p className="text-muted-foreground">Noch keine Mitarbeiter registriert</p>
               </CardContent>
             </Card>
-          ) : users.map((user: any) => {
+          ) : users.map((user: UserWithData) => {
             const userProgress = calculateUserProgress(user);
             const initials = user.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || '?';
             return (
@@ -101,7 +102,7 @@ export function ArbeitgeberDashboard() {
                     />
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Quiz: <span className="font-medium text-foreground">{user.quiz_ergebnisse?.filter((q: any) => q.passed).length || 0} bestanden</span>
+                    Quiz: <span className="font-medium text-foreground">{user.quiz_ergebnisse?.filter((q: { passed: boolean }) => q.passed).length || 0} bestanden</span>
                   </div>
                 </CardContent>
               </Card>

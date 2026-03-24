@@ -43,7 +43,6 @@ function AudioPlayer({ audioData, modulId }) {
       const savedPosition = audioProgress[modulId] || 0;
 
       if (savedPosition > 0) {
-        console.log('Auto-loading position:', savedPosition, 'for module:', modulId);
         // Set both audio element and state to keep them in sync
         audioRef.current.currentTime = savedPosition;
         setCurrentTime(savedPosition);
