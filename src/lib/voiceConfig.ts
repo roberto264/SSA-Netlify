@@ -2,6 +2,7 @@
  * Voice TTS/STT configuration with ElevenLabs primary + OpenAI fallback
  */
 import type { VoiceType } from '../types/content';
+import { authFetch } from './api';
 
 /**
  * Mapping from persona voiceType to ElevenLabs Voice IDs.
@@ -20,9 +21,8 @@ export function getVoiceId(voiceType: VoiceType): string {
 
 /** OpenAI TTS fallback */
 async function openAiTTS(text: string, voiceType: string, signal?: AbortSignal): Promise<string> {
-  const response = await fetch('/.netlify/functions/tts', {
+  const response = await authFetch('/.netlify/functions/tts', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text, voice: voiceType || 'onyx' }),
     signal,
   });
@@ -41,9 +41,8 @@ export async function elevenLabsTTS(text: string, voiceType: string, signal?: Ab
   const voiceId = getVoiceId(voiceType);
 
   try {
-    const response = await fetch('/.netlify/functions/elevenlabs-tts', {
+    const response = await authFetch('/.netlify/functions/elevenlabs-tts', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, voiceId }),
       signal,
     });
@@ -65,9 +64,8 @@ export async function elevenLabsTTS(text: string, voiceType: string, signal?: Ab
 /** OpenAI Whisper STT fallback */
 async function openAiSTT(audioBase64: string, mimeType: string, signal?: AbortSignal): Promise<string> {
   console.log('STT | using OpenAI Whisper fallback');
-  const response = await fetch('/.netlify/functions/transcribe', {
+  const response = await authFetch('/.netlify/functions/transcribe', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ audio: audioBase64, mimeType }),
     signal,
   });
@@ -93,9 +91,8 @@ export async function elevenLabsSTT(audioBase64: string, mimeType = 'audio/wav',
     signal?.addEventListener('abort', onCallerAbort, { once: true });
 
     console.log('STT | trying ElevenLabs Scribe...');
-    const response = await fetch('/.netlify/functions/elevenlabs-stt', {
+    const response = await authFetch('/.netlify/functions/elevenlabs-stt', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ audio: audioBase64, mimeType }),
       signal: timeoutController.signal,
     });

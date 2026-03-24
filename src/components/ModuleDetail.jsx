@@ -4,6 +4,7 @@ import { useProgress, useAudioProgress, useFlashcardProgress } from '../lib/data
 import { getLernhilfen } from '../lib/contentLoader';
 import MindMapMarkmap from './mindmap/MindMapMarkmap';
 import PdfViewer from './pdf/PdfViewer';
+import { Button } from '@/components/ui/button';
 
 // ============================================
 // AUDIO PLAYER KOMPONENTE
@@ -601,7 +602,7 @@ function TopicsList({ module, onSelectTopic, progress }) {
   const completedCount = module.topics.filter(t => isTopicCompleted(t.id)).length;
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-slate-200 card-shadow h-full flex flex-col">
+    <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm h-full flex flex-col">
       <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
         📚 Quiz
         <span className="text-sm font-normal text-slate-500">{completedCount}/{module.topics.length}</span>
@@ -654,28 +655,28 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
   const progressPercent = Math.round((completedTopics / module.topics.length) * 100);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       <div className={`bg-gradient-to-r ${module.color} text-white`}>
-        <div className="max-w-6xl mx-auto px-4 py-5">
-          <button onClick={onBack} className="flex items-center gap-2 text-white/80 hover:text-white mb-3 text-sm">
-            <ArrowLeft className="w-4 h-4" /> Zurück zum Dashboard
-          </button>
-          
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <Button variant="ghost" onClick={onBack} className="gap-2 text-white/80 hover:text-white hover:bg-white/10 -ml-2 mb-3">
+            <ArrowLeft className="h-4 w-4" /> Zurück zum Dashboard
+          </Button>
+
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
+            <div className="h-14 w-14 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center text-3xl border border-white/10">
               {module.icon}
             </div>
             <div className="flex-1">
-              <p className="text-white/80 text-sm">Modul {module.id}</p>
+              <p className="text-white/70 text-sm font-medium">Modul {module.id}</p>
               <h1 className="text-xl font-bold">{module.title}</h1>
-              <p className="text-white/80 text-sm">{module.description}</p>
+              <p className="text-white/70 text-sm">{module.description}</p>
             </div>
           </div>
-          
+
           <div className="mt-4 bg-white/20 rounded-full h-2">
-            <div className="bg-white h-2 rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
+            <div className="bg-white h-2 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
           </div>
-          <p className="text-white/80 text-xs mt-1">{progressPercent}% abgeschlossen</p>
+          <p className="text-white/70 text-xs mt-1.5">{progressPercent}% abgeschlossen</p>
         </div>
       </div>
 

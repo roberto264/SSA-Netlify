@@ -10,6 +10,7 @@ import { useRollenspiele } from '../lib/database';
 import { getPersonaById } from '../lib/contentLoader';
 import { blobToBase64, playBase64Audio } from '../lib/audioUtils';
 import { elevenLabsTTS, elevenLabsSTT } from '../lib/voiceConfig';
+import { authFetch } from '../lib/api';
 import { turnReducer, shouldPauseVAD, type TurnState } from '../lib/turnStateMachine';
 import type { ZenFeedback, Persona } from '../types/content';
 
@@ -92,6 +93,7 @@ export function useConversationSession({
   const abortControllerRef = useRef<AbortController>(new AbortController());
   const ttsAbortRef = useRef<AbortController | null>(null);
   const interruptionCountRef = useRef(0);
+  const isSendingRef = useRef(false);
   const [sessionStartTime] = useState<number>(Date.now());
 
   const { saveSession } = useRollenspiele();
@@ -123,9 +125,17 @@ export function useConversationSession({
 
   // ─── TTS with mutex ──────────────────────────────────────────────
   const playTTS = useCallback(async (text: string, voice: string): Promise<void> => {
+    // Abort previous TTS and clean up before starting new one
     if (ttsAbortRef.current) {
       ttsAbortRef.current.abort();
+      ttsAbortRef.current = null;
     }
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current.src = '';
+      currentAudioRef.current = null;
+    }
+
     const ttsController = new AbortController();
     ttsAbortRef.current = ttsController;
     const signal = ttsController.signal;
@@ -143,6 +153,7 @@ export function useConversationSession({
       if ((error as Error).name === 'AbortError') return;
       console.error('TTS Error:', error);
     } finally {
+      // Only clean up if this is still the active TTS controller
       if (ttsAbortRef.current === ttsController) {
         currentAudioRef.current = null;
         dispatch({ type: 'TTS_DONE' });
@@ -154,9 +165,12 @@ export function useConversationSession({
   // ─── Send message (chat API + TTS) ────────────────────────────────
   const sendTextMessage = useCallback(async (text: string) => {
     if (!text.trim() || conversationEndedRef.current) return;
+    // Lock to prevent double-sends (VAD + manual send race condition)
+    if (isSendingRef.current) return;
     // Prevent sending during active turn states (use ref for fresh value)
     const state = turnStateRef.current;
     if (state !== 'idle' && state !== 'listening' && state !== 'transcribing') return;
+    isSendingRef.current = true;
 
     const currentMessages = [...messagesRef.current, { role: 'user' as const, content: text }];
     setMessages(currentMessages);
@@ -165,9 +179,8 @@ export function useConversationSession({
     if (mode === 'zen') setStatusText('Denkt nach...');
 
     try {
-      const response = await fetch('/.netlify/functions/chat', {
+      const response = await authFetch('/.netlify/functions/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: currentMessages,
           systemPrompt: mode === 'zen'
@@ -227,6 +240,8 @@ export function useConversationSession({
       } else {
         setStatusText('Verbindungsfehler - versuche es erneut');
       }
+    } finally {
+      isSendingRef.current = false;
     }
   }, [persona, ttsEnabled, mode, playTTS, onConversationEnd]);
 
@@ -235,8 +250,15 @@ export function useConversationSession({
     // Zen mode: count interruptions if persona is speaking
     if (mode === 'zen' && turnStateRef.current === 'speaking') {
       ttsAbortRef.current?.abort();
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current.src = '';
+        currentAudioRef.current = null;
+      }
       interruptionCountRef.current += 1;
       console.log(`Interruption #${interruptionCountRef.current}`);
+      // Transition state from 'speaking' to 'idle' so SPEECH_START can work
+      dispatch({ type: 'TTS_DONE' });
     }
     dispatch({ type: 'SPEECH_START' });
   }, [mode]);
@@ -312,9 +334,8 @@ export function useConversationSession({
     }
 
     try {
-      const response = await fetch('/.netlify/functions/analyze', {
+      const response = await authFetch('/.netlify/functions/analyze', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
         signal: abortControllerRef.current.signal,
       });

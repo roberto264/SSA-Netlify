@@ -1,4 +1,8 @@
-import { CORS_HEADERS } from './_shared/response.js';
+import { getCorsHeaders } from './_shared/response.js';
+import { validateChat } from './_shared/validate.js';
+import { checkRateLimitV2 } from './_shared/rateLimit.js';
+import { checkSubscription } from './_shared/subscription.js';
+import { createClient } from '@supabase/supabase-js';
 
 /**
  * Chat function (Netlify Functions v2).
@@ -11,15 +15,18 @@ import { CORS_HEADERS } from './_shared/response.js';
  *   → SSE stream of OpenAI tokens, final [DONE] event includes conversationEnded flag
  */
 export default async (req) => {
+  const origin = req.headers.get('origin') || '';
+  const corsHeaders = getCorsHeaders(origin);
+
   // CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('', { status: 200, headers: CORS_HEADERS });
+    return new Response('', { status: 200, headers: corsHeaders });
   }
 
   if (req.method !== 'POST') {
     return new Response(
       JSON.stringify({ ok: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'Method Not Allowed' } }),
-      { status: 405, headers: CORS_HEADERS }
+      { status: 405, headers: corsHeaders }
     );
   }
 
@@ -28,17 +35,52 @@ export default async (req) => {
     console.error('OPENAI_API_KEY not configured');
     return new Response(
       JSON.stringify({ ok: false, error: { code: 'CONFIG_ERROR', message: 'API Key not configured' } }),
-      { status: 500, headers: CORS_HEADERS }
+      { status: 500, headers: corsHeaders }
     );
   }
+
+  // JWT Auth check
+  const authHeader = req.headers.get('authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) {
+    return new Response(
+      JSON.stringify({ ok: false, error: { code: 'UNAUTHORIZED', message: 'Missing Authorization header' } }),
+      { status: 401, headers: corsHeaders }
+    );
+  }
+  let user;
+  try {
+    const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    const { data: { user: authUser }, error: authErr } = await supabase.auth.getUser(authHeader.slice(7));
+    if (authErr || !authUser) {
+      return new Response(
+        JSON.stringify({ ok: false, error: { code: 'UNAUTHORIZED', message: 'Invalid or expired token' } }),
+        { status: 401, headers: corsHeaders }
+      );
+    }
+    user = authUser;
+  } catch (authErr) {
+    return new Response(
+      JSON.stringify({ ok: false, error: { code: 'AUTH_ERROR', message: 'Authentication failed' } }),
+      { status: 500, headers: corsHeaders }
+    );
+  }
+
+  // Rate limiting
+  const { allowed, response: rlResponse } = await checkRateLimitV2(user.id, 'chat', corsHeaders);
+  if (!allowed) return rlResponse;
+
+  // Subscription check
+  const { allowed: subAllowed, response: subResponse } = await checkSubscription(user.id, origin);
+  if (!subAllowed) return new Response(subResponse.body, { status: subResponse.statusCode, headers: subResponse.headers });
 
   try {
     const { messages, systemPrompt, maxTokens, stream } = await req.json();
 
-    if (!messages || !systemPrompt) {
+    const validationErr = validateChat({ messages, systemPrompt, maxTokens });
+    if (validationErr) {
       return new Response(
-        JSON.stringify({ ok: false, error: { code: 'INVALID_INPUT', message: 'Missing messages or systemPrompt' } }),
-        { status: 400, headers: CORS_HEADERS }
+        JSON.stringify({ ok: false, error: { code: 'INVALID_INPUT', message: validationErr } }),
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -69,7 +111,7 @@ export default async (req) => {
       console.error('OpenAI API error:', openaiResponse.status, errorText);
       return new Response(
         JSON.stringify({ ok: false, error: { code: 'OPENAI_ERROR', message: `OpenAI API error: ${openaiResponse.status}` } }),
-        { status: openaiResponse.status, headers: CORS_HEADERS }
+        { status: openaiResponse.status, headers: corsHeaders }
       );
     }
 
@@ -80,11 +122,11 @@ export default async (req) => {
 
       const rawContent = data.choices[0].message.content;
       const conversationEnded = rawContent.includes('[GESPRAECH_ENDE]');
-      data.choices[0].message.content = rawContent.replace('[GESPRAECH_ENDE]', '').trim();
+      data.choices[0].message.content = rawContent.replace(/\[GESPRAECH_ENDE\]/g, '').trim();
 
       return new Response(
         JSON.stringify({ ok: true, data: { ...data, conversationEnded } }),
-        { status: 200, headers: CORS_HEADERS }
+        { status: 200, headers: corsHeaders }
       );
     }
 
@@ -121,8 +163,12 @@ export default async (req) => {
               const token = parsed.choices?.[0]?.delta?.content;
               if (token) {
                 fullContent += token;
-                const tokenEvent = `data: ${JSON.stringify({ token })}\n\n`;
-                controller.enqueue(encoder.encode(tokenEvent));
+                // Strip [GESPRAECH_ENDE] from streamed tokens before sending to client
+                const cleanToken = token.replace(/\[GESPRAECH_ENDE\]/g, '');
+                if (cleanToken) {
+                  const tokenEvent = `data: ${JSON.stringify({ token: cleanToken })}\n\n`;
+                  controller.enqueue(encoder.encode(tokenEvent));
+                }
               }
             } catch {
               // Skip malformed lines
@@ -145,7 +191,7 @@ export default async (req) => {
     console.error('Function error:', err);
     return new Response(
       JSON.stringify({ ok: false, error: { code: 'INTERNAL_ERROR', message: err.message } }),
-      { status: 500, headers: CORS_HEADERS }
+      { status: 500, headers: corsHeaders }
     );
   }
 };

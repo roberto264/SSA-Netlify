@@ -52,7 +52,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const signUp = async (email, password, name, firma) => {
+  const signUp = async (email, password, name, firmaId) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -63,11 +63,22 @@ export function AuthProvider({ children }) {
 
     if (error) throw error;
 
-    // Update profile with firma
-    if (data.user) {
+    // Update profile with firma (both legacy text and new FK)
+    if (data.user && firmaId) {
+      // Lookup firma name for legacy field
+      const { data: firmaData } = await supabase
+        .from('firmen')
+        .select('name')
+        .eq('id', firmaId)
+        .single();
+
       await supabase
         .from('profiles')
-        .update({ name, firma })
+        .update({
+          name,
+          firma: firmaData?.name || null,
+          firma_id: firmaId,
+        })
         .eq('id', data.user.id);
     }
 

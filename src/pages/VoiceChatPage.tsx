@@ -4,17 +4,22 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useConversationSession } from '../hooks/useConversationSession';
 import { useVAD } from '../hooks/useVAD';
 import type { ZenFeedback } from '../types/content';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 // ─── Skill Rating Component ─────────────────────────────────────────
 function SkillRating({ label, value, max = 5 }: { label: string; value: number; max?: number }) {
   return (
     <div className="flex items-center justify-between py-2">
-      <span className="text-sm text-slate-600">{label}</span>
-      <div className="flex gap-1">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <div className="flex gap-0.5">
         {[...Array(max)].map((_, i) => (
           <Star
             key={i}
-            className={`w-4 h-4 ${i < value ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}`}
+            className={cn("h-4 w-4", i < value ? 'text-amber-400 fill-amber-400' : 'text-border')}
           />
         ))}
       </div>
@@ -29,100 +34,104 @@ function FeedbackModal({ feedback, personaName, onSave, isSaving }: {
   onSave: () => void;
   isSaving: boolean;
 }) {
-  const ratingColor: Record<string, string> = {
-    schwach: 'bg-red-100 text-red-700 border-red-200',
-    mittel: 'bg-amber-100 text-amber-700 border-amber-200',
-    gut: 'bg-green-100 text-green-700 border-green-200'
+  const ratingConfig: Record<string, { bg: string; badge: 'destructive' | 'warning' | 'success' }> = {
+    schwach: { bg: 'from-red-500 to-red-600', badge: 'destructive' },
+    mittel: { bg: 'from-amber-500 to-amber-600', badge: 'warning' },
+    gut: { bg: 'from-emerald-500 to-emerald-600', badge: 'success' },
   };
   const ratingEmoji: Record<string, string> = {
     schwach: '\u{1F614}', mittel: '\u{1F914}', gut: '\u{1F389}'
   };
 
+  const config = ratingConfig[feedback.gesamtbewertung] || ratingConfig.mittel;
+
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-5 rounded-t-2xl">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto border-0 shadow-2xl animate-slide-in">
+        {/* Header */}
+        <div className={`bg-gradient-to-r ${config.bg} text-white p-5 rounded-t-xl`}>
           <div className="flex items-center gap-3">
             <span className="text-3xl">{ratingEmoji[feedback.gesamtbewertung] || '\u{1F4CA}'}</span>
             <div>
-              <h2 className="font-bold text-lg">Gesprachsanalyse</h2>
-              <p className="text-indigo-100 text-sm">Gesprach mit {personaName}</p>
+              <h2 className="font-bold text-lg">Gesprächsanalyse</h2>
+              <p className="text-white/80 text-sm">Gespräch mit {personaName}</p>
             </div>
           </div>
         </div>
 
-        <div className="p-5 border-b">
-          <div className="flex items-center justify-center gap-3">
-            <span className="text-sm text-slate-500">Gesamtbewertung:</span>
-            <span className={`px-4 py-1.5 rounded-full font-semibold capitalize border ${ratingColor[feedback.gesamtbewertung]}`}>
+        <CardContent className="p-0">
+          {/* Rating */}
+          <div className="p-5 border-b flex items-center justify-center gap-3">
+            <span className="text-sm text-muted-foreground">Gesamtbewertung:</span>
+            <Badge variant={config.badge} className="text-sm px-4 py-1 capitalize">
               {feedback.gesamtbewertung}
-            </span>
+            </Badge>
           </div>
-        </div>
 
-        <div className="p-5 border-b bg-slate-50">
-          <p className="text-slate-700 text-sm leading-relaxed">{feedback.feedback}</p>
-        </div>
-
-        <div className="p-5 border-b">
-          <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-indigo-600" /> Soft Skills Bewertung
-          </h3>
-          <div className="divide-y divide-slate-100">
-            <SkillRating label="Gesprachsfuhrung" value={feedback.gesprachsfuhrung} />
-            <SkillRating label="Aktives Zuhoren" value={feedback.aktives_zuhoren} />
-            <SkillRating label="Klarheit" value={feedback.klarheit} />
-            <SkillRating label="Einwandbehandlung" value={feedback.einwand_behandlung} />
-            <SkillRating label="Empathie" value={feedback.empathie} />
-            <SkillRating label="Uberzeugungskraft" value={feedback.uberzeugungskraft} />
+          {/* Feedback Text */}
+          <div className="p-5 border-b bg-muted/30">
+            <p className="text-foreground text-sm leading-relaxed">{feedback.feedback}</p>
           </div>
-        </div>
 
-        <div className="p-5 grid grid-cols-2 gap-4">
-          {feedback.staerken?.length > 0 && (
-            <div>
-              <h4 className="font-medium text-green-700 mb-2 flex items-center gap-1.5 text-sm">
-                <CheckCircle className="w-4 h-4" /> Starken
-              </h4>
-              <ul className="space-y-1">
-                {feedback.staerken.map((s, i) => (
-                  <li key={i} className="text-xs text-slate-600 flex items-start gap-1.5">
-                    <span className="text-green-500 mt-0.5">&bull;</span>{s}
-                  </li>
-                ))}
-              </ul>
+          {/* Soft Skills */}
+          <div className="p-5 border-b">
+            <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" /> Soft Skills Bewertung
+            </h3>
+            <div className="divide-y divide-border">
+              <SkillRating label="Gesprächsführung" value={feedback.gesprachsfuhrung} />
+              <SkillRating label="Aktives Zuhören" value={feedback.aktives_zuhoren} />
+              <SkillRating label="Klarheit" value={feedback.klarheit} />
+              <SkillRating label="Einwandbehandlung" value={feedback.einwand_behandlung} />
+              <SkillRating label="Empathie" value={feedback.empathie} />
+              <SkillRating label="Überzeugungskraft" value={feedback.uberzeugungskraft} />
             </div>
-          )}
-          {feedback.verbesserungen?.length > 0 && (
-            <div>
-              <h4 className="font-medium text-amber-700 mb-2 flex items-center gap-1.5 text-sm">
-                <AlertCircle className="w-4 h-4" /> Verbesserungen
-              </h4>
-              <ul className="space-y-1">
-                {feedback.verbesserungen.map((v, i) => (
-                  <li key={i} className="text-xs text-slate-600 flex items-start gap-1.5">
-                    <span className="text-amber-500 mt-0.5">&bull;</span>{v}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+          </div>
 
-        <div className="p-5 bg-slate-50 rounded-b-2xl flex gap-3">
-          <button
-            onClick={onSave}
-            disabled={isSaving}
-            className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {isSaving ? (
-              <><Loader2 className="w-4 h-4 animate-spin" />Speichern...</>
-            ) : (
-              'Speichern & Beenden'
+          {/* Strengths & Improvements */}
+          <div className="p-5 grid grid-cols-2 gap-4 border-b">
+            {feedback.staerken?.length > 0 && (
+              <div>
+                <h4 className="font-medium text-emerald-700 mb-2 flex items-center gap-1.5 text-sm">
+                  <CheckCircle className="h-4 w-4" /> Stärken
+                </h4>
+                <ul className="space-y-1">
+                  {feedback.staerken.map((s, i) => (
+                    <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                      <span className="text-emerald-500 mt-0.5">·</span>{s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
-          </button>
-        </div>
-      </div>
+            {feedback.verbesserungen?.length > 0 && (
+              <div>
+                <h4 className="font-medium text-amber-700 mb-2 flex items-center gap-1.5 text-sm">
+                  <AlertCircle className="h-4 w-4" /> Verbesserungen
+                </h4>
+                <ul className="space-y-1">
+                  {feedback.verbesserungen.map((v, i) => (
+                    <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                      <span className="text-amber-500 mt-0.5">·</span>{v}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Save Button */}
+          <div className="p-5">
+            <Button onClick={onSave} disabled={isSaving} className="w-full" size="lg">
+              {isSaving ? (
+                <><Loader2 className="h-4 w-4 animate-spin" />Speichern...</>
+              ) : (
+                'Speichern & Beenden'
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -157,7 +166,7 @@ export function VoiceChatPage() {
   const isTranscribing = session.turnState === 'transcribing';
 
   const getMicStatusText = () => {
-    if (!micEnabled) return 'Mikrofon deaktiviert - Texteingabe nutzen';
+    if (!micEnabled) return 'Mikrofon deaktiviert — Texteingabe nutzen';
     if (isTranscribing) return 'Wird transkribiert...';
     if (isSpeechActive) return 'Aufnahme...';
     if (isSpeaking) return 'Persona spricht...';
@@ -170,143 +179,149 @@ export function VoiceChatPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-xl">
+          <div className="h-10 w-10 bg-muted rounded-xl flex items-center justify-center text-xl">
             {persona.image}
           </div>
           <div>
-            <h2 className="font-bold text-slate-800 text-sm sm:text-base">{persona.name}</h2>
-            <p className="text-xs text-slate-500">{persona.summary}</p>
+            <h2 className="font-bold text-foreground text-sm sm:text-base">{persona.name}</h2>
+            <p className="text-xs text-muted-foreground">{persona.summary}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant={ttsEnabled ? 'secondary' : 'ghost'}
+            size="icon"
             onClick={() => setTtsEnabled(!ttsEnabled)}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-              ttsEnabled ? 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
-            }`}
             title={ttsEnabled ? 'Sprache ausschalten' : 'Sprache einschalten'}
+            className={ttsEnabled ? 'text-primary' : 'text-muted-foreground'}
           >
-            {ttsEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-          </button>
-          <button
+            {ttsEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
             onClick={session.endSession}
             disabled={session.isAnalyzing}
-            className="px-3 sm:px-4 py-2 bg-red-100 text-red-700 rounded-xl font-medium hover:bg-red-200 transition-colors text-sm disabled:opacity-50 flex items-center gap-2"
+            className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-0 shadow-none"
           >
             {session.isAnalyzing ? (
-              <><Loader2 className="w-4 h-4 animate-spin" />Analysiere...</>
+              <><Loader2 className="h-4 w-4 animate-spin" />Analysiere...</>
             ) : (
-              'Gesprach beenden'
+              'Gespräch beenden'
             )}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 bg-white rounded-2xl card-shadow p-3 sm:p-4 overflow-y-auto mb-4 scrollbar-thin">
-        {session.messages.length === 0 ? (
-          <div className="text-center text-slate-400 py-8">
-            <p className="text-lg mb-2">{persona.image}</p>
-            <p>Das Gesprach beginnt...</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {session.messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] sm:max-w-[80%] p-3 rounded-2xl text-sm ${
-                  msg.role === 'user'
-                    ? 'bg-indigo-600 text-white rounded-br-md'
-                    : 'bg-slate-100 text-slate-800 rounded-bl-md'
-                }`}>
-                  {msg.content}
+      <Card className="flex-1 border-0 shadow-sm overflow-hidden mb-4">
+        <CardContent className="p-4 h-full overflow-y-auto scrollbar-thin">
+          {session.messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+              <span className="text-4xl mb-3">{persona.image}</span>
+              <p className="text-sm">Das Gespräch beginnt...</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {session.messages.map((msg, i) => (
+                <div key={i} className={cn("flex", msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+                  <div className={cn(
+                    "max-w-[85%] sm:max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed",
+                    msg.role === 'user'
+                      ? 'bg-primary text-primary-foreground rounded-br-md'
+                      : 'bg-muted text-foreground rounded-bl-md'
+                  )}>
+                    {msg.content}
+                  </div>
                 </div>
-              </div>
-            ))}
-            {isProcessing && (
-              <div className="flex justify-start">
-                <div className="bg-slate-100 p-3 rounded-2xl rounded-bl-md">
-                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-slate-500" />
+              ))}
+              {isProcessing && (
+                <div className="flex justify-start">
+                  <div className="bg-muted px-4 py-3 rounded-2xl rounded-bl-md">
+                    <div className="flex gap-1">
+                      <span className="h-2 w-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="h-2 w-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="h-2 w-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Input Area */}
-      <div className="bg-white rounded-2xl card-shadow p-3 sm:p-4">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            onClick={() => setMicEnabled(!micEnabled)}
-            className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white transition-all flex-shrink-0 ${
-              !micEnabled
-                ? 'bg-slate-400 hover:bg-slate-500'
-                : isSpeechActive
-                  ? 'bg-red-500'
-                  : isListening
-                    ? 'bg-emerald-500 hover:bg-emerald-600'
-                    : 'bg-indigo-600 hover:bg-indigo-700'
-            }`}
-          >
-            {micEnabled && isListening && !isSpeechActive && (
-              <div className="absolute inset-0 bg-emerald-500 rounded-full animate-pulse opacity-50"></div>
-            )}
-            {micEnabled ? (
-              <Mic className="w-5 h-5 sm:w-6 sm:h-6 relative z-10" />
-            ) : (
-              <MicOff className="w-5 h-5 sm:w-6 sm:h-6 relative z-10" />
-            )}
-          </button>
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => setMicEnabled(!micEnabled)}
+              className={cn(
+                "relative h-12 w-12 sm:h-14 sm:w-14 rounded-full flex items-center justify-center text-white transition-all flex-shrink-0",
+                !micEnabled && 'bg-muted-foreground/50 hover:bg-muted-foreground/60',
+                micEnabled && isSpeechActive && 'bg-destructive shadow-lg shadow-destructive/30',
+                micEnabled && isListening && !isSpeechActive && 'bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/30',
+                micEnabled && !isListening && 'bg-primary hover:bg-primary/90'
+              )}
+            >
+              {micEnabled && isListening && !isSpeechActive && (
+                <div className="absolute inset-0 bg-emerald-500 rounded-full animate-pulse opacity-40" />
+              )}
+              {micEnabled
+                ? <Mic className="h-5 w-5 sm:h-6 sm:w-6 relative z-10" />
+                : <MicOff className="h-5 w-5 sm:h-6 sm:w-6 relative z-10" />
+              }
+            </button>
 
-          {micEnabled ? (
-            isTranscribing ? (
-              <div className="flex-1 h-12 bg-indigo-50 rounded-xl flex items-center justify-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
-                <span className="text-sm text-indigo-600">Wird transkribiert...</span>
-              </div>
-            ) : isSpeechActive ? (
-              <div className="flex-1 h-12 bg-red-50 rounded-xl flex items-center justify-center gap-2">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-red-600 font-medium">Aufnahme...</span>
+            {micEnabled ? (
+              <div className={cn(
+                "flex-1 h-12 rounded-xl flex items-center justify-center gap-2",
+                isTranscribing && 'bg-primary/5',
+                isSpeechActive && 'bg-destructive/5',
+                !isTranscribing && !isSpeechActive && isSpeaking && 'bg-purple-50',
+                !isTranscribing && !isSpeechActive && !isSpeaking && 'bg-emerald-50'
+              )}>
+                {isTranscribing ? (
+                  <><Loader2 className="h-4 w-4 animate-spin text-primary" /><span className="text-sm text-primary">Wird transkribiert...</span></>
+                ) : isSpeechActive ? (
+                  <><div className="h-2 w-2 bg-destructive rounded-full animate-pulse" /><span className="text-sm text-destructive font-medium">Aufnahme...</span></>
+                ) : (
+                  <span className={cn("text-sm", isSpeaking ? 'text-purple-600' : 'text-emerald-600')}>
+                    {isSpeaking ? 'Persona spricht...' : 'Sprich einfach los...'}
+                  </span>
+                )}
               </div>
             ) : (
-              <div className={`flex-1 h-12 rounded-xl flex items-center justify-center gap-2 ${
-                isSpeaking ? 'bg-purple-50' : 'bg-emerald-50'
-              }`}>
-                <span className={`text-sm ${isSpeaking ? 'text-purple-600' : 'text-emerald-600'}`}>
-                  {isSpeaking ? 'Persona spricht...' : 'Sprich einfach los...'}
-                </span>
-              </div>
-            )
-          ) : (
-            <>
-              <input
-                type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    session.sendTextMessage(inputText);
-                    setInputText('');
-                  }
-                }}
-                placeholder="Nachricht eingeben..."
-                className="flex-1 px-3 sm:px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 transition-colors text-sm sm:text-base"
-              />
-              <button
-                onClick={() => { session.sendTextMessage(inputText); setInputText(''); }}
-                disabled={isProcessing || !inputText.trim()}
-                className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white hover:bg-indigo-700 transition-colors disabled:opacity-50 flex-shrink-0"
-              >
-                <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </>
-          )}
-        </div>
-        <p className="text-xs text-slate-400 mt-2 text-center">
-          {getMicStatusText()}
-        </p>
-      </div>
+              <>
+                <Input
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      session.sendTextMessage(inputText);
+                      setInputText('');
+                    }
+                  }}
+                  placeholder="Nachricht eingeben..."
+                  className="flex-1 h-12"
+                />
+                <Button
+                  size="icon-lg"
+                  onClick={() => { session.sendTextMessage(inputText); setInputText(''); }}
+                  disabled={isProcessing || !inputText.trim()}
+                >
+                  <Send className="h-5 w-5" />
+                </Button>
+              </>
+            )}
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-2 text-center">
+            {getMicStatusText()}
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Feedback Modal */}
       {session.showFeedback && session.feedback && (

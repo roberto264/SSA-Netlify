@@ -13,6 +13,9 @@ import { PersonaSelectionPage } from './pages/PersonaSelectionPage';
 import { VoiceChatPage } from './pages/VoiceChatPage';
 import { ZenModePage } from './pages/ZenModePage';
 import AITutor from './components/AITutor';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import CookieConsent from './components/CookieConsent';
 import { Loader2 } from 'lucide-react';
 
 function ProtectedRoute({ children }) {
@@ -75,6 +78,8 @@ function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path="/login" element={<AuthPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
 
       {/* Protected - Dashboard */}
       <Route
@@ -167,6 +172,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <AppRoutes />
+        <CookieConsent />
       </AuthProvider>
     </BrowserRouter>
   );

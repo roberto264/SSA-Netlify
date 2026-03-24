@@ -321,6 +321,46 @@ export function useFirmen() {
 }
 
 // ============================================
+// FIRMA SUBSCRIPTION HOOK
+// ============================================
+
+export function useFirmaSubscription() {
+  const { profile } = useAuth();
+  const [firma, setFirma] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (profile?.firma_id || profile?.firma) {
+      fetchFirma();
+    } else {
+      setLoading(false);
+    }
+  }, [profile]);
+
+  const fetchFirma = async () => {
+    try {
+      let query = supabase.from('firmen').select('*');
+
+      if (profile.firma_id) {
+        query = query.eq('id', profile.firma_id);
+      } else if (profile.firma) {
+        query = query.eq('name', profile.firma);
+      }
+
+      const { data, error } = await query.single();
+      if (error) throw error;
+      setFirma(data);
+    } catch (error) {
+      console.error('Error fetching firma subscription:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { firma, loading, refresh: fetchFirma };
+}
+
+// ============================================
 // AUDIO FORTSCHRITT HOOK
 // ============================================
 

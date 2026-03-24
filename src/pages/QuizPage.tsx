@@ -1,8 +1,12 @@
 import { useState } from 'react';
-import { ArrowLeft, Trophy, XCircle } from 'lucide-react';
+import { ArrowLeft, Trophy, XCircle, Check, X } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProgress, useQuizResults } from '../lib/database';
 import { modules, getQuizByTopicId } from '../lib/contentLoader';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 export function QuizPage() {
   const { moduleId, topicId } = useParams();
@@ -11,11 +15,11 @@ export function QuizPage() {
   const topic = module?.topics.find(t => t.id === topicId);
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState(false);
-  const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState<any[]>([]);
 
   const { updateProgress } = useProgress();
   const { saveQuizResult } = useQuizResults();
@@ -27,7 +31,7 @@ export function QuizPage() {
 
   const question = topic.questions[currentQuestion];
 
-  const handleAnswer = (index) => {
+  const handleAnswer = (index: number) => {
     if (answered) return;
     setSelectedAnswer(index);
     setAnswered(true);
@@ -57,92 +61,134 @@ export function QuizPage() {
     const passed = percentage >= 70;
     return (
       <main className="max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="bg-white rounded-2xl card-shadow p-6 sm:p-8 text-center animate-slide-in">
-          <div className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full flex items-center justify-center ${passed ? 'text-amber-500' : 'text-red-500'}`}>
-            {passed ? <Trophy className="w-12 h-12 sm:w-16 sm:h-16" /> : <XCircle className="w-12 h-12 sm:w-16 sm:h-16" />}
-          </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">
-            {passed ? 'Gratulation! 🎉' : 'Nicht bestanden'}
-          </h2>
-          <p className="text-slate-600 mb-6">
-            {passed ? 'Du hast das Quiz erfolgreich bestanden!' : 'Versuch es noch einmal, du schaffst das!'}
-          </p>
-          <div className={`text-5xl font-bold mb-2 ${passed ? 'text-green-500' : 'text-red-500'}`}>{percentage}%</div>
-          <p className="text-slate-500 mb-6">{score} von {topic.questions.length} richtig</p>
-          <div className="space-y-3">
-            <button onClick={() => { setCurrentQuestion(0); setSelectedAnswer(null); setAnswered(false); setScore(0); setAnswers([]); setShowResult(false); }}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition-all">
-              Quiz wiederholen
-            </button>
-            <button onClick={goBack}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl transition-all">
-              Zurück zum Modul
-            </button>
-          </div>
-        </div>
+        <Card className="border-0 shadow-lg animate-slide-in">
+          <CardContent className="p-8 text-center">
+            <div className={cn(
+              "h-20 w-20 mx-auto mb-6 rounded-2xl flex items-center justify-center",
+              passed ? 'bg-amber-50' : 'bg-red-50'
+            )}>
+              {passed
+                ? <Trophy className="h-10 w-10 text-amber-500" />
+                : <XCircle className="h-10 w-10 text-destructive" />
+              }
+            </div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">
+              {passed ? 'Gratulation!' : 'Nicht bestanden'}
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              {passed ? 'Du hast das Quiz erfolgreich bestanden!' : 'Versuch es noch einmal, du schaffst das!'}
+            </p>
+            <div className={cn(
+              "text-5xl font-bold mb-1",
+              passed ? 'text-emerald-500' : 'text-destructive'
+            )}>
+              {percentage}%
+            </div>
+            <p className="text-muted-foreground mb-8">{score} von {topic.questions.length} richtig</p>
+            <div className="space-y-3">
+              <Button
+                onClick={() => { setCurrentQuestion(0); setSelectedAnswer(null); setAnswered(false); setScore(0); setAnswers([]); setShowResult(false); }}
+                className="w-full"
+                size="lg"
+              >
+                Quiz wiederholen
+              </Button>
+              <Button
+                onClick={goBack}
+                variant="secondary"
+                className="w-full"
+                size="lg"
+              >
+                Zurück zum Modul
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </main>
     );
   }
 
+  const progressPercent = ((currentQuestion + 1) / topic.questions.length) * 100;
+
   return (
-    <main className="max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-      <button onClick={goBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-800 mb-4 transition-colors text-sm sm:text-base">
-        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" /> Zurück
-      </button>
-      <div className="bg-white rounded-2xl card-shadow p-4 sm:p-6 animate-slide-in">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-sm text-slate-500">Frage {currentQuestion + 1} von {topic.questions.length}</span>
-          <div className="h-2 flex-1 mx-4 bg-slate-100 rounded-full overflow-hidden">
-            <div className="h-full bg-indigo-500 rounded-full progress-bar-animate" style={{ width: `${((currentQuestion + 1) / topic.questions.length) * 100}%` }}></div>
+    <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <Button variant="ghost" onClick={goBack} className="gap-2 text-muted-foreground hover:text-foreground -ml-2 mb-4">
+        <ArrowLeft className="h-4 w-4" /> Zurück
+      </Button>
+
+      <Card className="border-0 shadow-sm animate-slide-in">
+        <CardContent className="p-5 sm:p-6">
+          {/* Progress */}
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">
+              {currentQuestion + 1} / {topic.questions.length}
+            </span>
+            <Progress value={progressPercent} className="flex-1 h-2" />
           </div>
-        </div>
 
-        <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-6">{question.question}</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-6">{question.question}</h2>
 
-        <div className="space-y-3">
-          {question.options.map((option, index) => {
-            const isCorrect = index === question.correct;
-            const wasSelected = selectedAnswer === index;
-            let classes = 'bg-slate-50 hover:bg-slate-100 border-slate-200';
-            if (answered) {
-              if (isCorrect) classes = 'bg-green-100 border-green-500 text-green-800';
-              else if (wasSelected) classes = 'bg-red-100 border-red-500 text-red-800';
-            }
-            return (
-              <button
-                key={index}
-                onClick={() => handleAnswer(index)}
-                disabled={answered}
-                className={`w-full p-3 sm:p-4 rounded-xl border-2 ${classes} text-left transition-all ${answered ? 'cursor-default' : ''}`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className={`w-8 h-8 rounded-lg flex items-center justify-center font-medium text-sm ${
-                    answered && isCorrect ? 'bg-green-500 text-white' :
-                    answered && wasSelected ? 'bg-red-500 text-white' :
-                    'bg-slate-200 text-slate-600'
-                  }`}>
-                    {answered && isCorrect ? '✓' : answered && wasSelected ? '✗' : String.fromCharCode(65 + index)}
-                  </span>
-                  <span className="font-medium text-sm sm:text-base">{option}</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+          <div className="space-y-3">
+            {question.options.map((option: string, index: number) => {
+              const isCorrect = index === question.correct;
+              const wasSelected = selectedAnswer === index;
 
-        {answered && (
-          <>
-            <div className={`mt-4 p-3 sm:p-4 rounded-xl border ${selectedAnswer === question.correct ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
-              <p className={`text-xs sm:text-sm ${selectedAnswer === question.correct ? 'text-green-800' : 'text-amber-800'}`}>
-                <strong>Erklärung:</strong> {question.explanation}
-              </p>
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleAnswer(index)}
+                  disabled={answered}
+                  className={cn(
+                    "w-full p-4 rounded-xl border-2 text-left transition-all duration-200",
+                    !answered && "hover:border-primary/50 hover:bg-primary/5",
+                    !answered && "border-border bg-background",
+                    answered && isCorrect && "border-emerald-500 bg-emerald-50",
+                    answered && wasSelected && !isCorrect && "border-destructive bg-destructive/5",
+                    answered && !isCorrect && !wasSelected && "border-border bg-background opacity-60",
+                    answered ? 'cursor-default' : 'cursor-pointer'
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={cn(
+                      "h-8 w-8 rounded-lg flex items-center justify-center font-medium text-sm flex-shrink-0",
+                      answered && isCorrect && "bg-emerald-500 text-white",
+                      answered && wasSelected && !isCorrect && "bg-destructive text-white",
+                      !answered && "bg-secondary text-muted-foreground",
+                      answered && !isCorrect && !wasSelected && "bg-secondary text-muted-foreground"
+                    )}>
+                      {answered && isCorrect ? <Check className="h-4 w-4" /> :
+                       answered && wasSelected ? <X className="h-4 w-4" /> :
+                       String.fromCharCode(65 + index)}
+                    </span>
+                    <span className="font-medium text-sm sm:text-base text-foreground">{option}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {answered && (
+            <div className="mt-5 space-y-4">
+              <div className={cn(
+                "p-4 rounded-xl border",
+                selectedAnswer === question.correct
+                  ? 'bg-emerald-50 border-emerald-200'
+                  : 'bg-amber-50 border-amber-200'
+              )}>
+                <p className={cn(
+                  "text-sm",
+                  selectedAnswer === question.correct ? 'text-emerald-800' : 'text-amber-800'
+                )}>
+                  <strong>Erklärung:</strong> {question.explanation}
+                </p>
+              </div>
+              <Button onClick={handleNext} className="w-full" size="lg">
+                {currentQuestion < topic.questions.length - 1 ? 'Nächste Frage' : 'Ergebnis anzeigen'}
+              </Button>
             </div>
-            <button onClick={handleNext} className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition-all">
-              {currentQuestion < topic.questions.length - 1 ? 'Nächste Frage' : 'Ergebnis anzeigen'}
-            </button>
-          </>
-        )}
-      </div>
+          )}
+        </CardContent>
+      </Card>
     </main>
   );
 }
