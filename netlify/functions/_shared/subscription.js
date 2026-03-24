@@ -15,7 +15,7 @@ export async function checkSubscription(userId, origin) {
     // Get user profile with firma
     const { data: profile, error: profileErr } = await supabase
       .from('profiles')
-      .select('firma_id, role')
+      .select('firma_id, role, subscription_status, trial_ends_at')
       .eq('id', userId)
       .single();
 
@@ -31,10 +31,15 @@ export async function checkSubscription(userId, origin) {
       return { allowed: true, firma: null };
     }
 
+    // Privatpersonen: Subscription auf Profile-Ebene prüfen
+    if (profile.role === 'privat' && !profile.firma_id) {
+      return checkPrivatSubscription(supabase, profile, userId, origin);
+    }
+
     if (!profile.firma_id) {
       return {
         allowed: false,
-        response: makeError(403, 'NO_FIRMA', 'Kein Unternehmen zugeordnet. Bitte Firma auswählen.', origin),
+        response: makeError(403, 'NO_FIRMA', 'Kein Unternehmen zugeordnet.', origin),
       };
     }
 
@@ -106,6 +111,36 @@ export async function checkSubscription(userId, origin) {
     console.error('Subscription check error:', err);
     return { allowed: true, firma: null };
   }
+}
+
+/** Check subscription for private users (no firma) */
+async function checkPrivatSubscription(supabase, profile, userId, origin) {
+  const status = profile.subscription_status || 'trialing';
+
+  // Check trial expiry
+  if (status === 'trialing' && profile.trial_ends_at) {
+    const trialEnd = new Date(profile.trial_ends_at);
+    if (trialEnd < new Date()) {
+      await supabase
+        .from('profiles')
+        .update({ subscription_status: 'unpaid' })
+        .eq('id', userId);
+
+      return {
+        allowed: false,
+        response: makeError(403, 'TRIAL_EXPIRED', 'Die Testphase ist abgelaufen. Bitte ein Abo abschliessen.', origin),
+      };
+    }
+  }
+
+  if (status !== 'active' && status !== 'trialing') {
+    return {
+      allowed: false,
+      response: makeError(403, 'SUBSCRIPTION_INACTIVE', 'Kein aktives Abo. Bitte ein Abo abschliessen.', origin),
+    };
+  }
+
+  return { allowed: true, firma: null };
 }
 
 function makeError(statusCode, code, message, origin) {

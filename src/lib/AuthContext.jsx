@@ -11,7 +11,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -21,7 +20,6 @@ export function AuthProvider({ children }) {
       }
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -52,32 +50,65 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const signUp = async (email, password, name, firmaId) => {
+  /** Registrierung als Privatperson (ohne Firma) */
+  const signUpPrivat = async (email, password, name) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { name }
-      }
+      options: { data: { name } },
     });
 
     if (error) throw error;
 
-    // Update profile with firma (both legacy text and new FK)
-    if (data.user && firmaId) {
-      // Lookup firma name for legacy field
-      const { data: firmaData } = await supabase
-        .from('firmen')
-        .select('name')
-        .eq('id', firmaId)
-        .single();
-
+    if (data.user) {
       await supabase
         .from('profiles')
         .update({
           name,
-          firma: firmaData?.name || null,
-          firma_id: firmaId,
+          role: 'privat',
+          trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          subscription_status: 'trialing',
+        })
+        .eq('id', data.user.id);
+    }
+
+    return data;
+  };
+
+  /** Registrierung als Firma (erstellt Firma + Arbeitgeber-Profil) */
+  const signUpFirma = async (email, password, name, firmaName) => {
+    // 1. Firma erstellen (Auto-Trial Trigger setzt trial_ends_at)
+    const { data: firmaData, error: firmaError } = await supabase
+      .from('firmen')
+      .insert({ name: firmaName })
+      .select()
+      .single();
+
+    if (firmaError) {
+      if (firmaError.message?.includes('duplicate')) {
+        throw new Error('Ein Unternehmen mit diesem Namen existiert bereits.');
+      }
+      throw firmaError;
+    }
+
+    // 2. User registrieren
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } },
+    });
+
+    if (error) throw error;
+
+    // 3. Profile mit Firma verknüpfen
+    if (data.user) {
+      await supabase
+        .from('profiles')
+        .update({
+          name,
+          firma: firmaData.name,
+          firma_id: firmaData.id,
+          role: 'arbeitgeber',
         })
         .eq('id', data.user.id);
     }
@@ -88,12 +119,11 @@ export function AuthProvider({ children }) {
   const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      password
+      password,
     });
 
     if (error) throw error;
 
-    // Update last login
     if (data.user) {
       await supabase
         .from('profiles')
@@ -128,13 +158,15 @@ export function AuthProvider({ children }) {
     user,
     profile,
     loading,
-    signUp,
+    signUpPrivat,
+    signUpFirma,
     signIn,
     signOut,
     updateProfile,
+    isPrivat: profile?.role === 'privat',
     isLernender: profile?.role === 'lernender',
     isArbeitgeber: profile?.role === 'arbeitgeber',
-    isBetreiber: profile?.role === 'betreiber'
+    isBetreiber: profile?.role === 'betreiber',
   };
 
   return (

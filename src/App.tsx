@@ -19,6 +19,8 @@ const ZenModePage = lazy(() => import('./pages/ZenModePage').then(m => ({ defaul
 const AITutor = lazy(() => import('./components/AITutor'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
+const InvitePage = lazy(() => import('./pages/InvitePage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 function PageLoader() {
   return (
@@ -75,6 +77,7 @@ function AppRoutes() {
         <Route path="/login" element={<AuthPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
+        <Route path="/invite/:token" element={<InvitePage />} />
 
         {/* Protected - Dashboard */}
         <Route path="/" element={<ProtectedRoute><AppLayout><DashboardRedirect /></AppLayout></ProtectedRoute>} />
@@ -93,6 +96,9 @@ function AppRoutes() {
 
         {/* Protected - Zen Mode (fullscreen, no AppLayout) */}
         <Route path="/roleplay/:personaId/zen" element={<ProtectedRoute><ZenModePage /></ProtectedRoute>} />
+
+        {/* Protected - Settings */}
+        <Route path="/settings" element={<ProtectedRoute><AppLayout><SettingsPage /></AppLayout></ProtectedRoute>} />
 
         {/* Protected - AI Tutor */}
         <Route path="/tutor" element={<ProtectedRoute><AppLayout><AITutor onBack={() => window.history.back()} /></AppLayout></ProtectedRoute>} />

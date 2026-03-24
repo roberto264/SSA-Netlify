@@ -1,26 +1,48 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sun, Mail, Lock, User, Building2, Loader2, AlertCircle } from 'lucide-react';
+import { Sun, Mail, Lock, User, Building2, Loader2, AlertCircle, UserCircle } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
-import { useFirmen } from '../lib/database';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+/** Map Supabase error messages to German */
+function localizeError(message) {
+  const map = {
+    'Invalid login credentials': 'Ungültige Anmeldedaten.',
+    'User already registered': 'Diese E-Mail-Adresse ist bereits registriert.',
+    'Email rate limit exceeded': 'Zu viele Versuche. Bitte später erneut probieren.',
+    'Password should be at least 6 characters': 'Passwort muss mindestens 6 Zeichen haben.',
+    'Signup requires a valid password': 'Bitte gib ein gültiges Passwort ein.',
+    'Unable to validate email address: invalid format': 'Bitte gib eine gültige E-Mail-Adresse ein.',
+  };
+  return map[message] || message;
+}
+
 export default function AuthPage() {
-  const [mode, setMode] = useState('login');
+  const [mode, setMode] = useState('login'); // login | register
+  const [accountType, setAccountType] = useState(null); // null | 'privat' | 'firma'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [firma, setFirma] = useState('');
+  const [firmaName, setFirmaName] = useState('');
   const [agbAccepted, setAgbAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
-  const { signIn, signUp } = useAuth();
-  const { firmen } = useFirmen();
+  const { signIn, signUpPrivat, signUpFirma } = useAuth();
+
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+    setName('');
+    setFirmaName('');
+    setAgbAccepted(false);
+    setError('');
+    setMessage('');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,18 +53,29 @@ export default function AuthPage() {
     try {
       if (mode === 'login') {
         await signIn(email, password);
-      } else {
-        await signUp(email, password, name, firma);
+      } else if (accountType === 'privat') {
+        await signUpPrivat(email, password, name);
         setMessage('Registrierung erfolgreich! Bitte bestätige deine E-Mail.');
         setMode('login');
+        resetForm();
+      } else if (accountType === 'firma') {
+        await signUpFirma(email, password, name, firmaName);
+        setMessage('Firma und Konto erstellt! Bitte bestätige deine E-Mail.');
+        setMode('login');
+        resetForm();
       }
     } catch (err) {
-      setError(err.message === 'Invalid login credentials'
-        ? 'Ungültige Anmeldedaten'
-        : err.message);
+      setError(localizeError(err.message));
     } finally {
       setLoading(false);
     }
+  };
+
+  const switchToRegister = () => {
+    setMode('register');
+    setAccountType(null);
+    setError('');
+    setMessage('');
   };
 
   return (
@@ -69,7 +102,7 @@ export default function AuthPage() {
           {/* Tab Switcher */}
           <div className="flex bg-muted rounded-lg p-1 mb-6">
             <button
-              onClick={() => setMode('login')}
+              onClick={() => { setMode('login'); setError(''); setMessage(''); }}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
                 mode === 'login'
                   ? 'bg-background text-foreground shadow-sm'
@@ -79,7 +112,7 @@ export default function AuthPage() {
               Anmelden
             </button>
             <button
-              onClick={() => setMode('register')}
+              onClick={switchToRegister}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
                 mode === 'register'
                   ? 'bg-background text-foreground shadow-sm'
@@ -103,125 +136,168 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === 'register' && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <div className="relative">
-                    <User className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Max Mustermann"
-                      required
-                      className="pl-10 h-11"
-                    />
-                  </div>
+          {/* Register: Account Type Selection */}
+          {mode === 'register' && !accountType && (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground text-center mb-4">Wie möchtest du dich registrieren?</p>
+              <button
+                onClick={() => setAccountType('privat')}
+                className="w-full p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-primary/5 transition-all text-left flex items-center gap-4"
+              >
+                <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <UserCircle className="h-5 w-5 text-blue-600" />
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="firma">Firma</Label>
-                  <div className="relative">
-                    <Building2 className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    <select
-                      id="firma"
-                      value={firma}
-                      onChange={(e) => setFirma(e.target.value)}
-                      required
-                      className="flex h-11 w-full rounded-lg border border-input bg-background pl-10 pr-4 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none"
-                    >
-                      <option value="">Firma auswählen...</option>
-                      {firmen.map(f => (
-                        <option key={f.id} value={f.id}>{f.name}</option>
-                      ))}
-                    </select>
-                  </div>
+                <div>
+                  <p className="font-medium text-foreground">Als Privatperson</p>
+                  <p className="text-xs text-muted-foreground">Eigenes Konto mit persönlicher Abrechnung</p>
                 </div>
-              </>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="email">E-Mail</Label>
-              <div className="relative">
-                <Mail className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="max@beispiel.ch"
-                  required
-                  className="pl-10 h-11"
-                />
-              </div>
+              </button>
+              <button
+                onClick={() => setAccountType('firma')}
+                className="w-full p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-primary/5 transition-all text-left flex items-center gap-4"
+              >
+                <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <Building2 className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Als Firma</p>
+                  <p className="text-xs text-muted-foreground">Firmenkonto erstellen und Mitarbeiter einladen</p>
+                </div>
+              </button>
             </div>
+          )}
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Passwort</Label>
-              <div className="relative">
-                <Lock className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
-                  className="pl-10 h-11"
-                />
-              </div>
+          {/* Login Form OR Register Form (after type selected) */}
+          {(mode === 'login' || (mode === 'register' && accountType)) && (
+            <form onSubmit={handleSubmit} className="space-y-4">
               {mode === 'register' && (
-                <p className="text-xs text-muted-foreground">Mindestens 6 Zeichen</p>
+                <>
+                  {/* Back to type selection */}
+                  <button
+                    type="button"
+                    onClick={() => setAccountType(null)}
+                    className="text-sm text-muted-foreground hover:text-foreground mb-2"
+                  >
+                    ← {accountType === 'privat' ? 'Privatperson' : 'Firma'} — ändern
+                  </button>
+
+                  {/* Firma name (only for firma) */}
+                  {accountType === 'firma' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="firmaName">Firmenname</Label>
+                      <div className="relative">
+                        <Building2 className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="firmaName"
+                          type="text"
+                          value={firmaName}
+                          onChange={(e) => setFirmaName(e.target.value)}
+                          placeholder="Meine Solar GmbH"
+                          required
+                          className="pl-10 h-11"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <div className="relative">
+                      <User className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="name"
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Max Mustermann"
+                        required
+                        className="pl-10 h-11"
+                      />
+                    </div>
+                  </div>
+                </>
               )}
-            </div>
 
-            {mode === 'register' && (
-              <label className="flex items-start gap-2 text-sm text-muted-foreground cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={agbAccepted}
-                  onChange={(e) => setAgbAccepted(e.target.checked)}
-                  required
-                  className="mt-1 rounded border-input"
-                />
-                <span>
-                  Ich akzeptiere die{' '}
-                  <Link to="/terms" className="text-primary hover:underline" target="_blank">AGB</Link>
-                  {' '}und die{' '}
-                  <Link to="/privacy" className="text-primary hover:underline" target="_blank">Datenschutzerklärung</Link>.
-                </span>
-              </label>
-            )}
+              <div className="space-y-2">
+                <Label htmlFor="email">E-Mail</Label>
+                <div className="relative">
+                  <Mail className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="max@beispiel.ch"
+                    required
+                    className="pl-10 h-11"
+                  />
+                </div>
+              </div>
 
-            <Button
-              type="submit"
-              disabled={loading || (mode === 'register' && !agbAccepted)}
-              size="lg"
-              className="w-full"
-            >
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {mode === 'login' ? 'Anmelden' : 'Registrieren'}
-            </Button>
-          </form>
+              <div className="space-y-2">
+                <Label htmlFor="password">Passwort</Label>
+                <div className="relative">
+                  <Lock className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                    className="pl-10 h-11"
+                  />
+                </div>
+                {mode === 'register' && (
+                  <p className="text-xs text-muted-foreground">Mindestens 6 Zeichen</p>
+                )}
+              </div>
+
+              {mode === 'register' && (
+                <label className="flex items-start gap-2 text-sm text-muted-foreground cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={agbAccepted}
+                    onChange={(e) => setAgbAccepted(e.target.checked)}
+                    required
+                    className="mt-1 rounded border-input"
+                  />
+                  <span>
+                    Ich akzeptiere die{' '}
+                    <Link to="/terms" className="text-primary hover:underline" target="_blank">AGB</Link>
+                    {' '}und die{' '}
+                    <Link to="/privacy" className="text-primary hover:underline" target="_blank">Datenschutzerklärung</Link>.
+                  </span>
+                </label>
+              )}
+
+              <Button
+                type="submit"
+                disabled={loading || (mode === 'register' && !agbAccepted)}
+                size="lg"
+                className="w-full"
+              >
+                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {mode === 'login' ? 'Anmelden' : accountType === 'firma' ? 'Firma erstellen' : 'Registrieren'}
+              </Button>
+            </form>
+          )}
 
           {/* Footer */}
           <p className="text-center text-sm text-muted-foreground mt-6">
             {mode === 'login' ? (
               <>
                 Noch kein Konto?{' '}
-                <button onClick={() => setMode('register')} className="text-primary font-medium hover:underline">
+                <button onClick={switchToRegister} className="text-primary font-medium hover:underline">
                   Registrieren
                 </button>
               </>
             ) : (
               <>
                 Bereits registriert?{' '}
-                <button onClick={() => setMode('login')} className="text-primary font-medium hover:underline">
+                <button onClick={() => { setMode('login'); setAccountType(null); setError(''); }} className="text-primary font-medium hover:underline">
                   Anmelden
                 </button>
               </>
