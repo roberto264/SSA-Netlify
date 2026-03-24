@@ -35,8 +35,6 @@ export const handler = async (event) => {
     if (validationErr) return error(400, 'INVALID_INPUT', validationErr, origin);
     if (!voiceId) return error(400, 'INVALID_INPUT', 'Missing voiceId', origin);
 
-    console.log('Sending TTS request to ElevenLabs...');
-
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`, {
       method: 'POST',
       headers: {
@@ -58,7 +56,6 @@ export const handler = async (event) => {
 
     const arrayBuffer = await response.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString('base64');
-    console.log('ElevenLabs TTS response received');
 
     return success({ audio: base64 }, origin);
   } catch (err) {

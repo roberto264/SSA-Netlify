@@ -34,11 +34,7 @@ export const handler = async (event) => {
     const validationErr = validateAudio({ audio, mimeType });
     if (validationErr) return error(400, 'INVALID_INPUT', validationErr, origin);
 
-    console.log('Received audio data, length:', audio.length);
-    console.log('MIME type:', mimeType);
-
     const binaryData = Buffer.from(audio, 'base64');
-    console.log('Binary data size:', binaryData.length, 'bytes');
 
     const mimeToExt = {
       'audio/webm': 'webm',
@@ -51,8 +47,6 @@ export const handler = async (event) => {
     };
     const extension = mimeToExt[mimeType] || 'webm';
     const contentType = mimeType?.split(';')[0] || 'audio/webm';
-    console.log('Using extension:', extension, 'content-type:', contentType);
-
     const boundary = '----FormBoundary' + Math.random().toString(36).substring(2);
 
     const formParts = [
@@ -73,8 +67,6 @@ export const handler = async (event) => {
     const formEndBuffer = Buffer.from(formEnd, 'utf8');
     const fullBody = Buffer.concat([formStart, binaryData, formEndBuffer]);
 
-    console.log('Sending to Whisper API...');
-
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
@@ -90,8 +82,6 @@ export const handler = async (event) => {
       console.error('Whisper API error:', response.status, data);
       return error(response.status, 'OPENAI_ERROR', data.error?.message || 'Transcription failed', origin);
     }
-
-    console.log('Transcription result:', data.text?.substring(0, 50) + '...');
 
     return success({ text: data.text }, origin);
   } catch (err) {

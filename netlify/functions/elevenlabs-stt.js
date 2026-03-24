@@ -34,8 +34,6 @@ export const handler = async (event) => {
     const validationErr = validateAudio({ audio, mimeType });
     if (validationErr) return error(400, 'INVALID_INPUT', validationErr, origin);
 
-    console.log('Received audio for ElevenLabs STT, length:', audio.length);
-
     const binaryData = Buffer.from(audio, 'base64');
 
     const mimeToExt = {
@@ -67,8 +65,6 @@ export const handler = async (event) => {
     const formEndBuffer = Buffer.from(formEnd, 'utf8');
     const fullBody = Buffer.concat([formStart, binaryData, formEndBuffer]);
 
-    console.log('Sending to ElevenLabs Scribe v2...');
-
     const response = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
       method: 'POST',
       headers: {
@@ -84,8 +80,6 @@ export const handler = async (event) => {
       console.error('ElevenLabs STT error:', response.status, data);
       return error(response.status, 'ELEVENLABS_ERROR', data.detail?.message || 'Transcription failed', origin);
     }
-
-    console.log('ElevenLabs STT result:', data.text?.substring(0, 50) + '...');
 
     return success({ text: data.text }, origin);
   } catch (err) {

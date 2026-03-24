@@ -86,14 +86,12 @@ export function playBase64Audio(
     if (signal?.aborted) { onAbort(); return; }
 
     audio.onended = () => { cleanup(); resolve(); };
-    audio.onerror = () => { cleanup(); console.error('Audio playback failed'); resolve(); };
+    audio.onerror = () => { cleanup(); resolve(); };
     signal?.addEventListener('abort', onAbort, { once: true });
   });
 
   if (!signal?.aborted) {
-    audio.play().catch((err) => {
-      console.error('Audio play error:', err);
-    });
+    audio.play().catch(() => {});
   }
 
   return { audio, promise };

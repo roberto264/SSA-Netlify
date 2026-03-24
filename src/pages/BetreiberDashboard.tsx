@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { ArrowLeft, Loader2, Search, Trophy, MessageCircle, BarChart3, Target, CreditCard, Users, Building2, Clock } from 'lucide-react';
+import { Loader2, Search, Trophy, MessageCircle, BarChart3, Target, CreditCard, Users, Building2, Clock } from 'lucide-react';
 import { useAllUsers, useFirmen } from '../lib/database';
 import { modules } from '../lib/contentLoader';
-import { personas } from '../lib/contentLoader';
 import { StarRating } from '../components/common';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
