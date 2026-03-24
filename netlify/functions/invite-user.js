@@ -86,7 +86,7 @@ export const handler = async (event) => {
       .eq('firma_id', profile.firma_id)
       .is('accepted_at', null);
 
-    if ((activeUsers + pendingInvites) >= (firma?.seat_limit || 5)) {
+    if ((activeUsers + pendingInvites) >= (firma?.seat_limit || 1)) {
       return error(400, 'SEAT_LIMIT', 'Seat-Limit erreicht. Bitte mehr Seats buchen.', origin);
     }
 

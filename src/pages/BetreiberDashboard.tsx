@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ArrowLeft, Loader2, Search, Trophy, MessageCircle, BarChart3, Target } from 'lucide-react';
-import { useAllUsers } from '../lib/database';
+import { ArrowLeft, Loader2, Search, Trophy, MessageCircle, BarChart3, Target, CreditCard, Users, Building2, Clock } from 'lucide-react';
+import { useAllUsers, useFirmen } from '../lib/database';
 import { modules } from '../lib/contentLoader';
 import { personas } from '../lib/contentLoader';
 import { StarRating } from '../components/common';
@@ -157,15 +157,19 @@ function UserProfile({ user, onBack }: { user: any; onBack: () => void }) {
 
 export function BetreiberDashboard() {
   const { users, loading } = useAllUsers();
+  const { firmen: allFirmen, loading: firmenLoading } = useFirmen();
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'users' | 'billing'>('users');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterFirma, setFilterFirma] = useState('alle');
+  const [filterRole, setFilterRole] = useState('alle');
 
   const firmen = [...new Set(users.map((u: any) => u.firma).filter(Boolean))];
 
   const filteredUsers = users.filter((u: any) => {
     if (filterFirma !== 'alle' && u.firma !== filterFirma) return false;
-    if (searchTerm && !u.name?.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (filterRole !== 'alle' && u.role !== filterRole) return false;
+    if (searchTerm && !u.name?.toLowerCase().includes(searchTerm.toLowerCase()) && !u.email?.toLowerCase().includes(searchTerm.toLowerCase())) return false;
     return true;
   });
 
@@ -190,6 +194,12 @@ export function BetreiberDashboard() {
   const avgProgress = users.length > 0
     ? Math.round(users.reduce((acc: number, u: any) => acc + calculateUserProgress(u), 0) / users.length)
     : 0;
+
+  // Billing stats
+  const privatUsers = users.filter((u: any) => u.role === 'privat');
+  const activeSubs = allFirmen.filter((f: any) => f.subscription_status === 'active').length;
+  const trialingSubs = allFirmen.filter((f: any) => f.subscription_status === 'trialing').length;
+  const totalSeats = allFirmen.reduce((acc: number, f: any) => acc + (f.seat_limit || 0), 0);
 
   const statsData = [
     { label: 'Benutzer gesamt', value: users.length, icon: BarChart3, color: 'text-primary', bg: 'bg-primary/10' },
@@ -217,8 +227,33 @@ export function BetreiberDashboard() {
         ))}
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-1 bg-muted rounded-lg p-1">
+        <button
+          onClick={() => setActiveTab('users')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            activeTab === 'users' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Users className="h-4 w-4" /> Benutzer
+        </button>
+        <button
+          onClick={() => setActiveTab('billing')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            activeTab === 'billing' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <CreditCard className="h-4 w-4" /> Abrechnung
+        </button>
+      </div>
+
+      {/* Billing Tab */}
+      {activeTab === 'billing' && (
+        <BillingOverview allFirmen={allFirmen} users={users} privatUsers={privatUsers} activeSubs={activeSubs} trialingSubs={trialingSubs} totalSeats={totalSeats} />
+      )}
+
       {/* User Table */}
-      <Card className="border-0 shadow-sm overflow-hidden">
+      {activeTab === 'users' && <Card className="border-0 shadow-sm overflow-hidden">
         <div className="p-4 border-b">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
@@ -237,7 +272,19 @@ export function BetreiberDashboard() {
               className="flex h-10 rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="alle">Alle Firmen</option>
+              <option value="">(Ohne Firma)</option>
               {firmen.map((f: string) => <option key={f} value={f}>{f}</option>)}
+            </select>
+            <select
+              value={filterRole}
+              onChange={(e) => setFilterRole(e.target.value)}
+              className="flex h-10 rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="alle">Alle Rollen</option>
+              <option value="privat">Privat</option>
+              <option value="lernender">Lernender</option>
+              <option value="arbeitgeber">Arbeitgeber</option>
+              <option value="betreiber">Betreiber</option>
             </select>
           </div>
         </div>
@@ -247,6 +294,7 @@ export function BetreiberDashboard() {
             <thead className="bg-muted/50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Name</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rolle</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Firma</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Fortschritt</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Quiz</th>
@@ -272,6 +320,15 @@ export function BetreiberDashboard() {
                           <p className="text-xs text-muted-foreground">{user.email}</p>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge variant={
+                        user.role === 'betreiber' ? 'destructive' :
+                        user.role === 'arbeitgeber' ? 'secondary' :
+                        user.role === 'privat' ? 'outline' : 'default'
+                      } className="text-[10px]">
+                        {user.role}
+                      </Badge>
                     </td>
                     <td className="px-4 py-3 text-sm text-muted-foreground">{user.firma || '-'}</td>
                     <td className="px-4 py-3">
@@ -299,7 +356,155 @@ export function BetreiberDashboard() {
             </tbody>
           </table>
         </div>
-      </Card>
+      </Card>}
     </main>
+  );
+}
+
+// ─── Billing Overview (Admin) ─────────────────────────────────
+function BillingOverview({ allFirmen, users, privatUsers, activeSubs, trialingSubs, totalSeats }: any) {
+  const statusColors: Record<string, string> = {
+    active: 'text-green-600 bg-green-50',
+    trialing: 'text-blue-600 bg-blue-50',
+    past_due: 'text-amber-600 bg-amber-50',
+    canceled: 'text-red-600 bg-red-50',
+    unpaid: 'text-gray-600 bg-gray-50',
+    incomplete: 'text-amber-600 bg-amber-50',
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Billing KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {[
+          { label: 'Aktive Abos', value: activeSubs, icon: CreditCard, color: 'text-green-600', bg: 'bg-green-50' },
+          { label: 'In Testphase', value: trialingSubs, icon: Clock, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Gebuchte Seats', value: totalSeats, icon: Users, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'Privat-User', value: privatUsers.length, icon: Target, color: 'text-amber-600', bg: 'bg-amber-50' },
+        ].map(({ label, value, icon: Icon, color, bg }) => (
+          <Card key={label} className="border-0 shadow-sm">
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center gap-3 mb-1.5">
+                <div className={`h-10 w-10 ${bg} rounded-lg flex items-center justify-center`}>
+                  <Icon className={`h-5 w-5 ${color}`} />
+                </div>
+                <span className="text-2xl font-bold text-foreground">{value}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">{label}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Firmen-Tabelle */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-0">
+          <div className="p-4 sm:p-5 border-b border-border">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Firmen & Abonnements
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Firma</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Seats</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Mitarbeiter</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Trial / Abo-Ende</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Stripe</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {allFirmen.map((f: any) => {
+                  const firmaUserCount = users.filter((u: any) => u.firma === f.name).length;
+                  const endDate = f.current_period_end
+                    ? new Date(f.current_period_end).toLocaleDateString('de-CH')
+                    : f.trial_ends_at
+                      ? new Date(f.trial_ends_at).toLocaleDateString('de-CH') + ' (Trial)'
+                      : '–';
+
+                  return (
+                    <tr key={f.id} className="hover:bg-muted/30">
+                      <td className="px-4 py-3 font-medium text-foreground text-sm">{f.name}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-[10px] font-medium ${statusColors[f.subscription_status] || 'text-gray-500 bg-gray-50'}`}>
+                          {f.subscription_status || '–'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{f.seat_limit || 0}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{firmaUserCount}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{endDate}</td>
+                      <td className="px-4 py-3">
+                        {f.stripe_customer_id ? (
+                          <Badge variant="default" className="text-[10px]">Verknüpft</Badge>
+                        ) : (
+                          <span className="text-gray-400 text-xs">–</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {allFirmen.length === 0 && (
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Keine Firmen vorhanden</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Privat-User */}
+      {privatUsers.length > 0 && (
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-0">
+            <div className="p-4 sm:p-5 border-b border-border">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Privat-User ({privatUsers.length})
+              </h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">E-Mail</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Trial-Ende</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Stripe</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {privatUsers.map((u: any) => (
+                    <tr key={u.id} className="hover:bg-muted/30">
+                      <td className="px-4 py-3 text-sm font-medium text-foreground">{u.name || '–'}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{u.email}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-[10px] font-medium ${statusColors[u.subscription_status] || 'text-gray-500 bg-gray-50'}`}>
+                          {u.subscription_status || '–'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
+                        {u.trial_ends_at ? new Date(u.trial_ends_at).toLocaleDateString('de-CH') : '–'}
+                      </td>
+                      <td className="px-4 py-3">
+                        {u.stripe_customer_id ? (
+                          <Badge variant="default" className="text-[10px]">Verknüpft</Badge>
+                        ) : (
+                          <span className="text-gray-400 text-xs">–</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }

@@ -22,7 +22,7 @@ const TABS = {
 export default function SettingsPage() {
   const { profile, updateProfile } = useAuth();
   const { firma, loading: firmaLoading } = useFirmaSubscription();
-  const { users: firmaUsers } = useFirmaUsers(profile?.firma);
+  const { users: firmaUsers, refresh: refreshUsers } = useFirmaUsers(profile?.firma);
   const [activeTab, setActiveTab] = useState('profile');
 
   const role = profile?.role;
@@ -64,10 +64,10 @@ export default function SettingsPage() {
       {activeTab === 'profile' && <ProfileTab />}
       {activeTab === 'account' && <AccountTab />}
       {activeTab === 'billing' && showBilling && (
-        <BillingTab role={role} firma={firma} firmaLoading={firmaLoading} firmaUsers={firmaUsers} />
+        <BillingTab role={role} firma={firma} firmaLoading={firmaLoading} firmaUsers={firmaUsers} currentUserId={profile?.id} onUserRemoved={refreshUsers} />
       )}
       {activeTab === 'team' && showTeam && (
-        <TeamTab firma={firma} firmaUsers={firmaUsers} />
+        <TeamTab firma={firma} firmaUsers={firmaUsers} currentUserId={profile?.id} onUserRemoved={refreshUsers} />
       )}
     </main>
   );
@@ -200,7 +200,7 @@ function AccountTab() {
 }
 
 // ─── Billing Tab ──────────────────────────────────────────────
-function BillingTab({ role, firma, firmaLoading, firmaUsers }: any) {
+function BillingTab({ role, firma, firmaLoading, firmaUsers, currentUserId, onUserRemoved }: any) {
   if (firmaLoading) {
     return (
       <div className="flex justify-center py-8">
@@ -242,13 +242,13 @@ function BillingTab({ role, firma, firmaLoading, firmaUsers }: any) {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <SubscriptionCard firma={firma} activeSeats={firmaUsers?.length || 0} />
-      <SeatManager users={firmaUsers || []} seatLimit={firma.seat_limit || 5} />
+      <SeatManager users={firmaUsers || []} seatLimit={firma.seat_limit || 1} currentUserId={currentUserId} onUserRemoved={onUserRemoved} />
     </div>
   );
 }
 
 // ─── Team Tab (Arbeitgeber only) ──────────────────────────────
-function TeamTab({ firma, firmaUsers }: any) {
+function TeamTab({ firma, firmaUsers, currentUserId, onUserRemoved }: any) {
   const [email, setEmail] = useState('');
   const [inviting, setInviting] = useState(false);
   const [inviteResult, setInviteResult] = useState<{ type: 'success' | 'error'; text: string; url?: string } | null>(null);
@@ -334,7 +334,7 @@ function TeamTab({ firma, firmaUsers }: any) {
       </Card>
 
       {/* Team List */}
-      <SeatManager users={firmaUsers || []} seatLimit={firma?.seat_limit || 5} />
+      <SeatManager users={firmaUsers || []} seatLimit={firma?.seat_limit || 1} currentUserId={currentUserId} onUserRemoved={onUserRemoved} />
     </div>
   );
 }

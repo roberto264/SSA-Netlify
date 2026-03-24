@@ -50,6 +50,24 @@ export default function PrivacyPage() {
           </section>
 
           <section>
+            <h2 className="text-xl font-semibold mb-3">3a. Einsicht durch Arbeitgeber</h2>
+            <p className="text-muted-foreground">
+              Wenn Sie über ein Firmenkonto registriert sind, hat der Firma-Administrator (Arbeitgeber) Einsicht in folgende Daten:
+            </p>
+            <ul className="list-disc pl-5 text-muted-foreground space-y-1">
+              <li>Modulfortschritt (abgeschlossene Themen, Prozent)</li>
+              <li>Quiz-Ergebnisse (Punkte, bestanden/nicht bestanden)</li>
+              <li>Rollenspiel-Bewertungen (Gesamtbewertung, Soft-Skill-Scores)</li>
+              <li>Aktivitätsdaten (letzter Login, Anzahl Sitzungen)</li>
+            </ul>
+            <p className="text-muted-foreground mt-2">
+              Diese Daten dienen ausschliesslich der Weiterbildung und Personalentwicklung.
+              Gesprächsinhalte (Transkripte) werden dem Arbeitgeber <strong>nicht</strong> angezeigt.
+              Rechtsgrundlage ist das berechtigte Interesse des Arbeitgebers an der Weiterbildungskontrolle (Art. 6 Abs. 1 lit. f DSGVO).
+            </p>
+          </section>
+
+          <section>
             <h2 className="text-xl font-semibold mb-3">4. Drittanbieter (Auftragsverarbeiter)</h2>
             <p className="text-muted-foreground">Wir nutzen folgende Dienste zur Datenverarbeitung:</p>
             <ul className="list-disc pl-5 text-muted-foreground space-y-1">

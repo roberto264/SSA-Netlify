@@ -1,9 +1,9 @@
 /**
  * SubscriptionCard — Zeigt Abo-Status, Seats, Trial-Countdown.
- * Wird im ArbeitgeberDashboard eingebunden.
+ * Unterstützt: Neues Abo abschliessen, Seats anpassen, Billing-Portal.
  */
 import { useState } from 'react';
-import { CreditCard, Users, Clock, ExternalLink, Loader2, AlertTriangle } from 'lucide-react';
+import { CreditCard, Users, Clock, ExternalLink, Loader2, AlertTriangle, Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { authFetch } from '@/lib/api';
@@ -18,6 +18,7 @@ interface SubscriptionCardProps {
     current_period_end: string | null;
   };
   activeSeats: number;
+  onUpdate?: () => void;
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -29,12 +30,16 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   incomplete: { label: 'Unvollständig', color: 'text-amber-600 bg-amber-50' },
 };
 
-export default function SubscriptionCard({ firma, activeSeats }: SubscriptionCardProps) {
+export default function SubscriptionCard({ firma, activeSeats, onUpdate }: SubscriptionCardProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const [seats, setSeats] = useState(firma.seat_limit || 1);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const status = STATUS_LABELS[firma.subscription_status] || STATUS_LABELS.unpaid;
+  const isActive = firma.subscription_status === 'active';
   const isTrialing = firma.subscription_status === 'trialing';
   const needsSubscription = ['unpaid', 'canceled', 'incomplete'].includes(firma.subscription_status);
+  const seatsChanged = seats !== firma.seat_limit;
 
   // Trial countdown
   let trialDaysLeft = 0;
@@ -45,17 +50,42 @@ export default function SubscriptionCard({ firma, activeSeats }: SubscriptionCar
 
   const handleCheckout = async () => {
     setLoading('checkout');
+    setMessage(null);
     try {
       const response = await authFetch('/.netlify/functions/stripe-checkout', {
         method: 'POST',
-        body: JSON.stringify({ seats: firma.seat_limit }),
+        body: JSON.stringify({ seats }),
       });
       const result = await response.json();
       if (result.ok && result.data?.url) {
         window.location.href = result.data.url;
+      } else {
+        setMessage({ type: 'error', text: result.error?.message || 'Checkout fehlgeschlagen' });
       }
-    } catch (err) {
-      console.error('Checkout error:', err);
+    } catch {
+      setMessage({ type: 'error', text: 'Verbindungsfehler' });
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleUpdateSeats = async () => {
+    setLoading('update');
+    setMessage(null);
+    try {
+      const response = await authFetch('/.netlify/functions/stripe-update-seats', {
+        method: 'POST',
+        body: JSON.stringify({ seats }),
+      });
+      const result = await response.json();
+      if (result.ok) {
+        setMessage({ type: 'success', text: result.data.message });
+        onUpdate?.();
+      } else {
+        setMessage({ type: 'error', text: result.error?.message || 'Fehler beim Anpassen' });
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Verbindungsfehler' });
     } finally {
       setLoading(null);
     }
@@ -63,6 +93,7 @@ export default function SubscriptionCard({ firma, activeSeats }: SubscriptionCar
 
   const handlePortal = async () => {
     setLoading('portal');
+    setMessage(null);
     try {
       const response = await authFetch('/.netlify/functions/stripe-portal', {
         method: 'POST',
@@ -70,9 +101,11 @@ export default function SubscriptionCard({ firma, activeSeats }: SubscriptionCar
       const result = await response.json();
       if (result.ok && result.data?.url) {
         window.location.href = result.data.url;
+      } else {
+        setMessage({ type: 'error', text: result.error?.message || 'Portal nicht verfügbar' });
       }
-    } catch (err) {
-      console.error('Portal error:', err);
+    } catch {
+      setMessage({ type: 'error', text: 'Verbindungsfehler' });
     } finally {
       setLoading(null);
     }
@@ -110,6 +143,15 @@ export default function SubscriptionCard({ firma, activeSeats }: SubscriptionCar
           </div>
         )}
 
+        {/* Messages */}
+        {message && (
+          <div className={`mb-4 p-3 rounded-lg text-sm ${
+            message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+          }`}>
+            {message.text}
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="p-3 bg-muted rounded-lg">
@@ -134,22 +176,60 @@ export default function SubscriptionCard({ firma, activeSeats }: SubscriptionCar
           )}
         </div>
 
+        {/* Seat Adjustment (for new checkout OR active subscription) */}
+        {(needsSubscription || isTrialing || isActive) && (
+          <div className="mb-4">
+            <label className="text-sm text-muted-foreground mb-2 block">
+              {isActive ? 'Seats anpassen' : 'Anzahl Seats'}
+            </label>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSeats(Math.max(isActive ? activeSeats : 1, seats - 1))}
+                disabled={seats <= (isActive ? activeSeats : 1)}
+                className="h-9 w-9 rounded-lg border border-input flex items-center justify-center hover:bg-muted transition-colors text-lg font-medium disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                −
+              </button>
+              <span className="w-12 text-center text-lg font-bold">{seats}</span>
+              <button
+                onClick={() => setSeats(seats + 1)}
+                className="h-9 w-9 rounded-lg border border-input flex items-center justify-center hover:bg-muted transition-colors text-lg font-medium"
+              >
+                +
+              </button>
+              {isActive && seats < activeSeats && (
+                <span className="text-xs text-destructive">Min. {activeSeats} (aktive Nutzer)</span>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Actions */}
-        <div className="flex gap-3">
-          {needsSubscription || isTrialing ? (
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* New subscription */}
+          {(needsSubscription || isTrialing) && (
             <Button onClick={handleCheckout} disabled={!!loading} className="flex-1">
               {loading === 'checkout' && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Abo abschliessen
+              Abo abschliessen ({seats} {seats === 1 ? 'Seat' : 'Seats'})
             </Button>
-          ) : null}
+          )}
 
-          {firma.subscription_status === 'active' || firma.subscription_status === 'past_due' ? (
+          {/* Update seats (active subscription) */}
+          {isActive && seatsChanged && (
+            <Button onClick={handleUpdateSeats} disabled={!!loading} className="flex-1">
+              {loading === 'update' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
+              Auf {seats} Seats ändern
+            </Button>
+          )}
+
+          {/* Billing Portal (active or past_due) */}
+          {(isActive || firma.subscription_status === 'past_due') && (
             <Button variant="outline" onClick={handlePortal} disabled={!!loading} className="flex-1">
               {loading === 'portal' && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               <ExternalLink className="h-4 w-4 mr-2" />
               Billing-Portal
             </Button>
-          ) : null}
+          )}
         </div>
       </CardContent>
     </Card>
