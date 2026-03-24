@@ -4,38 +4,43 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Corporate Clean: Navy + Emerald */
+    --background: 210 20% 99%;        /* #F8FAFC */
+    --foreground: 222 47% 11%;        /* #1E293B */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;                /* White */
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 238 73% 55%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 160 84% 39%;           /* #059669 Emerald */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 20% 96%;         /* Light gray */
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 47%;  /* #94A3B8 */
 
-    --accent: 38 92% 50%;
+    --accent: 160 84% 39%;            /* Emerald */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --success: 142 76% 36%;
-    --success-foreground: 210 40% 98%;
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 238 73% 55%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 160 84% 39%;
 
-    --radius: 0.75rem;
+    --radius: 0.625rem;
+
+    /* Custom: Navy for headers/dark sections */
+    --navy: 222 47% 11%;              /* #1E293B */
+    --navy-deep: 222 64% 7%;          /* #0F172A */
   }
 
   * {

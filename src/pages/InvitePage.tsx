@@ -44,11 +44,11 @@ export default function InvitePage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary/90 to-slate-900 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md border-0 shadow-2xl">
+      <div className="min-h-screen bg-[#0F172A] flex items-center justify-center p-4">
+        <Card className="w-full max-w-md border border-slate-200 shadow-2xl rounded-xl">
           <CardContent className="p-8 text-center">
-            <div className="h-16 w-16 mx-auto rounded-full bg-green-100 flex items-center justify-center mb-4">
-              <CheckCircle className="h-8 w-8 text-green-600" />
+            <div className="h-16 w-16 mx-auto rounded-full bg-emerald-50 flex items-center justify-center mb-4">
+              <CheckCircle className="h-8 w-8 text-emerald-600" />
             </div>
             <h2 className="text-xl font-bold mb-2">Konto erstellt!</h2>
             <p className="text-muted-foreground mb-4">Du wirst zur Anmeldeseite weitergeleitet...</p>
@@ -60,16 +60,16 @@ export default function InvitePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary/90 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-400/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
       </div>
 
-      <Card className="w-full max-w-md relative border-0 shadow-2xl">
+      <Card className="w-full max-w-md relative border border-slate-200 shadow-2xl rounded-xl">
         <CardContent className="p-8">
           <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+            <div className="h-12 w-12 rounded-xl bg-emerald-600 flex items-center justify-center shadow-lg">
               <Sun className="h-7 w-7 text-white" />
             </div>
             <div>
@@ -124,7 +124,7 @@ export default function InvitePage() {
               <p className="text-xs text-muted-foreground">Mindestens 6 Zeichen</p>
             </div>
 
-            <Button type="submit" disabled={loading} size="lg" className="w-full">
+            <Button type="submit" disabled={loading} size="lg" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               Konto erstellen
             </Button>

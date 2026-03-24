@@ -24,8 +24,8 @@ export default function CookieConsent() {
 
   return (
     <div className="fixed bottom-0 inset-x-0 z-50 p-4">
-      <div className="max-w-2xl mx-auto bg-white border border-border rounded-xl shadow-lg p-4 flex items-start gap-4">
-        <Cookie className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+      <div className="max-w-2xl mx-auto bg-white border border-slate-200 rounded-xl shadow-lg p-4 flex items-start gap-4">
+        <Cookie className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
         <div className="flex-1 text-sm text-muted-foreground">
           <p>
             Diese Website verwendet ausschliesslich technisch notwendige Cookies für die Anmeldung.
@@ -34,7 +34,7 @@ export default function CookieConsent() {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Button size="sm" onClick={accept}>Verstanden</Button>
+          <Button size="sm" onClick={accept} className="bg-emerald-600 hover:bg-emerald-700 text-white">Verstanden</Button>
           <button onClick={accept} className="text-muted-foreground hover:text-foreground">
             <X className="h-4 w-4" />
           </button>

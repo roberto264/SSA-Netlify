@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ChevronRight, CheckCircle, ChevronLeft, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X } from 'lucide-react';
+import { ArrowLeft, ChevronRight, CheckCircle, ChevronLeft, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, Headphones, Layers, Share2, FileText, ListChecks } from 'lucide-react';
 import { useProgress, useAudioProgress, useFlashcardProgress } from '../lib/database';
 import { getLernhilfen } from '../lib/contentLoader';
 import MindMapMarkmap from './mindmap/MindMapMarkmap';
@@ -138,14 +138,14 @@ function AudioPlayer({ audioData, modulId }) {
 
   if (!audioData.url) {
     return (
-      <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-200">
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center text-white shadow-lg text-xl">
-            🎧
+          <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400">
+            <Headphones className="w-6 h-6" />
           </div>
           <div className="flex-1">
-            <h3 className="font-bold text-slate-800">{audioData.title}</h3>
-            <p className="text-sm text-slate-500">Audio wird bald verfügbar sein...</p>
+            <h3 className="font-semibold text-slate-900">{audioData.title}</h3>
+            <p className="text-sm text-slate-400">Audio wird bald verfügbar sein...</p>
           </div>
         </div>
       </div>
@@ -153,7 +153,7 @@ function AudioPlayer({ audioData, modulId }) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-200">
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
       <audio
         ref={audioRef}
         src={audioData.url}
@@ -168,30 +168,30 @@ function AudioPlayer({ audioData, modulId }) {
       />
 
       <div className="flex items-center gap-4 mb-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center text-white shadow-lg text-xl">
-          🎧
+        <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center text-white">
+          <Headphones className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-slate-800">{audioData.title}</h3>
-          <p className="text-sm text-slate-500">
+          <h3 className="font-semibold text-slate-900">{audioData.title}</h3>
+          <p className="text-sm text-slate-400">
             {isLoading ? 'Lädt...' : audioData.description}
           </p>
         </div>
       </div>
 
       {error ? (
-        <div className="bg-red-100 text-red-700 rounded-lg p-3 text-sm">{error}</div>
+        <div className="bg-red-50 text-red-700 rounded-lg p-3 text-sm border border-red-200">{error}</div>
       ) : (
         <>
           <div className="flex items-center gap-3">
-            <button onClick={() => skip(-10)} className="p-2 text-slate-500 hover:text-slate-700 transition">
+            <button onClick={() => skip(-10)} className="p-2 text-slate-400 hover:text-slate-600 transition">
               <SkipBack className="w-5 h-5" />
             </button>
 
             <button
               onClick={togglePlay}
               disabled={isLoading || isBuffering}
-              className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-105 transition flex-shrink-0 disabled:opacity-50"
+              className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center text-white shadow-sm hover:bg-emerald-700 transition flex-shrink-0 disabled:opacity-50"
             >
               {isBuffering ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -202,24 +202,24 @@ function AudioPlayer({ audioData, modulId }) {
               )}
             </button>
 
-            <button onClick={() => skip(10)} className="p-2 text-slate-500 hover:text-slate-700 transition">
+            <button onClick={() => skip(10)} className="p-2 text-slate-400 hover:text-slate-600 transition">
               <SkipForward className="w-5 h-5" />
             </button>
 
             <div className="flex-1">
-              <div className="h-2 bg-amber-200 rounded-full overflow-hidden cursor-pointer" onClick={handleSeek}>
-                <div 
-                  className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-100"
+              <div className="h-2 bg-slate-200 rounded-full overflow-hidden cursor-pointer" onClick={handleSeek}>
+                <div
+                  className="h-full bg-emerald-600 transition-all duration-100 rounded-full"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <div className="flex justify-between mt-1 text-xs text-slate-500">
+              <div className="flex justify-between mt-1 text-xs text-slate-400">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
             </div>
 
-            <button onClick={toggleMute} className="p-2 text-slate-500 hover:text-slate-700 transition">
+            <button onClick={toggleMute} className="p-2 text-slate-400 hover:text-slate-600 transition">
               {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
           </div>
@@ -235,17 +235,17 @@ function AudioPlayer({ audioData, modulId }) {
 function Flashcards({ flashcardsData, onOpenFullscreen }) {
   if (!flashcardsData || flashcardsData.length === 0) {
     return (
-      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
-            📇
+          <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400">
+            <Layers className="w-6 h-6" />
           </div>
           <div className="flex-1">
-            <h3 className="font-bold text-slate-800 text-lg">Karteikarten</h3>
-            <p className="text-sm text-slate-600">Noch keine Karten verfügbar</p>
+            <h3 className="font-semibold text-slate-900">Karteikarten</h3>
+            <p className="text-sm text-slate-400">Noch keine Karten verfügbar</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 text-center text-slate-500 flex-1 flex items-center justify-center">
+        <div className="bg-slate-50 rounded-xl p-6 text-center text-slate-400 flex-1 flex items-center justify-center">
           <p>Karteikarten werden bald hinzugefügt...</p>
         </div>
       </div>
@@ -255,28 +255,28 @@ function Flashcards({ flashcardsData, onOpenFullscreen }) {
   const card = flashcardsData[0];
 
   return (
-    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
-          📇
+        <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center text-white">
+          <Layers className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-slate-800 text-lg">Karteikarten</h3>
+          <h3 className="font-semibold text-slate-900">Karteikarten</h3>
           <p className="text-sm text-emerald-600">{flashcardsData.length} Karten verfügbar</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl p-5 mb-4 border border-emerald-100 flex-1 flex flex-col justify-center min-h-[140px]">
-        <p className="text-xs text-emerald-600 font-semibold mb-3 uppercase tracking-wide">Vorschau</p>
-        <p className="text-slate-800 font-medium leading-relaxed line-clamp-3">{card.question}</p>
+      <div className="bg-slate-50 rounded-xl p-5 mb-4 border border-slate-100 flex-1 flex flex-col justify-center min-h-[140px]">
+        <p className="text-xs text-emerald-600 font-medium mb-3 uppercase tracking-wide">Vorschau</p>
+        <p className="text-slate-700 leading-relaxed line-clamp-3">{card.question}</p>
       </div>
 
       <button
         onClick={onOpenFullscreen}
-        className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+        className="w-full py-3 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
       >
         Karteikarten üben
-        <span className="text-lg">→</span>
+        <ChevronRight className="w-4 h-4" />
       </button>
     </div>
   );
@@ -337,28 +337,28 @@ function FlashcardsModal({ flashcardsData, modulId, onClose }) {
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
-        <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-4">
+        <div className="bg-[#0F172A] text-white p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">📇</span>
+              <Layers className="w-6 h-6 text-emerald-400" />
               <div>
-                <h2 className="font-bold">Karteikarten</h2>
-                <p className="text-emerald-100 text-sm">{stats.mastered} von {flashcardsData.length} gemeistert ({progressPercent}%)</p>
+                <h2 className="font-semibold">Karteikarten</h2>
+                <p className="text-slate-400 text-sm">{stats.mastered} von {flashcardsData.length} gemeistert ({progressPercent}%)</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition"
+              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
-          <div className="mt-3 bg-white/20 rounded-full h-2">
-            <div className="bg-white h-2 rounded-full transition-all duration-300" style={{ width: `${progressPercent}%` }} />
+          <div className="mt-3 bg-white/10 rounded-full h-2">
+            <div className="bg-emerald-500 h-2 rounded-full transition-all duration-300" style={{ width: `${progressPercent}%` }} />
           </div>
         </div>
 
-        <div className="px-6 py-3 bg-slate-50 border-b flex items-center justify-between">
+        <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <span className="text-sm text-slate-600">Karte {currentCard + 1} von {flashcardsData.length}</span>
           <button onClick={resetCards} className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
             Neustart
@@ -366,33 +366,33 @@ function FlashcardsModal({ flashcardsData, modulId, onClose }) {
         </div>
 
         <div className="p-6">
-          <div 
+          <div
             className="relative h-64 cursor-pointer"
             onClick={() => setIsFlipped(!isFlipped)}
             style={{ perspective: '1000px' }}
           >
-            <div 
+            <div
               className="relative w-full h-full transition-transform duration-500"
-              style={{ 
+              style={{
                 transformStyle: 'preserve-3d',
                 transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
               }}
             >
-              <div 
-                className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 shadow-lg border border-slate-200 flex flex-col justify-center"
+              <div
+                className="absolute inset-0 bg-slate-50 rounded-xl p-6 border border-slate-200 flex flex-col justify-center"
                 style={{ backfaceVisibility: 'hidden' }}
               >
-                <p className="text-xs text-emerald-600 font-semibold mb-3 tracking-wide">FRAGE</p>
-                <p className="text-slate-800 font-medium text-center text-lg leading-relaxed">{card.question}</p>
-                <p className="text-sm text-slate-400 mt-6 text-center">👆 Tippen zum Umdrehen</p>
+                <p className="text-xs text-emerald-600 font-medium mb-3 tracking-wide">FRAGE</p>
+                <p className="text-slate-900 text-center text-lg leading-relaxed">{card.question}</p>
+                <p className="text-sm text-slate-400 mt-6 text-center">Tippen zum Umdrehen</p>
               </div>
-              
-              <div 
-                className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 shadow-lg flex flex-col justify-center"
+
+              <div
+                className="absolute inset-0 bg-[#0F172A] rounded-xl p-6 flex flex-col justify-center"
                 style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
               >
-                <p className="text-xs text-emerald-100 font-semibold mb-3 tracking-wide">ANTWORT</p>
-                <p className="text-white font-medium text-center text-lg leading-relaxed">{card.answer}</p>
+                <p className="text-xs text-emerald-400 font-medium mb-3 tracking-wide">ANTWORT</p>
+                <p className="text-white text-center text-lg leading-relaxed">{card.answer}</p>
               </div>
             </div>
           </div>
@@ -403,11 +403,11 @@ function FlashcardsModal({ flashcardsData, modulId, onClose }) {
             <button onClick={prevCard} className="p-3 rounded-xl bg-slate-100 hover:bg-slate-200 transition text-slate-600">
               <ChevronLeft className="w-6 h-6" />
             </button>
-            
+
             <div className="flex gap-3 flex-1 justify-center">
               <button
                 onClick={nextCard}
-                className="px-6 py-3 bg-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-300 transition"
+                className="px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition"
               >
                 Nochmal üben
               </button>
@@ -415,15 +415,15 @@ function FlashcardsModal({ flashcardsData, modulId, onClose }) {
                 onClick={markAsKnown}
                 className={`px-6 py-3 rounded-xl font-medium transition flex items-center gap-2 ${
                   isCardMastered
-                    ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-500'
-                    : 'bg-emerald-500 text-white hover:bg-emerald-600'
+                    ? 'bg-emerald-50 text-emerald-700 border-2 border-emerald-500'
+                    : 'bg-emerald-600 text-white hover:bg-emerald-700'
                 }`}
               >
                 <CheckCircle className="w-5 h-5" />
-                {isCardMastered ? 'Gemeistert ✓' : 'Gewusst!'}
+                {isCardMastered ? 'Gemeistert' : 'Gewusst!'}
               </button>
             </div>
-            
+
             <button onClick={nextCard} className="p-3 rounded-xl bg-slate-100 hover:bg-slate-200 transition text-slate-600">
               <ChevronRight className="w-6 h-6" />
             </button>
@@ -440,7 +440,7 @@ function FlashcardsModal({ flashcardsData, modulId, onClose }) {
                   key={i}
                   onClick={() => { setCurrentCard(i); setIsFlipped(false); }}
                   className={`w-3 h-3 rounded-full transition ${
-                    i === currentCard ? 'bg-emerald-500 scale-125' :
+                    i === currentCard ? 'bg-emerald-600 scale-125' :
                     cardProgress.mastered ? 'bg-emerald-300' : 'bg-slate-300'
                   }`}
                   title={cardProgress.mastered ? 'Gemeistert' : 'Noch nicht gemeistert'}
@@ -461,34 +461,19 @@ function MindMapPreview({ mindmapData, onOpen }) {
   const topics = mindmapData.topics || [];
 
   return (
-    <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl p-6 border border-violet-200 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
-          🧠
+        <div className="w-12 h-12 bg-[#0F172A] rounded-xl flex items-center justify-center text-white">
+          <Share2 className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-slate-800 text-lg">Mind Map</h3>
-          <p className="text-sm text-violet-600">Visualisiere die Zusammenhänge</p>
+          <h3 className="font-semibold text-slate-900">Mind Map</h3>
+          <p className="text-sm text-slate-400">Visualisiere die Zusammenhänge</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl p-4 mb-4 border border-violet-100 flex-1 flex items-center justify-center min-h-[140px]">
+      <div className="bg-slate-50 rounded-xl p-4 mb-4 border border-slate-100 flex-1 flex items-center justify-center min-h-[140px]">
         <svg viewBox="0 0 280 140" className="w-full h-full max-h-36">
-          {/* Gradient definitions */}
-          <defs>
-            <linearGradient id="centerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#8b5cf6"/>
-              <stop offset="100%" stopColor="#a855f7"/>
-            </linearGradient>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-
           {/* Lines in background */}
           {topics.slice(0, 7).map((topic, i) => {
             const angle = -Math.PI/2 + (i * 2 * Math.PI) / Math.min(topics.length, 7);
@@ -498,9 +483,9 @@ function MindMapPreview({ mindmapData, onOpen }) {
               <line
                 key={`line-${topic.id}`}
                 x1="140" y1="70" x2={cx} y2={cy}
-                stroke={topic.color}
-                strokeWidth="2"
-                strokeOpacity="0.3"
+                stroke="#94a3b8"
+                strokeWidth="1.5"
+                strokeOpacity="0.4"
               />
             );
           })}
@@ -515,23 +500,23 @@ function MindMapPreview({ mindmapData, onOpen }) {
                 key={topic.id}
                 cx={cx} cy={cy}
                 rx="28" ry="12"
-                fill={topic.color}
+                fill="#cbd5e1"
                 fillOpacity="0.8"
               />
             );
           })}
 
-          {/* Center node without text */}
-          <circle cx="140" cy="70" r="32" fill="url(#centerGrad)" filter="url(#glow)"/>
+          {/* Center node */}
+          <circle cx="140" cy="70" r="32" fill="#0F172A"/>
         </svg>
       </div>
 
       <button
         onClick={onOpen}
-        className="w-full py-3.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl font-semibold hover:from-violet-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+        className="w-full py-3 bg-[#0F172A] text-white rounded-xl font-medium hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
       >
         Mind Map öffnen
-        <span className="text-lg">→</span>
+        <ChevronRight className="w-4 h-4" />
       </button>
     </div>
   );
@@ -544,46 +529,44 @@ function PdfPreview({ pdfData, onOpen }) {
   const topics = pdfData.topics || [];
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
-          📄
-        </div>
-        <div className="flex-1">
-          <h3 className="font-bold text-slate-800 text-lg">Unterlagen</h3>
-          <p className="text-sm text-blue-600">Komplette Schulungsmaterialien</p>
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm h-full flex flex-col">
+      {/* Header */}
+      <div className="p-5 border-b border-slate-100">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-[#0F172A] rounded-lg flex items-center justify-center text-white">
+            <FileText className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-slate-900">Unterlagen</h3>
+            <p className="text-xs text-slate-400">Schulungsmaterialien</p>
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl p-4 mb-4 border border-blue-100 flex-1 flex flex-col justify-center min-h-[140px]">
+      {/* Inhaltsverzeichnis */}
+      <div className="flex-1 overflow-y-auto p-5">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Inhalte</p>
+        <p className="text-sm font-medium text-slate-700 mb-3">{pdfData.title}</p>
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <span className="font-semibold text-blue-600">📖</span>
-            <span className="font-medium">{pdfData.title}</span>
-          </div>
-          <div className="pl-6 space-y-1">
-            {topics.slice(0, 3).map((topic, i) => (
-              <div key={i} className="text-xs text-slate-500 flex items-start gap-2">
-                <span className="text-blue-400 mt-0.5">•</span>
-                <span className="line-clamp-1">{topic}</span>
-              </div>
-            ))}
-            {topics.length > 3 && (
-              <div className="text-xs text-blue-500 font-medium pl-3">
-                + {topics.length - 3} weitere Themen
-              </div>
-            )}
-          </div>
+          {topics.map((topic, i) => (
+            <div key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+              <span className="text-slate-300 mt-0.5 text-xs">{i + 1}.</span>
+              <span>{topic}</span>
+            </div>
+          ))}
         </div>
       </div>
 
-      <button
-        onClick={onOpen}
-        className="w-full py-3.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-      >
-        Unterlagen öffnen
-        <span className="text-lg">→</span>
-      </button>
+      {/* Button */}
+      <div className="p-4 border-t border-slate-100">
+        <button
+          onClick={onOpen}
+          className="w-full py-2.5 bg-[#0F172A] text-white rounded-lg font-medium hover:bg-slate-800 transition-all flex items-center justify-center gap-2 text-sm"
+        >
+          Unterlagen öffnen
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 }
@@ -601,34 +584,35 @@ function TopicsList({ module, onSelectTopic, progress }) {
   const completedCount = module.topics.filter(t => isTopicCompleted(t.id)).length;
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm h-full flex flex-col">
-      <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-        📚 Quiz
-        <span className="text-sm font-normal text-slate-500">{completedCount}/{module.topics.length}</span>
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm h-full flex flex-col">
+      <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+        <ListChecks className="w-5 h-5 text-emerald-600" />
+        Quiz
+        <span className="text-sm font-normal text-slate-400">{completedCount}/{module.topics.length}</span>
       </h3>
 
       <div className="space-y-2 flex-1 overflow-y-auto">
         {module.topics.map((topic, i) => {
           const completed = isTopicCompleted(topic.id);
           return (
-            <div 
+            <div
               key={topic.id}
               onClick={() => onSelectTopic(topic)}
               className={`p-3 rounded-xl flex items-center gap-3 cursor-pointer transition ${
-                completed ? 'bg-green-50 border border-green-200' : 'bg-slate-50 hover:bg-slate-100 border border-transparent'
+                completed ? 'bg-emerald-50 border border-emerald-200' : 'bg-slate-50 hover:bg-slate-100 border border-transparent'
               }`}
             >
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                completed ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-600'
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${
+                completed ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
               }`}>
-                {completed ? '✓' : i + 1}
+                {completed ? <CheckCircle className="w-4 h-4" /> : i + 1}
               </div>
               <div className="flex-1 min-w-0">
-                <span className={`text-sm block truncate ${completed ? 'text-green-800' : 'text-slate-700'}`}>
+                <span className={`text-sm block truncate ${completed ? 'text-emerald-800' : 'text-slate-700'}`}>
                   {topic.title}
                 </span>
               </div>
-              <ChevronRight className={`w-4 h-4 flex-shrink-0 ${completed ? 'text-green-400' : 'text-slate-400'}`} />
+              <ChevronRight className={`w-4 h-4 flex-shrink-0 ${completed ? 'text-emerald-400' : 'text-slate-400'}`} />
             </div>
           );
         })}
@@ -647,72 +631,75 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
   const [showPdf, setShowPdf] = useState(false);
 
   const lernhilfen = getLernhilfen(module.id);
-  
-  const completedTopics = module.topics.filter(t => 
+
+  const completedTopics = module.topics.filter(t =>
     progress.some(p => p.modul_id === module.id && p.topic_id === t.id && p.completed)
   ).length;
   const progressPercent = Math.round((completedTopics / module.topics.length) * 100);
 
   return (
     <div className="min-h-screen bg-background">
-      <div className={`bg-gradient-to-r ${module.color} text-white`}>
+      <div className="bg-[#0F172A] text-white">
         <div className="max-w-6xl mx-auto px-4 py-6">
-          <Button variant="ghost" onClick={onBack} className="gap-2 text-white/80 hover:text-white hover:bg-white/10 -ml-2 mb-3">
+          <Button variant="ghost" onClick={onBack} className="gap-2 text-slate-400 hover:text-white hover:bg-white/10 -ml-2 mb-3">
             <ArrowLeft className="h-4 w-4" /> Zurück zum Dashboard
           </Button>
 
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center text-3xl border border-white/10">
+            <div className="h-14 w-14 bg-white/10 rounded-xl flex items-center justify-center text-3xl border border-white/10">
               {module.icon}
             </div>
             <div className="flex-1">
-              <p className="text-white/70 text-sm font-medium">Modul {module.id}</p>
-              <h1 className="text-xl font-bold">{module.title}</h1>
-              <p className="text-white/70 text-sm">{module.description}</p>
+              <p className="text-slate-400 text-sm font-medium">Modul {module.id}</p>
+              <h1 className="text-xl font-semibold">{module.title}</h1>
+              <p className="text-slate-400 text-sm">{module.description}</p>
             </div>
           </div>
 
-          <div className="mt-4 bg-white/20 rounded-full h-2">
-            <div className="bg-white h-2 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+          <div className="mt-4 bg-white/10 rounded-full h-2">
+            <div className="bg-emerald-500 h-2 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
           </div>
-          <p className="text-white/70 text-xs mt-1.5">{progressPercent}% abgeschlossen</p>
+          <p className="text-slate-400 text-xs mt-1.5">{progressPercent}% abgeschlossen</p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white text-xl shadow-lg">
-            🎯
-          </div>
-          <h2 className="text-2xl font-bold text-slate-800">Lernhilfen</h2>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-fr">
-          <div className="lg:col-span-2 flex flex-col gap-6">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Main Content (left) */}
+          <div className="flex-1 min-w-0 space-y-5">
+            {/* Audio */}
             {lernhilfen?.audio && (
               <AudioPlayer audioData={lernhilfen.audio} modulId={module.id} />
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {lernhilfen?.flashcards && (
-                <Flashcards flashcardsData={lernhilfen.flashcards} onOpenFullscreen={() => setShowFlashcards(true)} />
-              )}
-              {lernhilfen?.mindmap && (
-                <MindMapPreview mindmapData={lernhilfen.mindmap} onOpen={() => setShowMindMap(true)} />
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-6 min-h-full">
-            {lernhilfen?.pdf && (
-              <div className="flex-[0.45]">
-                <PdfPreview pdfData={lernhilfen.pdf} onOpen={() => setShowPdf(true)} />
+            {/* Lernhilfen Grid — 2 Spalten */}
+            <div>
+              <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Lernhilfen</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {lernhilfen?.flashcards && (
+                  <Flashcards flashcardsData={lernhilfen.flashcards} onOpenFullscreen={() => setShowFlashcards(true)} />
+                )}
+                {lernhilfen?.mindmap && (
+                  <MindMapPreview mindmapData={lernhilfen.mindmap} onOpen={() => setShowMindMap(true)} />
+                )}
               </div>
-            )}
-            <div className="flex-[0.55]">
+            </div>
+
+            {/* Quiz / Themen (volle Breite) */}
+            <div>
+              <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Quiz & Themen</h2>
               <TopicsList module={module} onSelectTopic={onSelectTopic} progress={progress} />
             </div>
           </div>
+
+          {/* Sidebar (right) — Unterlagen / PDF */}
+          {lernhilfen?.pdf && (
+            <div className="w-full lg:w-80 xl:w-96 flex-shrink-0">
+              <div className="lg:sticky lg:top-20">
+                <PdfPreview pdfData={lernhilfen.pdf} onOpen={() => setShowPdf(true)} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

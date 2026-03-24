@@ -76,8 +76,8 @@ function UserProfile({ user, onBack }: { user: any; onBack: () => void }) {
                     <span className="text-foreground">{module.icon} {module.title}</span>
                     <span className="font-medium text-muted-foreground">{prog}%</span>
                   </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className={`h-full bg-gradient-to-r ${module.color} rounded-full transition-all duration-500`} style={{ width: `${prog}%` }} />
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${prog}%` }} />
                   </div>
                 </div>
               );
@@ -213,7 +213,7 @@ export function BetreiberDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {statsData.map(({ label, value, icon: Icon, color, bg }) => (
-          <Card key={label} className="border-0 shadow-sm">
+          <Card key={label} className="border border-slate-200 shadow-sm rounded-xl">
             <CardContent className="p-4 sm:p-5">
               <div className="flex items-center gap-3 mb-1.5">
                 <div className={`h-10 w-10 ${bg} rounded-lg flex items-center justify-center`}>
@@ -253,7 +253,7 @@ export function BetreiberDashboard() {
       )}
 
       {/* User Table */}
-      {activeTab === 'users' && <Card className="border-0 shadow-sm overflow-hidden">
+      {activeTab === 'users' && <Card className="border border-slate-200 shadow-sm overflow-hidden rounded-xl">
         <div className="p-4 border-b">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">

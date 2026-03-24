@@ -182,9 +182,12 @@ CORRECT:
 ```
 src/
   components/          # UI components
-    billing/           # SubscriptionCard, SeatManager
+    billing/           # SubscriptionCard, SeatManager, InviteWidget
+    layout/            # Header (Navy, dropdown menu)
     ui/                # shadcn/ui components
   pages/               # Route pages (lazy-loaded)
+    SettingsPage.tsx    # Tabs: Profil, Konto, Abrechnung, Mitarbeiter
+    InvitePage.tsx      # Einladungslink annehmen
   hooks/               # Custom hooks (useConversationSession, useVAD)
   lib/                 # Core utilities (supabase, auth, database, api, voiceConfig)
   types/               # TypeScript interfaces (content.ts, database.ts)
@@ -192,7 +195,10 @@ src/
 content/               # JSON data (modules, quizzes, personas)
 netlify/functions/     # Serverless backend
   _shared/             # auth.js, response.js, validate.js, rateLimit.js, subscription.js
-  stripe-*.js          # Stripe checkout, webhook, portal
+  stripe-*.js          # Stripe checkout, webhook, portal, update-seats
+  invite-user.js       # Mitarbeiter per E-Mail einladen
+  accept-invite.js     # Einladung annehmen (User erstellen)
+  remove-user.js       # Mitarbeiter aus Firma entfernen
   user-export.js       # DSGVO data export
   user-delete.js       # DSGVO account deletion
 supabase/migrations/   # SQL migrations (run manually in Supabase)
@@ -217,7 +223,7 @@ e2e/                   # Playwright E2E tests
 
 ### After Database Changes:
 - [ ] Check Supabase RLS policies
-- [ ] Test with different user roles (lernender, arbeitgeber, betreiber)
+- [ ] Test with different user roles (privat, lernender, arbeitgeber, betreiber)
 - [ ] Verify no unauthorized data access
 
 ## Environment
@@ -242,22 +248,20 @@ See `.env.example` for full list. Key ones:
 
 ## Current Status
 
-- **Last completed:** Production-Readiness (6 Phasen): Security, Stripe B2B, DSGVO, Testing, Monitoring, Performance
-- **Next step:** Migrationen in Supabase ausführen, Stripe-Test einrichten, Sentry DSN konfigurieren
+- **Last completed:** Full UI Redesign (Corporate Clean), Registrierungsmodell (Privat/Firma), Settings-Seite, Einladungssystem, Mitarbeiter-Insights
+- **Next step:** Juristische Prüfung AGB/Datenschutz, Sentry DSN konfigurieren, Production-Deploy testen
 - **Build status:** working (code-split, ~41 unit tests passing)
 
 ## TODO
 
-- [ ] Supabase-Migrationen ausführen (add_subscriptions_and_billing.sql, migrate_firma_to_fk.sql, add_firma_trial_trigger.sql)
-- [ ] Stripe-Account einrichten + STRIPE_PRICE_ID erstellen
-- [ ] Upstash Redis einrichten + Keys in Netlify Env setzen
-- [ ] SUPABASE_SERVICE_ROLE_KEY in Netlify Env setzen
+- [ ] Datenschutztext & AGB durch Juristen prüfen lassen (Platzhalter [Firmenname], [Adresse] etc.)
 - [ ] Sentry-Projekt erstellen + VITE_SENTRY_DSN setzen
-- [ ] SITE_URL auf Production-Domain setzen
+- [ ] SITE_URL auf Custom Domain setzen wenn vorhanden
 - [ ] Playwright Browser installieren (`npx playwright install`)
-- [ ] Datenschutztext & AGB durch Juristen prüfen lassen
+- [ ] Stripe Webhook auf Production testen (lokal geht nicht ohne Stripe CLI)
 - [ ] Streaming-Chat aktivieren (optional, aktuell non-streaming)
 - [ ] Retry-Logic bei temporären Netzwerkfehlern im Chat (optional)
+- [ ] Echtes Lernzeit-Tracking einbauen (aktuell geschätzt aus Aktivitäten)
 
 ## Architecture Decisions
 
@@ -273,14 +277,36 @@ See `.env.example` for full list. Key ones:
 - **2026-03-24:** Audit-Logging: jeder authentifizierte API-Call wird in `audit_log` geloggt (fire-and-forget)
 - **2026-03-24:** Code-Splitting: alle Pages lazy-loaded, manualChunks für vendor-libs (react, supabase, pdf, charts, ui)
 - **2026-03-24:** Sentry ErrorBoundary wraps gesamte App, console.log Cleanup (~40 Statements entfernt)
+- **2026-03-24:** Neues Registrierungsmodell: "Als Privatperson" (rolle=`privat`) oder "Als Firma" (rolle=`arbeitgeber`, neue Firma wird erstellt). Firma-Dropdown entfernt (Datenschutz).
+- **2026-03-24:** Einladungssystem: `invite-user.js` + `accept-invite.js` + `invitations` Table. Arbeitgeber lädt per E-Mail ein → Token-Link → `/invite/:token`
+- **2026-03-24:** 4 Rollen: `privat`, `lernender`, `arbeitgeber`, `betreiber`. Subscription-Check unterstützt Privat-User (Profile-Level) + Firma-User (Firmen-Level)
+- **2026-03-24:** Settings-Seite (`/settings`) mit Tabs: Profil, Konto & Datenschutz, Abrechnung, Mitarbeiter (rollenbasiert)
+- **2026-03-24:** Header: Navy bg, Avatar-Dropdown (Einstellungen + Abmelden)
+- **2026-03-24:** Mitarbeiter-Insights: Klickbare Detailansicht mit KI-Feedback, Soft Skills, Lernzeit, aufklappbare Rollenspiel-Sessions
+- **2026-03-24:** Seat-Management: `stripe-update-seats.js` für bestehende Abos, `remove-user.js` für einzelne Mitarbeiter
+- **2026-03-24:** BetreiberDashboard: Tab "Abrechnung" mit Firmen-/Privat-User-Übersicht, Rollen-Filter
+- **2026-03-24:** Full UI Redesign "Corporate Clean": Navy (#0F172A) + Emerald (#059669) + Slate. Keine Gradienten, keine Emojis, Lucide-Icons, saubere Karten.
+
+## Design System (Corporate Clean)
+
+- **Primary:** Emerald `#059669` (Buttons, Progress, Akzente)
+- **Dark:** Navy `#0F172A` (Header, Hero-Sektionen, Login-Split)
+- **Background:** `#F8FAFC`
+- **Text:** Slate-900 (Headings), Slate-600 (Body), Slate-400 (Muted)
+- **Cards:** White, `border border-slate-200 shadow-sm rounded-xl`
+- **Buttons:** Primary = `bg-emerald-600`, Secondary = `bg-slate-100`
+- **No gradients** in Cards/Buttons, nur solid colors
+- **No emojis** — nur Lucide-React Icons
+- **Font:** Plus Jakarta Sans
 
 ## Known Issues
 
 - **Streaming nicht aktiv:** `chat.js` unterstützt SSE-Streaming, aber Frontend sendet immer non-streaming.
 - **Keine Retry-Logic:** Ein Netzwerkfehler beendet das Gespräch.
-- **`profiles.firma` (TEXT) noch nicht entfernt:** Legacy-Feld bleibt parallel zu `firma_id` bestehen bis alle Referenzen umgestellt sind. `useFirmaUsers()` nutzt noch `firma` Text.
-- **ModuleDetailPage Chunk gross (903 kB):** Enthält PDF-Viewer + Mindmap. Könnte weiter aufgesplittet werden.
-- **npm audit: 25 HIGH vulnerabilities** in pdfjs-dist Kette — kein Update verfügbar.
+- **`profiles.firma` (TEXT) noch nicht entfernt:** Legacy-Feld bleibt parallel zu `firma_id` bestehen. `useFirmaUsers()` nutzt noch `firma` Text.
+- **Lernzeit geschätzt:** Aktuell berechnet aus Aktivitäten (~10min/Thema, ~3min/Quiz, ~5min/Rollenspiel). Kein echtes Session-Tracking.
+- **Stripe Webhook lokal:** Funktioniert nur auf Production (Stripe kann localhost nicht erreichen). Lokal `subscription_id` manuell setzen.
+- **npm audit: HIGH vulnerabilities** in pdfjs-dist Kette — kein Update verfügbar.
 
 ## For Full Project Details
 See `.claude/PROJECT.md` for:

@@ -79,24 +79,37 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary/90 to-slate-900 flex items-center justify-center p-4">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-400/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-[#0F172A] flex">
+      {/* Left side: branding */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden">
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-12">
+            <div className="h-10 w-10 rounded-lg bg-emerald-500 flex items-center justify-center">
+              <Sun className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-white font-semibold text-lg">Swiss Solar Academy</span>
+          </div>
+          <h2 className="text-4xl font-bold text-white leading-tight mb-4">
+            Die Lernplattform für<br />professionelle Solarberater
+          </h2>
+          <p className="text-slate-400 text-lg max-w-md">
+            KI-gestützte Rollenspiele, interaktive Module und detaillierte Analysen für Ihr Vertriebsteam.
+          </p>
+        </div>
+        <p className="text-slate-500 text-sm relative z-10">Powered by Gama AG</p>
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 -left-20 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl" />
       </div>
 
-      <Card className="w-full max-w-md relative animate-slide-in border-0 shadow-2xl">
-        <CardContent className="p-8">
-          {/* Logo */}
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
-              <Sun className="h-7 w-7 text-white" />
+      {/* Right side: form */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-white lg:rounded-l-3xl">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="flex items-center justify-center gap-3 mb-8 lg:hidden">
+            <div className="h-10 w-10 rounded-lg bg-emerald-500 flex items-center justify-center">
+              <Sun className="h-5 w-5 text-white" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Swiss Solar Academy</h1>
-              <p className="text-sm text-muted-foreground">Lernplattform für Solarberater</p>
-            </div>
+            <span className="font-semibold text-lg text-slate-900">Swiss Solar Academy</span>
           </div>
 
           {/* Tab Switcher */}
@@ -307,8 +320,8 @@ export default function AuthPage() {
             <Link to="/privacy" className="hover:text-foreground">Datenschutz</Link>
             <Link to="/terms" className="hover:text-foreground">AGB</Link>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

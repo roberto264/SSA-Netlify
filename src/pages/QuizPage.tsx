@@ -61,14 +61,14 @@ export function QuizPage() {
     const passed = percentage >= 70;
     return (
       <main className="max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <Card className="border-0 shadow-lg animate-slide-in">
+        <Card className="border border-slate-200 shadow-lg animate-slide-in rounded-xl">
           <CardContent className="p-8 text-center">
             <div className={cn(
               "h-20 w-20 mx-auto mb-6 rounded-2xl flex items-center justify-center",
-              passed ? 'bg-amber-50' : 'bg-red-50'
+              passed ? 'bg-emerald-50' : 'bg-red-50'
             )}>
               {passed
-                ? <Trophy className="h-10 w-10 text-amber-500" />
+                ? <Trophy className="h-10 w-10 text-emerald-500" />
                 : <XCircle className="h-10 w-10 text-destructive" />
               }
             </div>
@@ -88,7 +88,7 @@ export function QuizPage() {
             <div className="space-y-3">
               <Button
                 onClick={() => { setCurrentQuestion(0); setSelectedAnswer(null); setAnswered(false); setScore(0); setAnswers([]); setShowResult(false); }}
-                className="w-full"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                 size="lg"
               >
                 Quiz wiederholen
@@ -96,7 +96,7 @@ export function QuizPage() {
               <Button
                 onClick={goBack}
                 variant="secondary"
-                className="w-full"
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700"
                 size="lg"
               >
                 Zurück zum Modul
@@ -116,7 +116,7 @@ export function QuizPage() {
         <ArrowLeft className="h-4 w-4" /> Zurück
       </Button>
 
-      <Card className="border-0 shadow-sm animate-slide-in">
+      <Card className="border border-slate-200 shadow-sm animate-slide-in rounded-xl">
         <CardContent className="p-5 sm:p-6">
           {/* Progress */}
           <div className="flex items-center gap-3 mb-6">
@@ -182,7 +182,7 @@ export function QuizPage() {
                   <strong>Erklärung:</strong> {question.explanation}
                 </p>
               </div>
-              <Button onClick={handleNext} className="w-full" size="lg">
+              <Button onClick={handleNext} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" size="lg">
                 {currentQuestion < topic.questions.length - 1 ? 'Nächste Frage' : 'Ergebnis anzeigen'}
               </Button>
             </div>

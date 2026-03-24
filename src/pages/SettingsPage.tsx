@@ -43,18 +43,18 @@ export default function SettingsPage() {
       </h1>
 
       {/* Tab Nav */}
-      <div className="flex gap-1 mb-6 bg-muted rounded-lg p-1 overflow-x-auto">
+      <div className="flex gap-1 mb-6 bg-slate-100 rounded-lg p-1 overflow-x-auto">
         {availableTabs.map(([key, { label, icon: Icon }]) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all ${
               activeTab === key
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className={`h-4 w-4 ${activeTab === key ? 'text-emerald-600' : ''}`} />
             {label}
           </button>
         ))}
@@ -101,15 +101,15 @@ function ProfileTab() {
   };
 
   return (
-    <Card>
+    <Card className="border border-slate-200 rounded-xl">
       <CardContent className="p-6 space-y-4">
-        <h2 className="text-lg font-semibold">Profil</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Profil</h2>
 
         <div className="space-y-2">
           <Label>Name</Label>
           <div className="flex gap-2">
             <Input value={name} onChange={(e) => setName(e.target.value)} className="max-w-sm" />
-            <Button onClick={handleSave} disabled={saving || name === profile?.name}>
+            <Button onClick={handleSave} disabled={saving || name === profile?.name} className="bg-emerald-600 hover:bg-emerald-700 text-white">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <Check className="h-4 w-4" /> : 'Speichern'}
             </Button>
           </div>
@@ -162,9 +162,9 @@ function AccountTab() {
   return (
     <div className="space-y-6">
       {/* Password Change */}
-      <Card>
+      <Card className="border border-slate-200 rounded-xl">
         <CardContent className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Passwort ändern</h2>
+          <h2 className="text-lg font-semibold text-slate-900">Passwort ändern</h2>
 
           {pwMessage && (
             <div className={`p-3 rounded-lg text-sm ${
@@ -185,7 +185,7 @@ function AccountTab() {
                 minLength={6}
               />
             </div>
-            <Button onClick={handlePasswordChange} disabled={pwLoading || newPw.length < 6}>
+            <Button onClick={handlePasswordChange} disabled={pwLoading || newPw.length < 6} className="bg-emerald-600 hover:bg-emerald-700 text-white">
               {pwLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Passwort ändern
             </Button>
@@ -212,9 +212,9 @@ function BillingTab({ role, firma, firmaLoading, firmaUsers, currentUserId, onUs
   // Privat-User: eigenes Billing (TODO: Privat-SubscriptionCard)
   if (role === 'privat') {
     return (
-      <Card>
+      <Card className="border border-slate-200 rounded-xl">
         <CardContent className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Abrechnung</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Abrechnung</h2>
           {firma ? (
             <SubscriptionCard firma={firma} activeSeats={1} />
           ) : (
@@ -231,7 +231,7 @@ function BillingTab({ role, firma, firmaLoading, firmaUsers, currentUserId, onUs
   // Arbeitgeber: Firma-Billing
   if (!firma) {
     return (
-      <Card>
+      <Card className="border border-slate-200 rounded-xl">
         <CardContent className="p-6 text-center py-8">
           <p className="text-muted-foreground">Keine Firma-Daten verfügbar.</p>
         </CardContent>
@@ -291,9 +291,9 @@ function TeamTab({ firma, firmaUsers, currentUserId, onUserRemoved }: any) {
   return (
     <div className="space-y-6">
       {/* Invite */}
-      <Card>
+      <Card className="border border-slate-200 rounded-xl">
         <CardContent className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Mitarbeiter einladen</h2>
+          <h2 className="text-lg font-semibold text-slate-900">Mitarbeiter einladen</h2>
           <p className="text-sm text-muted-foreground">
             Lade Mitarbeiter per E-Mail ein. Sie erhalten einen Link zur Registrierung.
           </p>
@@ -325,7 +325,7 @@ function TeamTab({ firma, firmaUsers, currentUserId, onUserRemoved }: any) {
                 className="pl-10"
               />
             </div>
-            <Button onClick={handleInvite} disabled={inviting || !email.includes('@')}>
+            <Button onClick={handleInvite} disabled={inviting || !email.includes('@')} className="bg-emerald-600 hover:bg-emerald-700 text-white">
               {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
               Einladen
             </Button>
