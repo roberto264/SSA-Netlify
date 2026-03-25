@@ -168,7 +168,6 @@ CREATE TRIGGER on_auth_user_created
 -- INITIAL DATA: Firmen
 -- ============================================
 INSERT INTO firmen (name) VALUES 
-  ('Gama AG'),
   ('SolarTech GmbH'),
   ('EcoEnergy AG'),
   ('SunPower Swiss');

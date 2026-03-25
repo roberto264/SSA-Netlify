@@ -1,7 +1,7 @@
 {
   "id": 5,
-  "title": "Wirtschaftlichkeit",
-  "icon": "💰",
-  "color": "from-emerald-500 to-emerald-600",
-  "description": "Förderung, Steuern, Amortisation"
+  "title": "Installation",
+  "icon": "🏗️",
+  "color": "from-cyan-500 to-cyan-600",
+  "description": "Montage, Sicherheit, Wartung"
 }

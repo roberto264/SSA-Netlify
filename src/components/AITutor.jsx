@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, Loader2, Brain, BookOpen, Target, TrendingUp, Volume2, VolumeX } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { useProgress, useQuizResults, useRollenspiele } from '../lib/database';
-import { modules } from '../lib/contentLoader';
+import { useModules } from '../hooks/useContent';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ export default function AITutor({ onBack }) {
   const { progress } = useProgress();
   const { results: quizResults } = useQuizResults();
   const { sessions: rollenspielSessions } = useRollenspiele();
+  const { data: modules, loading: modulesLoading } = useModules();
 
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -31,6 +32,7 @@ export default function AITutor({ onBack }) {
   const animationFrameRef = useRef(null);
 
   const analyzeProgress = () => {
+    if (!modules) return { overallProgress: 0, moduleProgress: [], weakAreas: [], strongAreas: [], quizInsights: [], suggestions: [] };
     const totalTopics = modules.reduce((acc, m) => acc + m.topics.length, 0);
     const completedTopics = progress.filter(p => p.completed).length;
     const overallProgress = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
@@ -143,7 +145,7 @@ ${a.weakSoftSkills.length > 0 ? a.weakSoftSkills.map(s => `- ${s.name} (nur ${s.
 5. Gib konstruktives Feedback und motiviere
 
 ## Modulinhalte die du erklären kannst:
-${modules.map(m => `
+${(modules || []).map(m => `
 ### ${m.title}
 ${m.topics.map(t => `- ${t.title}: ${t.description}`).join('\n')}
 `).join('\n')}
@@ -306,6 +308,14 @@ Halte deine Antworten prägnant (max. 150 Wörter). Sei ermutigend aber ehrlich.
       analyzerRef.current = null;
     }
   };
+
+  if (modulesLoading || !modules) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col lg:flex-row gap-4 h-[calc(100vh-64px)]">

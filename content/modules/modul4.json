@@ -1,7 +1,7 @@
 {
   "id": 4,
-  "title": "Installation",
-  "icon": "🏗️",
-  "color": "from-cyan-500 to-cyan-600",
-  "description": "Montage, Sicherheit, Wartung"
+  "title": "Planung",
+  "icon": "📐",
+  "color": "from-amber-500 to-orange-500",
+  "description": "Dimensionierung und Auslegung"
 }

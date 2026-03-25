@@ -45,9 +45,9 @@
 
 ## 4. CRITICAL: Always Use Netlify Dev
 
-- **NEVER** run `npm run dev` (Vite standalone)
+- **NEVER** run `npm run dev` (Astro standalone)
 - **ALWAYS** run `netlify dev` → http://localhost:8888
-- Port 5173 = broken (no functions), Port 8888 = correct
+- Port 4321 = broken (no functions), Port 8888 = correct
 
 ---
 
@@ -64,8 +64,9 @@
 
 | Pattern | Root Cause | Fix |
 |---|---|---|
-| API 404 | Using port 5173 statt 8888 | `netlify dev` verwenden |
+| API 404 | Using port 4321 statt 8888 | `netlify dev` verwenden |
 | "Unexpected end of JSON" | Netlify Functions not running | `netlify dev` prüfen |
+| supabaseUrl is required | Env-Vars fehlen | `PUBLIC_SUPABASE_URL` + `PUBLIC_SUPABASE_ANON_KEY` in `.env` setzen |
 | Audio/Whisper errors | Wrong MIME type/format | MIME type in transcribe.js prüfen |
 | Gespräch hängt / doppelte Nachrichten | Race Condition / State-Machine stuck | `isSendingRef` Lock + `TTS_DONE` dispatch prüfen |
 | `[GESPRAECH_ENDE]` sichtbar | Regex nicht global | `/\[GESPRAECH_ENDE\]/g` verwenden |
@@ -78,31 +79,42 @@
 ## Stack
 
 - **Project:** SSA-Netlify (Soft-Skill-Akademie)
-- **Stack:** React 18.2, TypeScript, Vite 7.3, TailwindCSS 3.4, Netlify Functions, Supabase, OpenAI, Stripe
+- **Stack:** Astro 6, React 18.2 (Islands), JavaScript (kein TypeScript), TailwindCSS 3.4, Netlify Functions, Supabase, OpenAI, Stripe
 - **AI:** OpenAI (gpt-4o chat, gpt-4o-mini analysis, whisper, tts), ElevenLabs (TTS/STT primary)
 - **Payment:** Stripe (B2B per-seat subscriptions)
 - **Monitoring:** Sentry, Upstash Redis (rate limiting)
+- **Content:** Supabase-Tabellen (normalisiert), Seed-Script in `scripts/migrate-content.js`
 - **Testing:** Vitest (unit), Playwright (e2e)
 
 ## Environment
 
 - **Node**: 18+
-- **Dev**: `netlify dev` → http://localhost:8888
-- **Build**: `npm run build`
+- **Dev**: `netlify dev` → http://localhost:8888 (Astro auf Port 4321)
+- **Build**: `npm run build` (Astro build)
 - **Test**: `npm test` | `npm run test:e2e`
-- **Deploy**: Git push to main (Netlify auto-deploy)
+- **Deploy**: Git push to main (Netlify auto-deploy, SSR via @astrojs/netlify)
 - **Env Vars**: See `.env.example`
 
 ## File Structure
 ```
 src/
-  components/          # UI (billing/, layout/, common/, ui/)
-  pages/               # Route pages (lazy-loaded)
-  hooks/               # useConversationSession, useVAD
-  lib/                 # supabase, auth, database, api, voiceConfig, audioUtils
-  types/               # content.ts, database.ts
+  pages/               # Astro-Seiten (.astro) — file-based routing
+  layouts/             # BaseLayout.astro
+  components/
+    islands/           # React Islands (Wrapper für Astro)
+    pages/             # React Page-Komponenten (.jsx)
+    billing/           # Stripe/Billing UI
+    layout/            # Header
+    common/            # StarRating etc.
+    ui/                # Radix-UI Komponenten
+    mindmap/           # MindMapMarkmap
+    pdf/               # PdfViewer
+  hooks/               # useConversationSession, useVAD, useContent
+  lib/                 # supabase, auth, database, api, voiceConfig, audioUtils, contentLoader
+  stores/              # nanostores (auth.js)
   __tests__/           # Vitest unit tests
-content/               # JSON (modules, quizzes, personas, flashcards, mindmaps)
+content/               # JSON (legacy — Daten sind in Supabase)
+scripts/               # migrate-content.js (Seed-Script)
 netlify/functions/     # Serverless backend
   _shared/             # auth, response, validate, rateLimit, subscription
 supabase/migrations/   # SQL migrations
@@ -119,22 +131,26 @@ e2e/                   # Playwright tests
 ## Architecture
 
 - **Security:** JWT-Auth auf allen Functions, dynamisches CORS, Input-Validierung, Rate-Limiting, Audit-Logging
-- **Frontend API:** Alle Calls über `authFetch()` (`src/lib/api.ts`)
+- **Framework:** Astro 6 (SSR) mit React Islands (`client:load` / `client:only="react"`)
+- **Auth:** Supabase Auth via AuthContext.jsx (in IslandWrapper für jede Island), nanostores für Cross-Island-State
+- **Routing:** Astro file-based routing (`src/pages/`), kein react-router-dom
+- **Navigation:** `window.location.href` statt `useNavigate()`, `useParams()` aus `IslandWrapper.jsx`
+- **Content:** Aus Supabase-Tabellen via `contentLoader.js` (async) + `useContent.js` Hooks
+- **Frontend API:** Alle Calls über `authFetch()` (`src/lib/api.js`)
 - **Rollen:** `privat`, `lernender`, `arbeitgeber`, `betreiber`
 - **Registrierung:** "Als Privatperson" oder "Als Firma" (Firma wird erstellt)
 - **Einladungen:** `invite-user.js` → Token-Link → `/invite/:token` → `accept-invite.js`
 - **Billing:** Stripe B2B per-seat, Subscription-Check auf Profile-Level (Privat) + Firmen-Level
 - **DSGVO:** Daten-Export, Soft-Delete, Cookie-Consent, AGB-Checkbox
-- **Code-Splitting:** Lazy-loaded Pages, manualChunks (react, supabase, pdf, charts, ui)
-- **Sentry:** ErrorBoundary wraps gesamte App
-- **TTS/STT:** ElevenLabs primary, OpenAI fallback, über `voiceConfig.ts`
-- **State Machine:** `turnStateMachine.ts` (idle → listening → transcribing → thinking → speaking → analyzing → ended)
+- **Sentry:** ErrorBoundary in ProtectedShell
+- **TTS/STT:** ElevenLabs primary, OpenAI fallback, über `voiceConfig.js`
+- **State Machine:** `turnStateMachine.js` (idle → listening → transcribing → thinking → speaking → analyzing → ended)
 - **DB Legacy:** `profiles.firma` (TEXT) noch parallel zu `firma_id` (UUID FK)
 
 ## Current Status
 
-- **Last completed:** Full UI Redesign, Registrierungsmodell, Settings-Seite, Einladungssystem, Mitarbeiter-Insights, Code Cleanup
-- **Build status:** working (code-split, ~41 unit tests passing)
+- **Last completed:** Astro-Migration (von React/TS/Vite), Content-Migration zu Supabase-Tabellen, TypeScript komplett entfernt
+- **Build status:** working (Astro SSR + React Islands, Netlify adapter)
 
 ## TODO
 
@@ -143,6 +159,9 @@ e2e/                   # Playwright tests
 - [ ] SITE_URL auf Custom Domain setzen
 - [ ] Stripe Webhook auf Production testen
 - [ ] Legacy `profiles.firma` TEXT-Feld entfernen (→ nur `firma_id`)
+- [ ] Netlify Env-Vars auf Production setzen (`PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`)
+- [ ] `content/` Verzeichnis entfernen (legacy JSON, Daten sind in Supabase)
+- [ ] nanostores auth.js Store aktivieren (aktuell nur vorbereitet, AuthContext.jsx ist aktiv)
 - [ ] Streaming-Chat aktivieren (optional)
 - [ ] Retry-Logic bei Netzwerkfehlern (optional)
 - [ ] Echtes Lernzeit-Tracking (optional)
@@ -153,6 +172,22 @@ e2e/                   # Playwright tests
 - **Lernzeit geschätzt:** Aus Aktivitäten berechnet, kein echtes Session-Tracking
 - **Stripe Webhook lokal:** Nur auf Production (Stripe kann localhost nicht erreichen)
 - **npm audit:** HIGH vulnerabilities in pdfjs-dist Kette — kein Update verfügbar
+- **Env-Vars doppelt:** `VITE_SUPABASE_*` + `PUBLIC_SUPABASE_*` nötig (Fallback in supabase.js)
+- **--legacy-peer-deps:** Nötig bei npm install wegen Astro/React Peer-Dependency-Konflikten
+
+## Test Users
+
+| Rolle | E-Mail | Passwort |
+|---|---|---|
+| Betreiber (Admin) | admin@ssa-test.ch | Test1234! |
+| Privat | privat@ssa-test.ch | Test1234! |
+| Arbeitgeber | chef@ssa-test.ch | Test1234! |
+| Lernender | anna@ssa-test.ch | Test1234! |
+| Lernender | ben@ssa-test.ch | Test1234! |
+| Lernender | clara@ssa-test.ch | Test1234! |
+
+Firma: **Solar Plus GmbH** (chef + anna + ben + clara)
+Seed-Script: `scripts/seed-testusers.js`
 
 ## Full Details
 See `.claude/PROJECT.md` for: Database schema, Function specs, Content structure, Persona prompts

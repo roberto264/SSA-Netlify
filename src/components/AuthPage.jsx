@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Sun, Mail, Lock, User, Building2, Loader2, AlertCircle, UserCircle } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -53,6 +52,8 @@ export default function AuthPage() {
     try {
       if (mode === 'login') {
         await signIn(email, password);
+        window.location.href = '/';
+        return;
       } else if (accountType === 'privat') {
         await signUpPrivat(email, password, name);
         setMessage('Registrierung erfolgreich! Bitte bestätige deine E-Mail.');
@@ -96,7 +97,7 @@ export default function AuthPage() {
             KI-gestützte Rollenspiele, interaktive Module und detaillierte Analysen für Ihr Vertriebsteam.
           </p>
         </div>
-        <p className="text-slate-500 text-sm relative z-10">Powered by Gama AG</p>
+        <p className="text-slate-500 text-sm relative z-10">&copy; Swiss Solar Academy</p>
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
         <div className="absolute top-1/2 -left-20 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl" />
       </div>
@@ -279,9 +280,9 @@ export default function AuthPage() {
                   />
                   <span>
                     Ich akzeptiere die{' '}
-                    <Link to="/terms" className="text-primary hover:underline" target="_blank">AGB</Link>
+                    <a href="/terms" className="text-primary hover:underline" target="_blank">AGB</a>
                     {' '}und die{' '}
-                    <Link to="/privacy" className="text-primary hover:underline" target="_blank">Datenschutzerklärung</Link>.
+                    <a href="/privacy" className="text-primary hover:underline" target="_blank">Datenschutzerklärung</a>.
                   </span>
                 </label>
               )}
@@ -317,8 +318,8 @@ export default function AuthPage() {
             )}
           </p>
           <div className="flex justify-center gap-4 mt-4 text-xs text-muted-foreground">
-            <Link to="/privacy" className="hover:text-foreground">Datenschutz</Link>
-            <Link to="/terms" className="hover:text-foreground">AGB</Link>
+            <a href="/privacy" className="hover:text-foreground">Datenschutz</a>
+            <a href="/terms" className="hover:text-foreground">AGB</a>
           </div>
         </div>
       </div>

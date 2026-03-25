@@ -2,175 +2,100 @@
   "moduleId": 2,
   "quizzes": [
     {
-      "id": "solarmodule",
-      "title": "Solarmodule",
-      "description": "Aufbau, Typen und Funktion",
+      "id": "kundentypen",
+      "title": "Kundentypen erkennen",
+      "description": "Die vier Kundengruppen und ihre Merkmale",
       "questions": [
         {
-          "question": "Welcher physikalische Prozess beschreibt die direkte Umwandlung von Sonnenlicht in elektrische Energie in einer Solarzelle?",
-          "options": ["Der Piezoeffekt", "Der Photovoltaikeffekt", "Der Thermoeffekt", "Der Elektromagnetische Effekt"],
+          "question": "Dein Gesprächspartner fragt als erstes: «Was kostet das und wann rechnet es sich?» — Welcher Kundentyp ist das wahrscheinlich?",
+          "options": ["Alfred Angst", "Beni Bank", "Othmar Öko", "Tim Technik"],
           "correct": 1,
-          "explanation": "Der Photovoltaikeffekt beschreibt, wie Photonen Elektronen in Halbleitermaterialien wie Silizium in Bewegung setzen und so einen Stromfluss erzeugen."
+          "explanation": "Beni Bank denkt in ROI, Rendite und Amortisation. Er entscheidet schnell, wenn die Zahlen stimmen."
         },
         {
-          "question": "Welche Modultechnologie wird aufgrund ihrer hohen Effizienz von 18-28% aktuell am häufigsten eingesetzt?",
-          "options": ["Polykristalline Module", "Monokristalline Module", "Dünnschicht-Module", "Amorphe Module"],
+          "question": "Ein Kunde sagt: «Ich muss das zuerst mit meiner Frau besprechen.» Was bedeutet das bei Alfred Angst?",
+          "options": ["Er hat kein Interesse", "Er braucht Sicherheit und Bedenkzeit — kein Druckverkauf", "Er vergleicht nur den Preis", "Er will einen Rabatt verhandeln"],
           "correct": 1,
-          "explanation": "Monokristalline Module bieten den höchsten Wirkungsgrad und zeichnen sich durch eine dunkle, homogene Oberfläche aus."
+          "explanation": "Alfred ist vorsichtig und braucht Bedenkzeit. Den nächsten Schritt klein halten: kostenlose Analyse statt sofortige Kaufentscheidung."
         },
         {
-          "question": "Was ist ein entscheidender Vorteil von Glas-Glas-Modulen gegenüber herkömmlichen Glas-Folie-Modulen?",
-          "options": ["Niedrigerer Preis", "Höhere Stabilität und Eignung für anspruchsvolle Umgebungen", "Leichteres Gewicht", "Einfachere Installation"],
-          "correct": 1,
-          "explanation": "Die beidseitige Verglasung schützt die Solarzellen besser vor mechanischen Belastungen und Umwelteinflüssen."
-        },
-        {
-          "question": "Was passiert bei Teilverschattung eines Moduls?",
-          "options": ["Nichts", "Leistung sinkt proportional", "Gesamte Leistung bricht ein", "Modul schaltet ab"],
+          "question": "Tim Technik fragt nach dem Temperaturkoeffizienten der Module. Du weisst es nicht auswendig. Was machst du?",
+          "options": ["Eine ungefähre Zahl nennen", "Das Thema wechseln und auf die Wirtschaftlichkeit lenken", "Ehrlich sagen «Das schaue ich nach» und die Daten nachliefern", "Sagen, dass das für die Kaufentscheidung nicht relevant ist"],
           "correct": 2,
-          "explanation": "Bei Teilverschattung kann die Leistung des gesamten Strings überproportional einbrechen (Hot-Spot-Effekt)."
+          "explanation": "Tim respektiert Fachwissen und merkt sofort, wenn jemand improvisiert. «Das schaue ich nach» ist besser als eine falsche Antwort."
         },
         {
-          "question": "Wie lange beträgt die typische Leistungsgarantie bei Solarmodulen?",
-          "options": ["10 Jahre", "15 Jahre", "25 Jahre", "30 Jahre"],
+          "question": "Othmar Öko fragt, ob die Panels in der Schweiz hergestellt werden. Du weisst, dass sie aus Asien kommen. Wie antwortest du?",
+          "options": ["Die Frage umgehen und über den Preis sprechen", "Ehrlich antworten: Produktion in Asien, aber Installation immer lokal mit Schweizer Monteuren", "Sagen, dass die Herkunft keinen Unterschied macht", "Behaupten, die Panels kämen aus Europa"],
+          "correct": 1,
+          "explanation": "Othmar schätzt Transparenz. Ehrlich antworten und die regionale Verankerung (Schweizer Monteure, lokale Installation) betonen."
+        },
+        {
+          "question": "Du triffst einen Kunden, der sowohl Merkmale von Alfred (zögerlich, fragt nach Garantien) als auch von Beni (fragt nach Kosten und Rendite) zeigt. Wie priorisierst du?",
+          "options": ["Nur auf die Zahlen fokussieren — Beni-Ansatz", "Nur auf Sicherheit fokussieren — Alfred-Ansatz", "Zuerst Sicherheitsbedenken adressieren, dann die Wirtschaftlichkeit zeigen", "Den Kunden bitten, sich zu entscheiden, was ihm wichtiger ist"],
           "correct": 2,
-          "explanation": "Die meisten Hersteller geben 25 Jahre Leistungsgarantie (mind. 80% der Nennleistung)."
+          "explanation": "Sicherheitsbedenken sind Kaufhindernisse. Erst wenn diese adressiert sind, ist der Kunde offen für die Zahlenargumente."
         },
         {
-          "question": "Was bedeutet \"bifazial\" bei Solarmodulen?",
-          "options": ["Doppelte Leistung", "Beidseitige Lichtaufnahme", "Zwei Wechselrichter", "Doppelte Garantie"],
+          "question": "Welches ist das Hauptmotiv von Othmar Öko?",
+          "options": ["Rendite und Steuervorteile", "Sicherheit und Kontrolle", "Nachhaltigkeit und Ökobilanz", "Smart Home Integration"],
+          "correct": 2,
+          "explanation": "Othmar will das Richtige tun. Finanzielle Argumente sind relevant, aber nachrangig. Er will einen Beitrag zur Energiewende leisten."
+        },
+        {
+          "question": "Welcher Kundentyp hat vermutlich bereits selbst recherchiert und kommt mit konkreten Produktvergleichen?",
+          "options": ["Alfred Angst", "Beni Bank", "Othmar Öko", "Tim Technik"],
+          "correct": 3,
+          "explanation": "Tim Technik ist gut bis sehr gut informiert, hat eigenständig recherchiert und erwartet technisch präzise Antworten auf Augenhöhe."
+        },
+        {
+          "question": "Was ist das richtige Gesprächsziel beim ersten Termin mit Alfred Angst?",
+          "options": ["Sofortiger Vertragsabschluss", "Termin für kostenlose Dachanalyse vereinbaren", "Technische Datenblätter senden", "Wirtschaftlichkeitsrechnung erstellen"],
           "correct": 1,
-          "explanation": "Bifaziale Module können Licht von beiden Seiten aufnehmen und so zusätzlichen Ertrag generieren."
+          "explanation": "Alfred braucht Zeit. Kein Abschluss-Druck. Den nächsten Schritt klein halten: kostenlose, unverbindliche Analyse."
         }
       ]
     },
     {
-      "id": "wechselrichter",
-      "title": "Wechselrichter",
-      "description": "Typen, Funktionen und Anwendungen",
+      "id": "sales-strategie",
+      "title": "Verkaufsstrategie pro Kundentyp",
+      "description": "Die richtige Ansprache und Argumentation",
       "questions": [
         {
-          "question": "Was ist die Hauptfunktion eines Wechselrichters?",
-          "options": ["Strom speichern", "DC zu AC wandeln", "Spannung erhöhen", "Strom messen"],
+          "question": "Wie solltest du ein Gespräch mit Beni Bank eröffnen?",
+          "options": ["Mit einer persönlichen Geschichte über Nachhaltigkeit", "Direkt mit konkreten Zahlen: Rendite, Amortisation, Steuervorteile", "Mit einer Frage zu seinen Sorgen und Bedenken", "Mit einer technischen Erklärung der Systemkomponenten"],
           "correct": 1,
-          "explanation": "Der Wechselrichter wandelt den Gleichstrom (DC) der Module in netzkonformen Wechselstrom (AC)."
+          "explanation": "Beni entscheidet in den ersten 30 Sekunden, ob das Gespräch relevant ist. Direkt mit Zahlen starten."
         },
         {
-          "question": "Welche elektrische Spannung und Frequenz liefert ein Wechselrichter typischerweise für das Hausnetz?",
-          "options": ["230 V bei 60 Hz", "400 V bei 50 Hz", "110 V bei 50 Hz", "380 V bei 60 Hz"],
-          "correct": 1,
-          "explanation": "400 V bei 50 Hz entspricht den Standardwerten für das öffentliche Stromnetz und die Hausversorgung in Europa."
+          "question": "Welche Aussage passt NICHT zu Alfreds typischem Verhalten?",
+          "options": ["Er stellt viele «Was wenn»-Fragen", "Er bittet um Referenzen anderer Kunden", "Er entscheidet schnell wenn die Zahlen stimmen", "Er erwähnt, andere Angebote einholen zu wollen"],
+          "correct": 2,
+          "explanation": "Schnelle Entscheidungen bei guten Zahlen ist typisch für Beni Bank, nicht für Alfred Angst. Alfred braucht Bedenkzeit."
         },
         {
-          "question": "Was beschreibt die Funktion des 'MPP-Trackings' bei einem Wechselrichter?",
-          "options": ["Die GPS-Ortung der Solaranlage", "Die kontinuierliche Anpassung zur Maximierung der Energieausbeute", "Die Überwachung der Netzfrequenz", "Die Temperaturmessung der Module"],
+          "question": "Was ist der beste Ansatz bei Othmar Öko?",
+          "options": ["Ihn als Kunden behandeln und das Produkt verkaufen", "Ihn als Mitgestalter ansprechen — er will Teil einer Bewegung sein", "Nur über Kosten und Einsparungen reden", "Technische Details in den Vordergrund stellen"],
           "correct": 1,
-          "explanation": "Das Maximum Power Point Tracking sorgt dafür, dass die Solarmodule bei jedem Sonnenstand im optimalen Betriebspunkt arbeiten."
+          "explanation": "Othmar kauft keine Anlage — er tritt einer Bewegung bei. Zeige ihm, dass er mit Solar wirklich etwas bewirkt."
         },
         {
-          "question": "Welcher Wechselrichtertyp eignet sich am besten für komplexe Dächer mit Teilverschattung einzelner Module?",
-          "options": ["String-Wechselrichter", "Mikro-Wechselrichter", "Hybrid-Wechselrichter", "Zentralwechselrichter"],
+          "question": "Was solltest du bei Tim Technik auf keinen Fall tun?",
+          "options": ["Technische Datenblätter anbieten", "Ihm Basics erklären, die er bereits kennt", "Seinen Wissensstand erkunden", "Über API-Zugang und Monitoring sprechen"],
           "correct": 1,
-          "explanation": "Da jedes Modul seinen eigenen Wechselrichter hat, beeinflusst die Verschattung eines Moduls nicht die Leistung der anderen."
+          "explanation": "Tim hasst es, wenn man ihm Grundlagen erklärt. Zuerst seinen Wissensstand erkunden und dann darauf aufbauen."
         },
         {
-          "question": "Wie hoch ist die typische Lebensdauer eines Wechselrichters im Vergleich zu Solarmodulen?",
-          "options": ["5-8 Jahre", "10-15 Jahre", "20-25 Jahre", "25-30 Jahre"],
+          "question": "Ein Kunde fragt: «Funktioniert die Anlage auch wenn das Stromnetz weg ist?» Welche Variante von Alfred ist das?",
+          "options": ["Alfred Standard", "Alfred Blackout-Variante", "Das ist kein Alfred, sondern Tim", "Das ist kein Alfred, sondern Othmar"],
           "correct": 1,
-          "explanation": "Aufgrund der thermischen Belastung der Elektronik ist die Lebensdauer kürzer als die der Module, die oft über 25 Jahre halten."
+          "explanation": "Die Blackout-Variante von Alfred fokussiert auf Versorgungssicherheit. Er braucht PV + Batteriespeicher mit Backup-Funktion."
         },
         {
-          "question": "Wo wird ein Hybridwechselrichter eingesetzt?",
-          "options": ["Ohne Batterie", "Mit Batterie", "Nur gewerblich", "Nur bei Inselbetrieb"],
+          "question": "Woran erkennst du, dass Beni Bank ein A-Kunde mit hohem Volumen sein könnte?",
+          "options": ["Er fragt nach Referenzen", "Er erwähnt mehrere Liegenschaften oder Gewerbeobjekte", "Er möchte regionale Panels", "Er fragt nach Smart Home Integration"],
           "correct": 1,
-          "explanation": "Hybridwechselrichter werden in Systemen mit Batteriespeicher eingesetzt und managen PV, Batterie und Netz."
-        }
-      ]
-    },
-    {
-      "id": "optimierer",
-      "title": "Optimierer",
-      "description": "Modul-Level-Optimierung und Monitoring",
-      "questions": [
-        {
-          "question": "Welchen Vorteil bietet der Einsatz von Optimierern in einer Photovoltaikanlage?",
-          "options": ["Reduzierung der Installationskosten", "Detaillierte Fehleranalyse für jedes einzelne Modul", "Erhöhung der Modulspannung", "Vereinfachung der Verkabelung"],
-          "correct": 1,
-          "explanation": "Optimierer ermöglichen ein Monitoring auf Modulebene, was die Lokalisierung von Defekten erheblich erleichtert."
-        },
-        {
-          "question": "Wann sind Moduloptimierer besonders sinnvoll?",
-          "options": ["Immer", "Bei Verschattung", "Nie", "Nur bei Grossanlagen"],
-          "correct": 1,
-          "explanation": "Moduloptimierer sind besonders bei Verschattungsproblemen oder unterschiedlichen Ausrichtungen sinnvoll."
-        },
-        {
-          "question": "Welche Sicherheitsfunktion bieten moderne Optimierer?",
-          "options": ["Blitzschutz", "Automatische Modulabschaltung bei Gefahr", "Brandmeldung", "Diebstahlschutz"],
-          "correct": 1,
-          "explanation": "Optimierer können die Modulspannung im Notfall auf ein sicheres Niveau reduzieren (Rapid Shutdown)."
-        }
-      ]
-    },
-    {
-      "id": "batteriespeicher",
-      "title": "Batteriespeicher",
-      "description": "Technologien und Dimensionierung",
-      "questions": [
-        {
-          "question": "Welches Speichermedium gilt aktuell als Standard in Photovoltaikanlagen aufgrund seiner hohen Energiedichte?",
-          "options": ["Blei-Säure-Batterie", "Lithium-Ionen-Batterie", "Nickel-Cadmium-Batterie", "Salzwasser-Batterie"],
-          "correct": 1,
-          "explanation": "Lithium-Ionen-Technologie bietet das beste Verhältnis von Gewicht, Platzbedarf und Zyklenfestigkeit für Heimanwendungen."
-        },
-        {
-          "question": "Warum weist eine DC-gekoppelte Batterie in der Regel einen höheren Wirkungsgrad auf als eine AC-gekoppelte?",
-          "options": ["Weil DC-Batterien billiger sind", "Weil weniger Umwandlungsschritte zwischen DC und AC nötig sind", "Weil DC-Speicher mehr Kapazität haben", "Weil das Hausnetz mit DC arbeitet"],
-          "correct": 1,
-          "explanation": "Da der Solarstrom bereits als Gleichstrom (DC) vorliegt, kann er direkt mit minimalen Verlusten in die Batterie fliessen."
-        },
-        {
-          "question": "Was ist eine sinnvolle Speichergrösse für ein Einfamilienhaus?",
-          "options": ["1-2 kWh", "5-10 kWh", "20-30 kWh", "50+ kWh"],
-          "correct": 1,
-          "explanation": "Für ein Einfamilienhaus sind 5-10 kWh meist ausreichend, um den Abend- und Nachtverbrauch zu decken."
-        },
-        {
-          "question": "Was bedeutet \"Notstromfähigkeit\" bei einem Batteriespeicher?",
-          "options": ["Schnelles Laden", "Stromversorgung bei Netzausfall", "Doppelte Kapazität", "Outdoor-tauglich"],
-          "correct": 1,
-          "explanation": "Notstromfähige Systeme können bei Netzausfall wichtige Verbraucher weiter mit Strom versorgen."
-        },
-        {
-          "question": "Wie lange ist die typische Lebensdauer eines Lithium-Ionen-Batteriespeichers?",
-          "options": ["3-5 Jahre", "10-15 Jahre", "20-25 Jahre", "30+ Jahre"],
-          "correct": 1,
-          "explanation": "Lithium-Ionen-Batterien halten typischerweise 10-15 Jahre, abhängig von der Nutzung und Anzahl der Ladezyklen."
-        }
-      ]
-    },
-    {
-      "id": "wallbox",
-      "title": "Ladestationen",
-      "description": "E-Mobilität und PV",
-      "questions": [
-        {
-          "question": "Welche Ladeleistung hat eine typische Heim-Wallbox?",
-          "options": ["3.7 kW", "11 kW", "22 kW", "50 kW"],
-          "correct": 1,
-          "explanation": "11 kW ist der Standard für Heim-Wallboxen (3-phasig, 16A). Meldepflichtig, aber nicht bewilligungspflichtig."
-        },
-        {
-          "question": "Was ist \"PV-Überschussladen\"?",
-          "options": ["Schnellladen", "Laden nur mit Solarstrom-Überschuss", "Laden in der Nacht", "Laden am Arbeitsplatz"],
-          "correct": 1,
-          "explanation": "Beim PV-Überschussladen wird das E-Auto nur mit dem überschüssigen Solarstrom geladen, der sonst eingespeist würde."
-        },
-        {
-          "question": "Was ermöglicht das Lastmanagement bei einer Wallbox?",
-          "options": ["Schnelleres Laden", "Intelligente Verteilung der verfügbaren Leistung", "Höhere Spannung", "Gratis Laden"],
-          "correct": 1,
-          "explanation": "Lastmanagement verteilt die verfügbare Leistung intelligent, um Überlastung des Hausanschlusses zu vermeiden."
+          "explanation": "Beni denkt in Portfolios. Bei mehreren Objekten ist er ein A-Kunde — grössere Dachflächen und höherer Eigenverbrauch machen die Anlagen noch wirtschaftlicher."
         }
       ]
     }

@@ -2,96 +2,102 @@
   "moduleId": 4,
   "quizzes": [
     {
-      "id": "dachtypen",
-      "title": "Dachtypen",
-      "description": "Verschiedene Dacheindeckungen",
+      "id": "dimensionierung",
+      "title": "Anlagengrösse",
+      "description": "Berechnung der optimalen Grösse",
       "questions": [
         {
-          "question": "Welches ist der häufigste Dachtyp in der Schweiz?",
-          "options": ["Flachdach", "Schrägdach mit Ziegeln", "Metalldach", "Gründach"],
+          "question": "Wie viel kWp pro Person rechnet man als Faustregel?",
+          "options": ["0.5 kWp", "1-1.5 kWp", "3 kWp", "5 kWp"],
           "correct": 1,
-          "explanation": "Schrägdächer mit Ziegeln sind in der Schweiz am häufigsten verbreitet."
+          "explanation": "Als Faustregel rechnet man 1-1.5 kWp pro Person im Haushalt."
         },
         {
-          "question": "Bei welchem Dachtyp ist die Statik besonders zu prüfen?",
-          "options": ["Neubau", "Ziegeldach", "Flachdach mit Auflast", "Alle gleich"],
+          "question": "Wie viel m² Dachfläche braucht man für 1 kWp?",
+          "options": ["2-3 m²", "5-7 m²", "10-12 m²", "15-20 m²"],
+          "correct": 1,
+          "explanation": "Für 1 kWp benötigt man etwa 5-7 m² Dachfläche (je nach Moduleffizienz)."
+        },
+        {
+          "question": "Wie viel kWh produziert 1 kWp in der Schweiz pro Jahr?",
+          "options": ["500 kWh", "700 kWh", "900-1000 kWh", "1500 kWh"],
           "correct": 2,
-          "explanation": "Bei Flachdächern mit aufgeständerten Modulen muss die zusätzliche Dachlast geprüft werden."
+          "explanation": "In der Schweiz produziert 1 kWp etwa 900-1000 kWh pro Jahr (je nach Standort und Ausrichtung)."
         }
       ]
     },
     {
-      "id": "montagesysteme",
-      "title": "Montagesysteme",
-      "description": "Aufdach, Indach, Flachdach",
+      "id": "ausrichtung",
+      "title": "Dachausrichtung",
+      "description": "Einfluss von Neigung und Himmelsrichtung",
       "questions": [
         {
-          "question": "Welches System wird bei Ziegeldächern meist verwendet?",
-          "options": ["Aufdach-System", "Indach-System", "Flachdach-System", "Fassadensystem"],
-          "correct": 0,
-          "explanation": "Bei Ziegeldächern wird meist ein Aufdach-System mit Dachhaken verwendet."
+          "question": "Welche Ausrichtung bringt den höchsten Jahresertrag?",
+          "options": ["Norden", "Osten", "Süden", "Westen"],
+          "correct": 2,
+          "explanation": "Südausrichtung bringt den höchsten Jahresertrag (100%). Ost/West erreichen ca. 80-85%."
         },
         {
-          "question": "Was ist ein Vorteil von Indach-Systemen?",
-          "options": ["Günstiger", "Bessere Ästhetik", "Höherer Ertrag", "Einfachere Montage"],
-          "correct": 1,
-          "explanation": "Indach-Systeme sind optisch ansprechender, da die Module bündig ins Dach integriert werden."
+          "question": "Welche Dachneigung ist optimal für die Schweiz?",
+          "options": ["0° (flach)", "15-20°", "30-35°", "60-70°"],
+          "correct": 2,
+          "explanation": "Eine Neigung von 30-35° ist in der Schweiz optimal für den Jahresertrag."
         },
         {
-          "question": "Was ist bei Flachdächern zu beachten?",
-          "options": ["Nichts Besonderes", "Neigungswinkel und Dachlast", "Nur die Farbe", "Nur die Grösse"],
+          "question": "Wann ist eine Ost-West-Ausrichtung sinnvoll?",
+          "options": ["Nie", "Bei hohem Eigenverbrauch", "Nur im Gebirge", "Bei Schnee"],
           "correct": 1,
-          "explanation": "Bei Flachdächern müssen Aufständerungswinkel, Reihenabstand und zusätzliche Dachlast berücksichtigt werden."
+          "explanation": "Ost-West liefert gleichmässigere Produktion über den Tag und ist ideal für hohen Eigenverbrauch."
         }
       ]
     },
     {
-      "id": "sicherheit",
-      "title": "Sicherheit",
-      "description": "Absturzsicherung und Blitzschutz",
+      "id": "verschattung",
+      "title": "Verschattungsanalyse",
+      "description": "Sonnenverlauf und Hindernisse",
       "questions": [
         {
-          "question": "Ab welcher Höhe ist eine Absturzsicherung Pflicht?",
-          "options": ["Ab 1m", "Ab 2m", "Ab 3m", "Ab 5m"],
-          "correct": 2,
-          "explanation": "Ab 3m Absturzhöhe ist eine Absturzsicherung gemäss SUVA-Vorschriften obligatorisch."
-        },
-        {
-          "question": "Wann muss der bestehende Blitzschutz angepasst werden?",
-          "options": ["Nie", "Immer", "Wenn ein Blitzschutz vorhanden ist", "Nur bei Grossanlagen"],
-          "correct": 2,
-          "explanation": "Bei bestehendem Blitzschutz muss dieser an die PV-Anlage angepasst werden (Potentialausgleich)."
-        },
-        {
-          "question": "Was ist ein DC-Freischalter?",
-          "options": ["Wechselrichter", "Sicherheitsschalter für Gleichstrom", "Zähler", "Batterie"],
+          "question": "Welches Tool wird für die Verschattungsanalyse verwendet?",
+          "options": ["Thermometer", "Sonnenbahnindikator / 3D-Software", "Kompass", "Wetterbericht"],
           "correct": 1,
-          "explanation": "Der DC-Freischalter ermöglicht das sichere Abschalten der Gleichstromseite (Module) für Wartung oder Notfall."
+          "explanation": "Sonnenbahnindikator oder 3D-Software (z.B. PV*SOL, Eturnity) zeigen Verschattung über das Jahr."
+        },
+        {
+          "question": "Wann ist die Verschattung am kritischsten?",
+          "options": ["Im Sommer", "Im Winter", "Am Mittag", "In der Nacht"],
+          "correct": 1,
+          "explanation": "Im Winter steht die Sonne tiefer, daher werfen Hindernisse längere Schatten."
+        },
+        {
+          "question": "Wie kann man Verschattungsprobleme lösen?",
+          "options": ["Grössere Module", "Moduloptimierer oder Mikrowechselrichter", "Mehr Module", "Batterie"],
+          "correct": 1,
+          "explanation": "Moduloptimierer oder Mikrowechselrichter optimieren jedes Modul einzeln und minimieren Verschattungsverluste."
         }
       ]
     },
     {
-      "id": "wartung",
-      "title": "Wartung",
-      "description": "Reinigung und Kontrolle",
+      "id": "eigenverbrauch",
+      "title": "Eigenverbrauchsoptimierung",
+      "description": "Speicher ja oder nein?",
       "questions": [
         {
-          "question": "Wie oft sollte eine PV-Anlage gewartet werden?",
-          "options": ["Nie", "Jährlich", "Alle 5 Jahre", "Monatlich"],
+          "question": "Wie hoch ist der typische Eigenverbrauch ohne Speicher?",
+          "options": ["10-20%", "25-35%", "50-60%", "80-90%"],
           "correct": 1,
-          "explanation": "Eine jährliche Sichtkontrolle und Monitoring-Check wird empfohlen."
+          "explanation": "Ohne Speicher liegt der Eigenverbrauch typischerweise bei 25-35% (je nach Verbrauchsprofil)."
         },
         {
-          "question": "Müssen Solarmodule gereinigt werden?",
-          "options": ["Nie, der Regen reicht", "Nur bei starker Verschmutzung", "Wöchentlich", "Täglich"],
+          "question": "Wie viel kann ein Batteriespeicher den Eigenverbrauch erhöhen?",
+          "options": ["Auf 40-50%", "Auf 60-80%", "Auf 100%", "Gar nicht"],
           "correct": 1,
-          "explanation": "Normalerweise reicht der Regen. Bei starker Verschmutzung (Laub, Vogelkot, Pollen) kann eine Reinigung sinnvoll sein."
+          "explanation": "Mit Batteriespeicher lässt sich der Eigenverbrauch typischerweise auf 60-80% steigern."
         },
         {
-          "question": "Wie erkennt man Defekte an der Anlage?",
-          "options": ["Gar nicht", "Durch Monitoring und Ertragskontrolle", "Nur bei Totalausfall", "Am Geruch"],
+          "question": "Wann lohnt sich ein Batteriespeicher wirtschaftlich?",
+          "options": ["Immer", "Bei grosser Differenz zwischen Einspeise- und Bezugstarif", "Nie", "Nur bei Notstrom"],
           "correct": 1,
-          "explanation": "Regelmässiges Monitoring zeigt Ertragsabweichungen, die auf Defekte hinweisen können."
+          "explanation": "Je grösser die Differenz zwischen Bezugstarif und Einspeisevergütung, desto eher lohnt sich ein Speicher."
         }
       ]
     }

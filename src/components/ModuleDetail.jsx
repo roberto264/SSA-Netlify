@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, ChevronRight, CheckCircle, ChevronLeft, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, Headphones, Layers, Share2, FileText, ListChecks } from 'lucide-react';
 import { useProgress, useAudioProgress, useFlashcardProgress } from '../lib/database';
-import { getLernhilfen } from '../lib/contentLoader';
+import { useLernhilfen } from '../hooks/useContent';
 import MindMapMarkmap from './mindmap/MindMapMarkmap';
 import PdfViewer from './pdf/PdfViewer';
 import { Button } from '@/components/ui/button';
@@ -630,7 +630,7 @@ function ModuleDetail({ module, onBack, onSelectTopic }) {
   const [showFlashcards, setShowFlashcards] = useState(false);
   const [showPdf, setShowPdf] = useState(false);
 
-  const lernhilfen = getLernhilfen(module.id);
+  const { data: lernhilfen } = useLernhilfen(module.id);
 
   const completedTopics = module.topics.filter(t =>
     progress.some(p => p.modul_id === module.id && p.topic_id === t.id && p.completed)

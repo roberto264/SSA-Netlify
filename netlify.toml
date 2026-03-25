@@ -5,19 +5,13 @@
 
 [dev]
   command = "npm run dev"
-  targetPort = 5173
+  targetPort = 4321
   port = 8888
   framework = "#custom"
   autoLaunch = false
 
 [functions]
   node_bundler = "esbuild"
-
-# SPA fallback — serve index.html for all routes
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
 
 # Security headers
 [[headers]]

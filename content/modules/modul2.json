@@ -1,7 +1,7 @@
 {
   "id": 2,
-  "title": "Systemkomponenten",
-  "icon": "🔧",
-  "color": "from-purple-500 to-purple-600",
-  "description": "Module, Wechselrichter, Speicher"
+  "title": "Kundengruppen",
+  "icon": "👥",
+  "color": "from-teal-500 to-teal-600",
+  "description": "Kundentypen erkennen und richtig ansprechen"
 }

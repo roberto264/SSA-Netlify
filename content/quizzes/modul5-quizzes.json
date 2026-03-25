@@ -2,114 +2,96 @@
   "moduleId": 5,
   "quizzes": [
     {
-      "id": "foerderung",
-      "title": "Förderprogramme",
-      "description": "Einmalvergütung und kantonale Förderung",
+      "id": "dachtypen",
+      "title": "Dachtypen",
+      "description": "Verschiedene Dacheindeckungen",
       "questions": [
         {
-          "question": "Wie heisst die Bundesförderung für PV-Anlagen?",
-          "options": ["KEV", "Einmalvergütung (EIV)", "Solarprämie", "PV-Bonus"],
+          "question": "Welches ist der häufigste Dachtyp in der Schweiz?",
+          "options": ["Flachdach", "Schrägdach mit Ziegeln", "Metalldach", "Gründach"],
           "correct": 1,
-          "explanation": "Die Einmalvergütung (EIV) ist die aktuelle Bundesförderung für PV-Anlagen."
+          "explanation": "Schrägdächer mit Ziegeln sind in der Schweiz am häufigsten verbreitet."
         },
         {
-          "question": "Ab welcher Grösse gibt es die \"grosse\" Einmalvergütung?",
-          "options": ["Ab 2 kWp", "Ab 10 kWp", "Ab 30 kWp", "Ab 100 kWp"],
-          "correct": 3,
-          "explanation": "Ab 100 kWp gibt es die grosse Einmalvergütung mit höheren Fördersätzen."
-        },
-        {
-          "question": "Wer verwaltet die Einmalvergütung?",
-          "options": ["Die Gemeinde", "Der Kanton", "Pronovo AG", "Das BFE"],
+          "question": "Bei welchem Dachtyp ist die Statik besonders zu prüfen?",
+          "options": ["Neubau", "Ziegeldach", "Flachdach mit Auflast", "Alle gleich"],
           "correct": 2,
-          "explanation": "Pronovo AG ist die akkreditierte Zertifizierungsstelle für die Einmalvergütung."
-        },
-        {
-          "question": "Wie lange dauert die Auszahlung der EIV typischerweise?",
-          "options": ["1 Monat", "3-6 Monate", "1-2 Jahre", "5 Jahre"],
-          "correct": 1,
-          "explanation": "Die Auszahlung dauert typischerweise 3-6 Monate nach vollständiger Anmeldung."
+          "explanation": "Bei Flachdächern mit aufgeständerten Modulen muss die zusätzliche Dachlast geprüft werden."
         }
       ]
     },
     {
-      "id": "steuern",
-      "title": "Steuerliche Aspekte",
-      "description": "Abzüge und Einnahmen",
+      "id": "montagesysteme",
+      "title": "Montagesysteme",
+      "description": "Aufdach, Indach, Flachdach",
       "questions": [
         {
-          "question": "Sind PV-Anlagen steuerlich absetzbar?",
-          "options": ["Nein", "Ja, als Unterhaltskosten", "Nur gewerblich", "Nur im Neubau"],
-          "correct": 1,
-          "explanation": "PV-Anlagen können als energetische Sanierung von den Einkommenssteuern abgezogen werden."
+          "question": "Welches System wird bei Ziegeldächern meist verwendet?",
+          "options": ["Aufdach-System", "Indach-System", "Flachdach-System", "Fassadensystem"],
+          "correct": 0,
+          "explanation": "Bei Ziegeldächern wird meist ein Aufdach-System mit Dachhaken verwendet."
         },
         {
-          "question": "Wie werden Stromverkäufe (Einspeisevergütung) besteuert?",
-          "options": ["Gar nicht", "Als Einkommen", "Als Vermögen", "Pauschal 10%"],
+          "question": "Was ist ein Vorteil von Indach-Systemen?",
+          "options": ["Günstiger", "Bessere Ästhetik", "Höherer Ertrag", "Einfachere Montage"],
           "correct": 1,
-          "explanation": "Einnahmen aus Stromverkäufen müssen als Einkommen versteuert werden."
+          "explanation": "Indach-Systeme sind optisch ansprechender, da die Module bündig ins Dach integriert werden."
         },
         {
-          "question": "Kann man die Steuerabzüge auf mehrere Jahre verteilen?",
-          "options": ["Nein", "Ja, in den meisten Kantonen", "Nur bei Grossanlagen", "Nur bei Neubauten"],
+          "question": "Was ist bei Flachdächern zu beachten?",
+          "options": ["Nichts Besonderes", "Neigungswinkel und Dachlast", "Nur die Farbe", "Nur die Grösse"],
           "correct": 1,
-          "explanation": "In den meisten Kantonen können die Abzüge auf 2-3 Jahre verteilt werden (Progression brechen)."
+          "explanation": "Bei Flachdächern müssen Aufständerungswinkel, Reihenabstand und zusätzliche Dachlast berücksichtigt werden."
         }
       ]
     },
     {
-      "id": "stromrechnung",
-      "title": "Stromrechnung verstehen",
-      "description": "Tarife und Vergütungen",
+      "id": "sicherheit",
+      "title": "Sicherheit",
+      "description": "Absturzsicherung und Blitzschutz",
       "questions": [
         {
-          "question": "Was ist der Unterschied zwischen Hoch- und Niedertarif?",
-          "options": ["Spannung", "Tageszeit", "Stromstärke", "Anbieter"],
-          "correct": 1,
-          "explanation": "Hochtarif gilt tagsüber (ca. 7-20 Uhr), Niedertarif nachts und am Wochenende."
-        },
-        {
-          "question": "Was beeinflusst die Einspeisevergütung?",
-          "options": ["Nur die Anlagengrösse", "Nur der Standort", "Der lokale Netzbetreiber", "Das Wetter"],
+          "question": "Ab welcher Höhe ist eine Absturzsicherung Pflicht?",
+          "options": ["Ab 1m", "Ab 2m", "Ab 3m", "Ab 5m"],
           "correct": 2,
-          "explanation": "Die Einspeisevergütung wird vom lokalen Netzbetreiber festgelegt und variiert stark."
+          "explanation": "Ab 3m Absturzhöhe ist eine Absturzsicherung gemäss SUVA-Vorschriften obligatorisch."
         },
         {
-          "question": "Was ist die \"Netznutzung\"?",
-          "options": ["Stromverbrauch", "Gebühr für Netzinfrastruktur", "Einspeisevergütung", "Zählermiete"],
+          "question": "Wann muss der bestehende Blitzschutz angepasst werden?",
+          "options": ["Nie", "Immer", "Wenn ein Blitzschutz vorhanden ist", "Nur bei Grossanlagen"],
+          "correct": 2,
+          "explanation": "Bei bestehendem Blitzschutz muss dieser an die PV-Anlage angepasst werden (Potentialausgleich)."
+        },
+        {
+          "question": "Was ist ein DC-Freischalter?",
+          "options": ["Wechselrichter", "Sicherheitsschalter für Gleichstrom", "Zähler", "Batterie"],
           "correct": 1,
-          "explanation": "Die Netznutzung ist die Gebühr für die Nutzung der Strominfrastruktur."
+          "explanation": "Der DC-Freischalter ermöglicht das sichere Abschalten der Gleichstromseite (Module) für Wartung oder Notfall."
         }
       ]
     },
     {
-      "id": "amortisation",
-      "title": "Wirtschaftlichkeitsrechnung",
-      "description": "Amortisation und Rendite",
+      "id": "wartung",
+      "title": "Wartung",
+      "description": "Reinigung und Kontrolle",
       "questions": [
         {
-          "question": "Wie lange dauert die Amortisation einer typischen PV-Anlage?",
-          "options": ["3-5 Jahre", "8-12 Jahre", "20-25 Jahre", "30+ Jahre"],
+          "question": "Wie oft sollte eine PV-Anlage gewartet werden?",
+          "options": ["Nie", "Jährlich", "Alle 5 Jahre", "Monatlich"],
           "correct": 1,
-          "explanation": "Typische Amortisationszeiten liegen bei 8-12 Jahren, je nach Eigenverbrauch und Strompreisen."
+          "explanation": "Eine jährliche Sichtkontrolle und Monitoring-Check wird empfohlen."
         },
         {
-          "question": "Was erhöht die Wirtschaftlichkeit am meisten?",
-          "options": ["Grössere Anlage", "Hoher Eigenverbrauch", "Billigere Module", "Mehr Schatten"],
+          "question": "Müssen Solarmodule gereinigt werden?",
+          "options": ["Nie, der Regen reicht", "Nur bei starker Verschmutzung", "Wöchentlich", "Täglich"],
           "correct": 1,
-          "explanation": "Hoher Eigenverbrauch ist der wichtigste Faktor, da selbst genutzter Strom mehr wert ist als eingespeister."
+          "explanation": "Normalerweise reicht der Regen. Bei starker Verschmutzung (Laub, Vogelkot, Pollen) kann eine Reinigung sinnvoll sein."
         },
         {
-          "question": "Welche Rendite kann man bei einer PV-Anlage erwarten?",
-          "options": ["0-2%", "3-6%", "10-15%", "20%+"],
+          "question": "Wie erkennt man Defekte an der Anlage?",
+          "options": ["Gar nicht", "Durch Monitoring und Ertragskontrolle", "Nur bei Totalausfall", "Am Geruch"],
           "correct": 1,
-          "explanation": "Typische Renditen liegen bei 3-6% pro Jahr über 25 Jahre Lebensdauer."
-        },
-        {
-          "question": "Was sollte in einer Wirtschaftlichkeitsrechnung enthalten sein?",
-          "options": ["Nur Investitionskosten", "Nur Ertrag", "Investition, Ertrag, Förderung, Steuern, Wartung", "Nur Förderung"],
-          "correct": 2,
-          "explanation": "Eine vollständige Berechnung berücksichtigt alle Kosten, Erträge, Förderungen und Steuereffekte."
+          "explanation": "Regelmässiges Monitoring zeigt Ertragsabweichungen, die auf Defekte hinweisen können."
         }
       ]
     }

@@ -1,99 +1,12 @@
 {
   "moduleId": 2,
-  "centerLabel": "Systemkomponenten Photovoltaik",
+  "centerLabel": "Kundengruppen & Sales",
   "topics": [
-    {
-      "id": "photovoltaikmodul",
-      "title": "Photovoltaikmodul",
-      "color": "#6366f1",
-      "details": [
-        "Funktion: Photovoltaikeffekt, DC-Erzeugung",
-        "Monokristallin: 18-28% Effizienz (Standard)",
-        "Polykristallin: Veraltet",
-        "Dünnschicht: Flexibel für Camper",
-        "Glas-Folie (Standard) / Glas-Glas (Stabil)",
-        "Aufbau: Alurahmen, Solarzellen, Kabelbox"
-      ]
-    },
-    {
-      "id": "wechselrichter",
-      "title": "Wechselrichter",
-      "color": "#8b5cf6",
-      "details": [
-        "Wandelt DC in AC um",
-        "String-Wechselrichter",
-        "Hybrid-Wechselrichter",
-        "Micro-Inverter",
-        "MPP-Tracking für optimale Leistung",
-        "Monitoring-Funktion"
-      ]
-    },
-    {
-      "id": "batteriespeicher",
-      "title": "Batteriespeicher",
-      "color": "#a855f7",
-      "details": [
-        "Lithium-Ionen-Technologie",
-        "Kapazität: 5-15 kWh",
-        "AC- vs. DC-gekoppelt",
-        "Notstromfähigkeit",
-        "Lebensdauer: 10-15 Jahre"
-      ]
-    },
-    {
-      "id": "optimierer",
-      "title": "Optimierer",
-      "color": "#d946ef",
-      "details": [
-        "Einzelmodul-Überwachung",
-        "Verschattungsausgleich",
-        "Modul-Level-Optimierung",
-        "Sicherheitsabschaltung"
-      ]
-    },
-    {
-      "id": "notstrombox",
-      "title": "Notstrombox",
-      "color": "#ec4899",
-      "details": [
-        "Netztrennung bei Ausfall",
-        "Inselbetrieb möglich",
-        "Automatische Umschaltung",
-        "Sicherheitsfunktionen"
-      ]
-    },
-    {
-      "id": "eigenverbrauchsmanager",
-      "title": "Eigenverbrauchsmanager",
-      "color": "#f43f5e",
-      "details": [
-        "Eigenverbrauchsoptimierung",
-        "Smart Home Integration",
-        "Laststeuerung",
-        "Visualisierung"
-      ]
-    },
-    {
-      "id": "wallbox",
-      "title": "Ladestation (Wallbox)",
-      "color": "#f97316",
-      "details": [
-        "Wallbox 11/22 kW",
-        "Lastmanagement",
-        "PV-Überschussladen",
-        "Abrechnungsfunktion"
-      ]
-    },
-    {
-      "id": "gak",
-      "title": "Generatoranschlusskasten",
-      "color": "#22c55e",
-      "details": [
-        "Verbindet Module mit Wechselrichter",
-        "Sicherungselemente",
-        "Überspannungsschutz",
-        "DC-Trennschalter"
-      ]
-    }
+    { "id": "alfred", "title": "Alfred Angst", "color": "#185FA5", "details": ["Sicherheit & Kontrolle", "45-65 Jahre, Eigenheimbesitzer", "Langsam, braucht Bedenkzeit", "Referenzen & Garantien", "Kein Druckverkauf"] },
+    { "id": "beni", "title": "Beni Bank", "color": "#3B6D11", "details": ["Rendite & ROI", "40-60 Jahre, Unternehmer/Investor", "Schnell bei guten Zahlen", "Steueroptimierung", "Schriftliche Unterlagen"] },
+    { "id": "othmar", "title": "Othmar Öko", "color": "#0F6E56", "details": ["Nachhaltigkeit & Ökobilanz", "35-60 Jahre, umweltbewusst", "Wertebasierte Entscheidung", "Ganzheitliches System", "Regionale Verankerung"] },
+    { "id": "tim", "title": "Tim Technik", "color": "#534AB7", "details": ["Innovation & Optimierung", "30-50 Jahre, Early Adopter", "Rational-analytisch", "Smart Home & API", "Datenblätter & Specs"] },
+    { "id": "erkennung", "title": "Erkennung", "color": "#e11d48", "details": ["Alfred: «Was wenn...»-Fragen", "Beni: «Was bringt mir das?»", "Othmar: «Ich will beitragen»", "Tim: «Welches System ist am besten?»"] },
+    { "id": "strategie", "title": "Verkaufsstrategie", "color": "#f59e0b", "details": ["Alfred: Geduld, Sicherheit, kleine Schritte", "Beni: Zahlen zuerst, Wirtschaftlichkeit", "Othmar: Werte teilen, Mitgestalter", "Tim: Augenhöhe, keine Basics"] }
   ]
 }
